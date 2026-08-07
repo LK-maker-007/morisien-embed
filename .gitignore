@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+data/raw/
+data/cache/
+*.arrow
+models/
+checkpoints/
+wandb/
+.ipynb_checkpoints/
+.DS_Store
