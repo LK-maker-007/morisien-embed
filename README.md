@@ -1,35 +1,41 @@
 # morisien-embed
 
-An embedding model for **Mauritian Creole (Kreol Morisien)** — the language ~86.5% of Mauritius speaks,
-which today's embedding models don't cover.
+An embedding model for **Mauritian Creole (Kreol Morisien)** — the language ~86% of Mauritius speaks,
+which today's multilingual embedding models don't reliably cover.
 
 ## Why
 
-If you want to build semantic search, RAG, or a chatbot in Kreol Morisien, there is currently **no
-dedicated embedding model**. The multilingual giants (BGE-M3, LaBSE, multilingual-e5) don't list
-Mauritian Creole (`mfe`) as a supported language, and their discrimination on it is weak
-(measured separation ~0.05 on parallel pairs — they lump most Creole text into a narrow band).
+There is no dedicated embedding model for Kreol Morisien, and general multilingual models are weak on
+it. On a held-out Creole→English retrieval benchmark (the MorisienMT test split, 1,000 pairs),
+`multilingual-e5-small` reaches only **0.54 ndcg@10**. The one strong general model is **LaBSE**
+(**0.94 ndcg@10**), because it was built for translation-pair retrieval — so LaBSE is the bar to beat.
+This project fine-tunes an efficient multilingual base into a Creole specialist and measures it
+honestly against that bar.
 
-This project fine-tunes a small, efficient, multilingual base into a Creole specialist, and builds a
-retrieval benchmark to measure it — so the improvement is provable, not asserted.
+## Data
 
-## Honest scope (no overclaiming)
+- **Training:** 35,064 leak-free Creole↔{English,French} pairs, merged from MorisienMT (CC) and
+  Kreyòl-MT, with every MorisienMT dev/test sentence removed — verified disjoint by exact and
+  punctuation-insensitive match. Only the trained model is released, never the data; regenerate it
+  with `scripts/build_training.py`.
+- **Benchmark:** the held-out MorisienMT test split (CC-licensed, redistributable), the intended basis
+  for a Mauritian Creole bitext-mining task on MMTEB.
 
-- **First** dedicated Kreol Morisien embedding model (verified: none exists on the HF Hub).
-- Target: **beat the general multilingual models on Creole retrieval**, on a hard benchmark we build.
-- Margin expected **moderate, not massive** — Mauritian Creole is French-based, so the giants get
-  partial transfer for free. The win shows up on hard retrieval / discrimination, not on trivial pairs.
-- Small model by design (~118M): efficient, deployable, free to train — and specialization beats scale
-  on a narrow niche.
+## Usage
 
-## Approach
+```bash
+pip install -e .
 
-- **Base:** `intfloat/multilingual-e5-small` (~118M, multilingual incl. French)
-- **Data:** 30,472 unique Creole↔English/French pairs from Kreyòl-MT (`jhu-clsp/kreyol-mt`,
-  `mfe-eng` + `mfe-fra`). Run `python data/download.py` to regenerate; the data is not committed.
-- **Training:** sentence-transformers, `MultipleNegativesRankingLoss`, free Kaggle GPU
-- **Eval:** a purpose-built hard Kreol Morisien retrieval benchmark (candidate for MMTEB contribution)
+python scripts/build_training.py                       # -> data/processed/train.jsonl (35K pairs)
+python scripts/build_benchmark.py --target eng         # -> benchmark/data/eng
+python scripts/evaluate.py sentence-transformers/LaBSE # baseline on the benchmark
+python scripts/train.py --base intfloat/multilingual-e5-small --batch-size 128 --epochs 3
+```
+
+Training runs on a single GPU (free Kaggle T4/P100); everything else runs on CPU.
 
 ## Status
 
-Data pipeline done (30,472 train / 1,122 test pairs). Building the retrieval benchmark next.
+Data pipeline, benchmark, and fine-tuning script are complete and tested. Training is in progress; the
+goal is to beat LaBSE (0.94 ndcg@10) on the held-out benchmark and contribute the Kreol Morisien task
+to MMTEB.
