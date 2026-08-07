@@ -6,11 +6,23 @@ which today's multilingual embedding models don't reliably cover.
 ## Why
 
 There is no dedicated embedding model for Kreol Morisien, and general multilingual models are weak on
-it. On a held-out Creole→English retrieval benchmark (the MorisienMT test split, 1,000 pairs),
-`multilingual-e5-small` reaches only **0.54 ndcg@10**. The one strong general model is **LaBSE**
-(**0.94 ndcg@10**), because it was built for translation-pair retrieval — so LaBSE is the bar to beat.
-This project fine-tunes an efficient multilingual base into a Creole specialist and measures it
-honestly against that bar.
+it. This project fine-tunes an efficient multilingual base into a Creole specialist and measures it
+honestly against the strongest general model.
+
+## Baselines — Creole→English retrieval, MorisienMT test (1,000 pairs)
+
+| model | params | ndcg@10 | acc@1 |
+|---|---|---|---|
+| paraphrase-multilingual-MiniLM-L12-v2 | 118M | 0.16 | 0.10 |
+| BAAI/bge-m3 | 568M | 0.46 | 0.36 |
+| intfloat/multilingual-e5-small *(base for fine-tuning)* | 118M | 0.54 | 0.42 |
+| intfloat/multilingual-e5-base | 278M | 0.64 | 0.53 |
+| intfloat/multilingual-e5-large | 560M | 0.73 | 0.65 |
+| **sentence-transformers/LaBSE** | 470M | **0.94** | **0.91** |
+
+Every model is evaluated under its best prompt configuration; reproduce with `scripts/evaluate.py`.
+General multilingual models — including the SOTA BGE-M3 — fall far short; only LaBSE, built for
+translation-pair retrieval, is competitive. Beating **0.94 ndcg@10** is the goal.
 
 ## Data
 
