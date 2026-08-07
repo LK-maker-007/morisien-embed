@@ -1,8 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "morisien-embed"
 version = "0.1.0"
 description = "An embedding model for Mauritian Creole (Kreol Morisien)"
 requires-python = ">=3.10"
+
+[tool.setuptools]
+packages = ["morisien_embed"]
 
 [tool.ruff]
 line-length = 119
@@ -12,6 +19,7 @@ target-version = "py310"
 select = ["E", "F", "I", "W", "UP", "B", "SIM", "C4"]
 
 [tool.ruff.lint.isort]
+known-first-party = ["morisien_embed"]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.format]
