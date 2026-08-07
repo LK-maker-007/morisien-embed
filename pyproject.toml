@@ -5,11 +5,14 @@ description = "An embedding model for Mauritian Creole (Kreol Morisien)"
 requires-python = ">=3.10"
 
 [tool.ruff]
-line-length = 100
+line-length = 119
 target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B", "SIM", "C4"]
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.format]
 docstring-code-format = true

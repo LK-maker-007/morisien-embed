@@ -6,6 +6,8 @@ normalizes and deduplicates them, and writes the corpus's own train and test spl
 not committed; rerun this script to regenerate it.
 """
 
+from __future__ import annotations
+
 import argparse
 from pathlib import Path
 
@@ -34,9 +36,7 @@ def to_pair(row: dict) -> dict[str, str]:
 def load_pairs(config: str, split: str) -> Dataset:
     dataset = load_dataset(REPO_ID, config, split=split)
     dataset = dataset.map(to_pair, remove_columns=dataset.column_names)
-    return dataset.map(
-        lambda row: {"creole": row["creole"].strip(), "translation": row["translation"].strip()}
-    )
+    return dataset.map(lambda row: {"creole": row["creole"].strip(), "translation": row["translation"].strip()})
 
 
 def is_valid(row: dict[str, str], min_chars: int, max_chars: int) -> bool:
