@@ -10,3 +10,5 @@ checkpoints/
 wandb/
 .ipynb_checkpoints/
 .DS_Store
+PLAN.md
+data/processed/

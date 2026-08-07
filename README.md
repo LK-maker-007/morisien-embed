@@ -25,12 +25,11 @@ retrieval benchmark to measure it — so the improvement is provable, not assert
 ## Approach
 
 - **Base:** `intfloat/multilingual-e5-small` (~118M, multilingual incl. French)
-- **Data:** ~135K clean English↔Creole parallel pairs (`hramphul/Kreol-Morisien`) + curated pairs
+- **Data:** 30,472 unique Creole↔English/French pairs from Kreyòl-MT (`jhu-clsp/kreyol-mt`,
+  `mfe-eng` + `mfe-fra`). Run `python data/download.py` to regenerate; the data is not committed.
 - **Training:** sentence-transformers, `MultipleNegativesRankingLoss`, free Kaggle GPU
 - **Eval:** a purpose-built hard Kreol Morisien retrieval benchmark (candidate for MMTEB contribution)
 
-See [PLAN.md](PLAN.md) for the phased build.
-
 ## Status
 
-Planning. Data de-risk passed (135K clean pairs; giants weak on Creole discrimination).
+Data pipeline done (30,472 train / 1,122 test pairs). Building the retrieval benchmark next.
