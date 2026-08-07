@@ -13,3 +13,4 @@ wandb/
 PLAN.md
 data/processed/
 ENGINEERING.md
+benchmark/data/
