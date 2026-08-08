@@ -29,10 +29,11 @@ def main() -> None:
     parser.add_argument("--query-prompt", default="")
     parser.add_argument("--corpus-prompt", default="")
     parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--truncate-dim", type=int, default=None, help="truncate embeddings (Matryoshka dims)")
     args = parser.parse_args()
 
     bench = benchmark.load(args.data_dir)
-    model = SentenceTransformer(args.model)
+    model = SentenceTransformer(args.model, truncate_dim=args.truncate_dim)
     results = benchmark.evaluate(
         model,
         bench,

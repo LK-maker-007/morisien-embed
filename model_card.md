@@ -90,11 +90,14 @@ Both models sit at the ceiling of this benchmark — FLORES+ sentences are long 
 1,012-way retrieval saturates. Read this as evidence of zero out-of-domain degradation, not as a
 margin over LaBSE.
 
-Training was repeated with three random seeds; Creole→English test ndcg@10 across seeds:
-**0.9653 ± 0.0002** (accuracy@1 **0.9433 ± 0.0006**). The released checkpoint is seed 42, designated
-before results were seen.
+The contrastive stage was repeated with three random seeds over the same deterministically mined
+negative set; Creole→English test ndcg@10 across seeds: **0.9653 ± 0.0002** (accuracy@1
+**0.9433 ± 0.0006**). The released checkpoint is seed 42, designated before results were seen.
 
-Every number is reproducible from the [training repository](https://github.com/LK-maker-007/morisien-embed).
+Every number in the tables above is reproducible from the
+[training repository](https://github.com/LK-maker-007/morisien-embed) (Matryoshka figures via
+`scripts/evaluate.py --truncate-dim`). The Haitian-proximity and case-sensitivity figures under
+Limitations come from an adversarial audit of the released checkpoint.
 
 ## Training
 
