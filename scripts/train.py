@@ -131,6 +131,12 @@ def main() -> None:
     parser.add_argument("--relative-margin", type=float, default=0.05)
     parser.add_argument("--mini-batch-size", type=int, default=32)
     parser.add_argument("--matryoshka", action="store_true", help="train truncatable Matryoshka embeddings")
+    parser.add_argument(
+        "--checkpoints",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="write per-epoch checkpoints; disable to save only the final model (checkpoints cost ~3x model size)",
+    )
     args = parser.parse_args()
 
     train_dataset = load_training_pairs(args.train_file, args.limit)
@@ -162,7 +168,7 @@ def main() -> None:
         fp16=args.fp16,
         batch_sampler=BatchSamplers.NO_DUPLICATES,
         eval_strategy="epoch",
-        save_strategy="epoch",
+        save_strategy="epoch" if args.checkpoints else "no",
         save_total_limit=1,
         logging_steps=50,
         seed=args.seed,
