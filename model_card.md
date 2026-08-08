@@ -142,7 +142,9 @@ Limitations come from an internal adversarial audit of the released checkpoint.
   resulting optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen. Leak filtering
   reserves the Creole side of every evaluation pair; English/French target texts are not reserved, and
   an audit found 1 of 999 benchmark passages also occurring in training as the translation of a
-  different Creole sentence.
+  different Creole sentence (dropping it moves ndcg@10 by less than 0.0001). The accent-insensitive
+  half of the leak check was added after the released run; it verifiably leaves the training set
+  byte-identical, since the sources were already disjoint at that level.
 - **Orthographic variation.** Training data mixes pre- and post-2011 (Lortograf Kreol Morisien)
   spellings; performance on older orthography is untested.
 
