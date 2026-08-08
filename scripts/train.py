@@ -92,10 +92,16 @@ def matryoshka_dims(full_dim: int) -> list[int]:
     return [full_dim, *(dim for dim in (512, 256, 128, 64) if dim < full_dim)]
 
 
+def embedding_dim(model: SentenceTransformer) -> int:
+    getter = getattr(model, "get_embedding_dimension", None) or model.get_sentence_embedding_dimension
+    return getter()
+
+
 def dev_evaluator() -> InformationRetrievalEvaluator:
-    queries, corpus, qrels = benchmark.build(data.morisienmt("dev"))
+    """Score the dev split on the same Creole→English task the final test uses, for a matched signal."""
+    queries, corpus, qrels = benchmark.build(data.morisienmt("dev"), target_lang="eng")
     return InformationRetrievalEvaluator(
-        queries=queries, corpus=corpus, relevant_docs=qrels, name="morisienmt-dev", batch_size=64
+        queries=queries, corpus=corpus, relevant_docs=qrels, name="morisienmt-dev-eng", batch_size=64
     )
 
 
@@ -145,7 +151,7 @@ def main() -> None:
         else MultipleNegativesRankingLoss(model)
     )
     if args.matryoshka:
-        loss = MatryoshkaLoss(model, loss, matryoshka_dims=matryoshka_dims(model.get_sentence_embedding_dimension()))
+        loss = MatryoshkaLoss(model, loss, matryoshka_dims=matryoshka_dims(embedding_dim(model)))
 
     train_args = SentenceTransformerTrainingArguments(
         output_dir=str(args.output_dir),
