@@ -1,6 +1,5 @@
-sentence-transformers>=3.0
+sentence-transformers>=5.0
 datasets>=2.0
 transformers>=4.40
 torch>=2.0
-mteb>=1.0
-numpy
+huggingface-hub>=0.20

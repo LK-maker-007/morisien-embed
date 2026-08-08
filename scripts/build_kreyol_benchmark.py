@@ -11,19 +11,15 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 
 from morisien_embed import benchmark, data
+from morisien_embed.data import loose
 
 
 def training_creoles(train_file: Path) -> set[str]:
     rows = [json.loads(line) for line in train_file.read_text(encoding="utf-8").splitlines()]
     return {row["creole"].lower() for row in rows}
-
-
-def loose(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "", text.lower())
 
 
 def main() -> None:

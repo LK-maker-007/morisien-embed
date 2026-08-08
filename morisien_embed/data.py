@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import zipfile
 from collections import Counter
 
@@ -28,6 +29,11 @@ Pair = dict[str, str]
 
 def normalize(text: str) -> str:
     return " ".join(text.split())
+
+
+def loose(text: str) -> str:
+    """Punctuation- and case-insensitive key, used to catch near-duplicate leakage."""
+    return re.sub(r"[^a-z0-9]+", "", text.lower())
 
 
 def kreyol_mt(split: str) -> list[Pair]:

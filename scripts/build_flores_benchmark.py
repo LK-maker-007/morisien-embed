@@ -13,12 +13,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 
 from huggingface_hub import hf_hub_download
 
 from morisien_embed import benchmark, data
+from morisien_embed.data import loose
 
 FLORES_REPO = "openlanguagedata/flores_plus"
 LANG_FILES = {"mfe": "mfe_Latn.jsonl", "eng": "eng_Latn.jsonl", "fra": "fra_Latn.jsonl"}
@@ -29,10 +29,6 @@ def flores_split(lang: str, split: str) -> dict[int, str]:
     path = hf_hub_download(FLORES_REPO, f"{split}/{LANG_FILES[lang]}", repo_type="dataset")
     rows = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines()]
     return {row["id"]: data.normalize(row["text"]) for row in rows}
-
-
-def loose(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "", text.lower())
 
 
 def main() -> None:
