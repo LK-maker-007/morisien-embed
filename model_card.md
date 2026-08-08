@@ -22,7 +22,7 @@ datasets:
 # morisien-embed
 
 The first dedicated text embedding model for **Mauritian Creole (Kreol Morisien, `mfe`)** — the
-language spoken by ~90% of Mauritius and covered by no dedicated embedding model before this one.
+home language of roughly 86% of Mauritius and covered by no dedicated embedding model before this one.
 
 Fine-tuned from [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) on all
 publicly available Creole↔{English, French} parallel data, it outperforms every general multilingual
@@ -38,7 +38,7 @@ from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("Singaraj/morisien-embed")
 
-creole = ["Mo pe al bazar aster.", "Zanfan yo pe zwe dan lakour."]
+creole = ["Mo pe al bazar aster.", "Bann zanfan pe zwe dan lakour."]
 english = ["I am going to the market now.", "The children are playing in the yard."]
 
 similarity = model.similarity(model.encode(creole), model.encode(english))
@@ -92,7 +92,7 @@ Every number is reproducible from the [training repository](https://github.com/L
 
 ## Training
 
-- **Data:** 35,064 unique, leak-free Creole↔{English, French} pairs — the entirety of publicly
+- **Data:** 35,064 unique, leak-free Creole↔{English, French} pairs — effectively all publicly
   available Mauritian Creole parallel text — merged from
   [MorisienMT](https://huggingface.co/datasets/prajdabre/MorisienMT) (CC) and
   [Kreyòl-MT](https://huggingface.co/datasets/jhu-clsp/kreyol-mt) (mixed licenses; used for training
