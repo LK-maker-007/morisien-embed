@@ -1,10 +1,11 @@
 """Build an independent Creole retrieval benchmark from the FLORES+ devtest split.
 
 FLORES+ (``openlanguagedata/flores_plus``, CC-BY-SA-4.0, gated) added Mauritian Creole in 2025:
-professionally translated wikinews sentences, native-reviewed, aligned across languages by ``id``.
-Unlike the MorisienMT test split, this data shares no source with the training corpora, so scores
-here measure generalization to an independent domain. Any pair whose Creole sentence nevertheless
-appears in the training set is dropped — exactly and punctuation-insensitively — and reported.
+professionally translated sentences from Wikinews, Wikijunior and Wikivoyage, native-reviewed,
+aligned across languages by ``id``. Unlike the MorisienMT test split, this data shares no source
+with the training corpora, so scores here measure generalization to an independent domain. Any pair
+whose Creole sentence nevertheless appears in the training set — compared case-, punctuation- and
+accent-insensitively — is dropped and reported.
 
 Access requires accepting the dataset's terms on the Hugging Face Hub and an ``HF_TOKEN``.
 """
@@ -47,13 +48,8 @@ def main() -> None:
     ]
 
     train_rows = [json.loads(line) for line in args.train_file.read_text(encoding="utf-8").splitlines()]
-    train_exact = {row["creole"].lower() for row in train_rows}
-    train_loose = {loose(creole) for creole in train_exact}
-    clean = [
-        pair
-        for pair in pairs
-        if pair["creole"].lower() not in train_exact and loose(pair["creole"]) not in train_loose
-    ]
+    train_loose = {loose(row["creole"]) for row in train_rows}
+    clean = [pair for pair in pairs if loose(pair["creole"]) not in train_loose]
     print(f"flores {args.split} aligned pairs: {len(pairs)}   leaked (dropped): {len(pairs) - len(clean)}")
 
     out_dir = args.output_dir or Path("benchmark/data") / f"flores-{args.target}"

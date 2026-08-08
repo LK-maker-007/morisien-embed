@@ -5,9 +5,14 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -19,6 +24,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         python-version: ["3.10", "3.12"]
@@ -36,3 +42,10 @@ jobs:
           for script in scripts/*.py; do
             python "$script" --help > /dev/null
           done
+      - name: training entrypoint reaches the trainer (catches missing training deps)
+        run: |
+          python -c "
+          from sentence_transformers import SentenceTransformerTrainingArguments
+          SentenceTransformerTrainingArguments(output_dir='/tmp/smoke', eval_strategy='no')
+          print('trainer arguments constructible')
+          "

@@ -11,7 +11,7 @@ license = "MIT"
 authors = [{ name = "Singaraj B", email = "singaraj.yali@gmail.com" }]
 requires-python = ">=3.10"
 dependencies = [
-    "sentence-transformers>=5.4",
+    "sentence-transformers[train]>=5.4",
     "transformers>=4.41",
     "torch>=2.0",
     "datasets>=2.14",
@@ -20,6 +20,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff==0.14.10"]
+
+[project.urls]
+Repository = "https://github.com/LK-maker-007/morisien-embed"
+Model = "https://huggingface.co/Singaraj/morisien-embed"
 
 [tool.setuptools]
 packages = ["morisien_embed"]

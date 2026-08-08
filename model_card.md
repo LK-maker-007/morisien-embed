@@ -135,7 +135,10 @@ Every number is reproducible from the [training repository](https://github.com/L
   (cosine ≈ 0.81 to the same sentence); caps-heavy text retrieves worse.
 - **Protocol note.** During recipe development the held-out test score was printed at the end of each
   training run, so recipe selection had test visibility; an independent audit bounded the resulting
-  optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen.
+  optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen. Leak filtering
+  reserves the Creole side of every evaluation pair; English/French target texts are not reserved, and
+  an audit found 1 of 999 benchmark passages also occurring in training as the translation of a
+  different Creole sentence.
 - **Orthographic variation.** Training data mixes pre- and post-2011 (Lortograf Kreol Morisien)
   spellings; performance on older orthography is untested.
 

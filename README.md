@@ -58,7 +58,8 @@ python scripts/train.py --base intfloat/multilingual-e5-base \
   --seed 42 --no-checkpoints --output-dir models/morisien-embed
 ```
 
-Training runs on a single free Kaggle T4 (~45 min total); everything else runs on CPU.
+Training runs on a single free Kaggle T4 (~45 min total); everything else runs on CPU. To smoke-test
+the training loop without a GPU, add `--no-fp16 --limit 64`.
 
 ## Status
 

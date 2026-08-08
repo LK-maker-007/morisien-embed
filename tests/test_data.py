@@ -55,6 +55,27 @@ def test_merge_keeps_first_occurrence() -> None:
     assert kept[0]["lang"] == "eng"
 
 
+def test_kreyol_mt_orients_pairs_creole_first_and_skips_empty_rows(monkeypatch) -> None:
+    def row(src_lang: str, src_text: str, tgt_lang: str, tgt_text: str) -> dict:
+        entry = {"src_lang": src_lang, "src_text": src_text, "tgt_lang": tgt_lang, "tgt_text": tgt_text}
+        return {"translation": entry}
+
+    rows = {
+        "mfe-eng": [
+            row("mfe", "Mo pe ale", "eng", "I am going"),  # creole on the source side
+            row("eng", "He is eating", "mfe", "Li pe manze"),  # creole on the target side
+            row("eng", "  ", "mfe", "Zot pe zwe"),  # blank translation is skipped
+        ],
+        "mfe-fra": [row("fra", "Je rentre chez moi", "mfe", "Mo pe ale  lakaz")],
+    }
+    monkeypatch.setattr(data, "load_dataset", lambda repo, config, split: rows[config])
+    assert data.kreyol_mt("train") == [
+        {"creole": "Mo pe ale", "translation": "I am going", "lang": "eng"},
+        {"creole": "Li pe manze", "translation": "He is eating", "lang": "eng"},
+        {"creole": "Mo pe ale lakaz", "translation": "Je rentre chez moi", "lang": "fra"},
+    ]
+
+
 def test_morisienmt_reads_zip_archives_and_skips_empty_rows(monkeypatch, tmp_path: Path) -> None:
     rows = {
         "en-cr": [
