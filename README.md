@@ -26,9 +26,10 @@ available Creole parallel data.
 - Creole→French: **0.9751** vs LaBSE's 0.9475.
 - FLORES+ `mfe` (independent domain, 1,012 unseen sentences): perfect 1.0000 retrieval — though LaBSE
   also sits at that ceiling (0.9996), so the out-of-domain comparison is saturated rather than won.
-- E5 baselines were scored with and without their `query:`/`passage:` prompts and are reported at
-  their best (no prefix wins on this task); the other baselines have no prompt convention. Reproduce
-  any number with `scripts/evaluate.py`.
+- E5 baselines were ablated with and without their `query:`/`passage:` prompts on an earlier
+  iteration of the benchmark (no prefix won every time); final-benchmark numbers use the winning
+  no-prefix configuration. The other baselines have no prompt convention. Reproduce any number with
+  `scripts/evaluate.py`.
 
 ## Data
 

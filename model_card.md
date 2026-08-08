@@ -97,7 +97,7 @@ negative set; Creole→English test ndcg@10 across seeds: **0.9653 ± 0.0002** (
 Every number in the tables above is reproducible from the
 [training repository](https://github.com/LK-maker-007/morisien-embed) (Matryoshka figures via
 `scripts/evaluate.py --truncate-dim`). The Haitian-proximity and case-sensitivity figures under
-Limitations come from an adversarial audit of the released checkpoint.
+Limitations come from an internal adversarial audit of the released checkpoint.
 
 ## Training
 
@@ -113,7 +113,7 @@ Limitations come from an adversarial audit of the released checkpoint.
   checkpoint's contrastive stage trained on those 24,100 tuples (the stage-1 mining model itself was
   trained on all 35,064). Contrastive training uses `CachedMultipleNegativesRankingLoss` (batch 128,
   767 in-batch negatives per anchor) wrapped in `MatryoshkaLoss` (dims 768/512/256/128/64). 3 epochs,
-  lr 2e-5, warmup 10%, fp16, seed 42, single T4 GPU (~30 min).
+  lr 2e-5, warmup 10%, fp16, seed 42, single T4 GPU (~30 min contrastive + ~11 min mining).
 - **Base model:** [intfloat/multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base)
   (278M parameters, MIT).
 
@@ -131,14 +131,15 @@ Limitations come from an adversarial audit of the released checkpoint.
 - **Haitian Creole proximity.** Like every multilingual embedder we tested, the model embeds Haitian
   Creole close to Mauritian Creole: with same-meaning Haitian sentences injected into a FLORES-based
   corpus, mfe→eng accuracy@1 drops from 1.00 to 0.71 (the Haitian twin outranks the English
-  translation). The fine-tune still discriminates the two creoles better than LaBSE does on the same
-  trap (306/400 correct vs LaBSE's 170/400), and wrong-meaning Haitian text is never confused — but
-  mixed mfe/hat corpora will degrade retrieval.
+  translation) — and LaBSE degrades less on this same trap (to 0.79). On a related eng→{mfe, hat}
+  discrimination test the fine-tune picks the correct Mauritian translation 306/400 times vs LaBSE's
+  170/400, and wrong-meaning Haitian text is never confused — but mixed mfe/hat corpora will degrade
+  retrieval.
 - **Case sensitivity.** ALL-CAPS text embeds measurably differently from its lower-case form
   (cosine ≈ 0.81 to the same sentence); caps-heavy text retrieves worse.
 - **Protocol note.** During recipe development the held-out test score was printed at the end of each
-  training run, so recipe selection had test visibility; an independent audit bounded the resulting
-  optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen. Leak filtering
+  training run, so recipe selection had test visibility; an internal adversarial audit bounded the
+  resulting optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen. Leak filtering
   reserves the Creole side of every evaluation pair; English/French target texts are not reserved, and
   an audit found 1 of 999 benchmark passages also occurring in training as the translation of a
   different Creole sentence.
