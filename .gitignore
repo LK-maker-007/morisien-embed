@@ -17,3 +17,6 @@ benchmark/data/
 
 # editable-install build artifact
 *.egg-info/
+
+# local run reports
+*.ipynb
