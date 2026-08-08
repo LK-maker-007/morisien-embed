@@ -3,14 +3,15 @@
 Two corpora feed the model: MorisienMT (``prajdabre/MorisienMT``, CC) and Kreyòl-MT
 (``jhu-clsp/kreyol-mt``). Both align Mauritian Creole (``mfe``) with English and French. Every loader
 returns pairs shaped as ``{creole, translation, lang}`` with whitespace normalized and case
-preserved; dedup and leak comparisons lower-case the text.
+preserved. Deduplication compares exact lower-cased text; evaluation-leak filtering additionally
+uses :func:`loose`, which is insensitive to case, punctuation and accents.
 """
 
 from __future__ import annotations
 
 import io
 import json
-import re
+import unicodedata
 import zipfile
 from collections import Counter
 
@@ -32,8 +33,13 @@ def normalize(text: str) -> str:
 
 
 def loose(text: str) -> str:
-    """Punctuation- and case-insensitive key, used to catch near-duplicate leakage."""
-    return re.sub(r"[^a-z0-9]+", "", text.lower())
+    """Case-, punctuation- and accent-insensitive key, used to catch near-duplicate leakage.
+
+    Casefolds, decomposes accents (NFKD) and keeps only alphanumeric characters, so curly quotes,
+    zero-width characters, combining marks and spacing differences all collapse away.
+    """
+    decomposed = unicodedata.normalize("NFKD", text.casefold())
+    return "".join(char for char in decomposed if char.isalnum())
 
 
 def kreyol_mt(split: str) -> list[Pair]:
@@ -46,7 +52,9 @@ def kreyol_mt(split: str) -> list[Pair]:
                 creole, translation = entry["src_text"], entry["tgt_text"]
             else:
                 creole, translation = entry["tgt_text"], entry["src_text"]
-            pairs.append({"creole": normalize(creole), "translation": normalize(translation), "lang": lang})
+            creole, translation = normalize(creole), normalize(translation)
+            if creole and translation:
+                pairs.append({"creole": creole, "translation": translation, "lang": lang})
     return pairs
 
 
@@ -68,20 +76,25 @@ def morisienmt(split: str) -> list[Pair]:
 
 
 def reserved_creole(splits: tuple[str, ...] = ("dev", "test")) -> set[str]:
-    """Lower-cased MorisienMT evaluation sentences that training must never contain."""
+    """Loose keys of the MorisienMT evaluation sentences that training must never contain."""
     reserved: set[str] = set()
     for split in splits:
-        reserved.update(pair["creole"].lower() for pair in morisienmt(split))
+        reserved.update(loose(pair["creole"]) for pair in morisienmt(split))
     return reserved
 
 
 def merge(pairs: list[Pair], reserved: set[str]) -> tuple[list[Pair], Counter]:
-    """Drop evaluation-leaking and duplicate pairs, keeping the first occurrence of each."""
+    """Drop evaluation-leaking and duplicate pairs, keeping the first occurrence of each.
+
+    Leak filtering matches ``reserved`` (a set of :func:`loose` keys) loosely, so punctuation,
+    case and accent variants of an evaluation sentence are dropped too. Deduplication is exact
+    lower-cased comparison of the full pair.
+    """
     kept: list[Pair] = []
     seen: set[tuple[str, str]] = set()
     dropped: Counter = Counter()
     for pair in pairs:
-        if pair["creole"].lower() in reserved:
+        if loose(pair["creole"]) in reserved:
             dropped["leak"] += 1
             continue
         key = (pair["creole"].lower(), pair["translation"].lower())

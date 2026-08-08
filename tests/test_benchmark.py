@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from morisien_embed import benchmark
 
 PAIRS = [
@@ -32,7 +34,36 @@ def test_build_target_lang_filters_pairs() -> None:
     assert list(corpus.values()) == ["Je rentre chez moi"]
 
 
+def test_build_normalizes_line_breaking_whitespace() -> None:
+    pairs = [{"creole": "Mo pe ale", "translation": "I am\ngoing", "lang": "eng"}]
+    queries, corpus, _ = benchmark.build(pairs)
+    assert list(queries.values()) == ["Mo pe ale"]
+    assert list(corpus.values()) == ["I am going"]
+
+
+def test_build_empty_pairs() -> None:
+    assert benchmark.build([]) == ({}, {}, {})
+
+
 def test_write_then_load_roundtrips(tmp_path: Path) -> None:
     built = benchmark.build(PAIRS)
     benchmark.write(tmp_path, built)
     assert benchmark.load(tmp_path) == built
+
+
+def test_write_then_load_roundtrips_non_ascii(tmp_path: Path) -> None:
+    pairs = [{"creole": "Zanfan-la pe manz so dipin astèr", "translation": "L'enfant mange, déjà", "lang": "fra"}]
+    built = benchmark.build(pairs)
+    benchmark.write(tmp_path, built)
+    loaded = benchmark.load(tmp_path)
+    assert loaded == built
+    assert "astèr" in next(iter(loaded[0].values()))
+
+
+def test_load_rejects_duplicate_ids(tmp_path: Path) -> None:
+    benchmark.write(tmp_path, benchmark.build(PAIRS))
+    queries_file = tmp_path / "queries.jsonl"
+    first_line = queries_file.read_text(encoding="utf-8").split("\n")[0]
+    queries_file.write_text(first_line + "\n" + first_line + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate _id"):
+        benchmark.load(tmp_path)

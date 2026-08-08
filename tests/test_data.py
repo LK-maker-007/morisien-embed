@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import io
+import zipfile
+from pathlib import Path
+
 from morisien_embed import data
 
 
@@ -16,6 +20,14 @@ def test_loose_ignores_case_and_punctuation() -> None:
     assert data.loose("Mo pe ale") != data.loose("Mo pa ale")
 
 
+def test_loose_ignores_accents_and_invisible_characters() -> None:
+    assert data.loose("ast\u00e8r") == data.loose("aster")  # accented e vs plain e
+    assert data.loose("ast\u00e9r") == data.loose("aste\u0301r")  # NFC vs NFD composition
+    assert data.loose("mo\u200bpe ale") == data.loose("Mo pe ale")  # zero-width space
+    assert data.loose("li\u2019n ale") == data.loose("li'n ale")  # curly vs straight apostrophe
+    assert data.loose("mo\u00a0pe ale") == data.loose("mo pe ale")  # non-breaking space
+
+
 def test_merge_drops_exact_duplicates_case_insensitively() -> None:
     pairs = [pair("Mo pe ale", "I am going"), pair("MO PE ALE", "i am going"), pair("Mo pe ale", "I go")]
     kept, dropped = data.merge(pairs, reserved=set())
@@ -23,11 +35,17 @@ def test_merge_drops_exact_duplicates_case_insensitively() -> None:
     assert dropped["duplicate"] == 1
 
 
-def test_merge_drops_reserved_evaluation_sentences() -> None:
-    pairs = [pair("Mo pe ale", "I am going"), pair("Li pe manze", "He is eating")]
-    kept, dropped = data.merge(pairs, reserved={"mo pe ale"})
+def test_merge_drops_reserved_evaluation_sentences_loosely() -> None:
+    reserved = {data.loose("Mo pe ale lakaz.")}
+    pairs = [
+        pair("Mo pe ale lakaz", "punctuation variant leaks"),
+        pair("MO PE ALE LAKAZ!!", "case and punctuation variant leaks"),
+        pair("Mo pe alé lakaz", "accent variant leaks"),
+        pair("Li pe manze", "clean pair survives"),
+    ]
+    kept, dropped = data.merge(pairs, reserved=reserved)
     assert [p["creole"] for p in kept] == ["Li pe manze"]
-    assert dropped["leak"] == 1
+    assert dropped["leak"] == 3
 
 
 def test_merge_keeps_first_occurrence() -> None:
@@ -35,3 +53,30 @@ def test_merge_keeps_first_occurrence() -> None:
     kept, _ = data.merge(pairs, reserved=set())
     assert len(kept) == 1
     assert kept[0]["lang"] == "eng"
+
+
+def test_morisienmt_reads_zip_archives_and_skips_empty_rows(monkeypatch, tmp_path: Path) -> None:
+    rows = {
+        "en-cr": [
+            {"input": "I am going home", "target": "Mo pe ale lakaz"},
+            {"input": "  ", "target": "Mo pe ale"},  # blank translation is skipped
+        ],
+        "fr-cr": [{"input": "Je rentre chez moi", "target": "Mo pe ale  lakaz"}],
+    }
+
+    def fake_download(repo: str, filename: str, repo_type: str) -> str:
+        pair_name = Path(filename).stem
+        archive = tmp_path / f"{pair_name}.zip"
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as bundle:
+            lines = "\n".join(f'{{"input": "{r["input"]}", "target": "{r["target"]}"}}' for r in rows[pair_name])
+            bundle.writestr(f"{pair_name}_test.jsonl", lines)
+        archive.write_bytes(buffer.getvalue())
+        return str(archive)
+
+    monkeypatch.setattr(data, "hf_hub_download", fake_download)
+    pairs = data.morisienmt("test")
+    assert pairs == [
+        {"creole": "Mo pe ale lakaz", "translation": "I am going home", "lang": "eng"},
+        {"creole": "Mo pe ale lakaz", "translation": "Je rentre chez moi", "lang": "fra"},
+    ]

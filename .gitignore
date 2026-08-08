@@ -20,3 +20,9 @@ benchmark/data/
 
 # local run reports
 *.ipynb
+
+# credentials — never commit
+.env
+kaggle.json
+secrets*.json
+*.token

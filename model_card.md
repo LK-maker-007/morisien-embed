@@ -21,13 +21,14 @@ datasets:
 
 # morisien-embed
 
-The first dedicated text embedding model for **Mauritian Creole (Kreol Morisien, `mfe`)** — the
-home language of roughly 86% of Mauritius and covered by no dedicated embedding model before this one.
+To our knowledge, the first dedicated text embedding model for **Mauritian Creole (Kreol Morisien,
+`mfe`)** — the home language of roughly 90% of Mauritius (2022 census).
 
-Fine-tuned from [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) on all
-publicly available Creole↔{English, French} parallel data, it outperforms every general multilingual
-embedding model — including [LaBSE](https://huggingface.co/sentence-transformers/LaBSE), the strongest
-translation-retrieval model available — on held-out Creole retrieval in both directions.
+Fine-tuned from [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) on
+effectively all publicly available Creole↔{English, French} parallel data, it outperforms every
+general multilingual embedding model we evaluated — including
+[LaBSE](https://huggingface.co/sentence-transformers/LaBSE), the strongest of them on this task — on
+held-out Creole retrieval in both directions.
 
 Use it for semantic search, retrieval, RAG, bitext mining, or clustering over Kreol Morisien text.
 
@@ -44,8 +45,8 @@ english = ["I am going to the market now.", "The children are playing in the yar
 similarity = model.similarity(model.encode(creole), model.encode(english))
 ```
 
-Trained with Matryoshka loss, so embeddings can be truncated for faster search at a small
-accuracy cost:
+Trained with Matryoshka loss, so embeddings can be truncated for faster search at a small,
+measured accuracy cost (ndcg@10 on the benchmark below: 0.9591 at 256 dims, 0.9531 at 128):
 
 ```python
 model = SentenceTransformer("Singaraj/morisien-embed", truncate_dim=256)
@@ -56,8 +57,8 @@ No prompt/prefix is required.
 ## Results
 
 Creole→English retrieval on the held-out [MorisienMT](https://huggingface.co/datasets/prajdabre/MorisienMT)
-test split (1,000 queries, leak-free against training data — verified by exact and
-punctuation-insensitive matching):
+test split (1,000 queries, leak-free against training data — enforced in the data pipeline by exact
+matching and by a punctuation-, case- and accent-insensitive check):
 
 | Model | Params | ndcg@10 | accuracy@1 |
 |---|---|---|---|
@@ -77,7 +78,8 @@ Creole→French, same protocol:
 | **morisien-embed** | **0.9751** | **0.9530** |
 
 Generalization to an independent domain — [FLORES+](https://huggingface.co/datasets/openlanguagedata/flores_plus)
-`mfe` devtest (1,012 professionally translated wikinews sentences, zero overlap with training data):
+`mfe` devtest (1,012 professionally translated sentences from Wikinews, Wikijunior and Wikivoyage,
+zero overlap with training data):
 
 | Model | ndcg@10 | accuracy@1 |
 |---|---|---|
@@ -100,13 +102,15 @@ Every number is reproducible from the [training repository](https://github.com/L
   available Mauritian Creole parallel text — merged from
   [MorisienMT](https://huggingface.co/datasets/prajdabre/MorisienMT) (CC) and
   [Kreyòl-MT](https://huggingface.co/datasets/jhu-clsp/kreyol-mt) (mixed licenses; used for training
-  only, not redistributed). Every MorisienMT dev/test sentence was removed from training by exact and
-  fuzzy matching.
+  only, not redistributed). Every MorisienMT dev/test sentence is removed from training by exact
+  matching and by a punctuation-, case- and accent-insensitive check.
 - **Recipe:** hard-negative mining with positive-aware false-negative filtering
-  (`mine_hard_negatives`: 5 negatives/anchor, `range_min=10`, `relative_margin=0.05`), then
-  contrastive training with `CachedMultipleNegativesRankingLoss` (batch 128, ~760 in-batch negatives
-  per anchor) wrapped in `MatryoshkaLoss` (dims 768/512/256/128/64). 3 epochs, lr 2e-5, warmup 10%,
-  fp16, seed 42, single T4 GPU (~30 min).
+  (`mine_hard_negatives`: 5 negatives/anchor, `range_min=10`, `relative_margin=0.05`). The margin
+  filter is strict: 24,100 of the 35,064 pairs survived with a full negative set, and the released
+  checkpoint's contrastive stage trained on those 24,100 tuples (the stage-1 mining model itself was
+  trained on all 35,064). Contrastive training uses `CachedMultipleNegativesRankingLoss` (batch 128,
+  767 in-batch negatives per anchor) wrapped in `MatryoshkaLoss` (dims 768/512/256/128/64). 3 epochs,
+  lr 2e-5, warmup 10%, fp16, seed 42, single T4 GPU (~30 min).
 - **Base model:** [intfloat/multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base)
   (278M parameters, MIT).
 
@@ -121,6 +125,17 @@ Every number is reproducible from the [training repository](https://github.com/L
 - **One distribution family.** MorisienMT and Kreyòl-MT overlap heavily, and the only fully
   independent evaluation domain for `mfe` (FLORES+) is saturated at this corpus size — so the margin
   over LaBSE is demonstrated in-domain only.
+- **Haitian Creole proximity.** Like every multilingual embedder we tested, the model embeds Haitian
+  Creole close to Mauritian Creole: with same-meaning Haitian sentences injected into a FLORES-based
+  corpus, mfe→eng accuracy@1 drops from 1.00 to 0.71 (the Haitian twin outranks the English
+  translation). The fine-tune still discriminates the two creoles better than LaBSE does on the same
+  trap (306/400 correct vs LaBSE's 170/400), and wrong-meaning Haitian text is never confused — but
+  mixed mfe/hat corpora will degrade retrieval.
+- **Case sensitivity.** ALL-CAPS text embeds measurably differently from its lower-case form
+  (cosine ≈ 0.81 to the same sentence); caps-heavy text retrieves worse.
+- **Protocol note.** During recipe development the held-out test score was printed at the end of each
+  training run, so recipe selection had test visibility; an independent audit bounded the resulting
+  optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen.
 - **Orthographic variation.** Training data mixes pre- and post-2011 (Lortograf Kreol Morisien)
   spellings; performance on older orthography is untested.
 
@@ -133,7 +148,7 @@ If you use this model, please cite the data sources it builds on:
 ```bibtex
 @misc{morisien-embed,
   author = {Singaraj B},
-  title = {morisien-embed: the first text embedding model for Mauritian Creole},
+  title = {morisien-embed: a dedicated text embedding model for Mauritian Creole},
   year = {2026},
   url = {https://huggingface.co/Singaraj/morisien-embed}
 }

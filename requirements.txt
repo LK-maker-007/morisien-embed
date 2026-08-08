@@ -1,5 +1,0 @@
-sentence-transformers>=5.0
-datasets>=2.0
-transformers>=4.40
-torch>=2.0
-huggingface-hub>=0.20

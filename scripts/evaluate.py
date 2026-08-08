@@ -36,6 +36,7 @@ def main() -> None:
     results = benchmark.evaluate(
         model,
         bench,
+        name=args.data_dir.name,
         query_prompt=args.query_prompt or None,
         corpus_prompt=args.corpus_prompt or None,
         batch_size=args.batch_size,

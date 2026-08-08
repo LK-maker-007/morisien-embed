@@ -1,12 +1,25 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "morisien-embed"
 version = "0.1.0"
 description = "An embedding model for Mauritian Creole (Kreol Morisien)"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Singaraj B", email = "singaraj.yali@gmail.com" }]
 requires-python = ">=3.10"
+dependencies = [
+    "sentence-transformers>=5.4",
+    "transformers>=4.41",
+    "torch>=2.0",
+    "datasets>=2.14",
+    "huggingface-hub>=0.20",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff==0.14.10"]
 
 [tool.setuptools]
 packages = ["morisien_embed"]

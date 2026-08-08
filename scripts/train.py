@@ -38,13 +38,11 @@ from sentence_transformers.util import mine_hard_negatives
 
 from morisien_embed import benchmark, data
 
-LABSE_REFERENCE = "LaBSE test: accuracy@1=0.9090  ndcg@10=0.9393"
-
 
 def load_training_pairs(path: Path, limit: int | None) -> Dataset:
     """Load (anchor=creole, positive=translation) pairs. Column order is the loss contract."""
     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
-    if limit:
+    if limit is not None:
         rows = rows[:limit]
     return Dataset.from_dict(
         {"anchor": [row["creole"] for row in rows], "positive": [row["translation"] for row in rows]}
@@ -92,11 +90,6 @@ def matryoshka_dims(full_dim: int) -> list[int]:
     return [full_dim, *(dim for dim in (512, 256, 128, 64) if dim < full_dim)]
 
 
-def embedding_dim(model: SentenceTransformer) -> int:
-    getter = getattr(model, "get_embedding_dimension", None) or model.get_sentence_embedding_dimension
-    return getter()
-
-
 def dev_evaluator() -> InformationRetrievalEvaluator:
     """Score the dev split on the same Creole→English task the final test uses, for a matched signal."""
     queries, corpus, qrels = benchmark.build(data.morisienmt("dev"), target_lang="eng")
@@ -107,15 +100,16 @@ def dev_evaluator() -> InformationRetrievalEvaluator:
 
 def report_test(model: SentenceTransformer) -> None:
     results = benchmark.evaluate(model, benchmark.build(data.morisienmt("test"), target_lang="eng"))
-    acc = next(v for k, v in results.items() if k.endswith("cosine_accuracy@1"))
-    ndcg = next(v for k, v in results.items() if k.endswith("cosine_ndcg@10"))
+    acc = next((v for k, v in results.items() if k.endswith("cosine_accuracy@1")), None)
+    ndcg = next((v for k, v in results.items() if k.endswith("cosine_ndcg@10")), None)
+    if acc is None or ndcg is None:
+        raise RuntimeError(f"expected cosine accuracy@1 and ndcg@10 in evaluator output, got: {sorted(results)}")
     print(f"\nFINAL (Creole->English test): accuracy@1={acc:.4f}  ndcg@10={ndcg:.4f}")
-    print(f"  reference: {LABSE_REFERENCE}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base", default="intfloat/multilingual-e5-small")
+    parser.add_argument("--base", default="intfloat/multilingual-e5-base")
     parser.add_argument("--train-file", type=Path, default=Path("data/processed/train.jsonl"))
     parser.add_argument("--output-dir", type=Path, default=Path("models/morisien-embed"))
     parser.add_argument("--epochs", type=float, default=3)
@@ -157,14 +151,14 @@ def main() -> None:
         else MultipleNegativesRankingLoss(model)
     )
     if args.matryoshka:
-        loss = MatryoshkaLoss(model, loss, matryoshka_dims=matryoshka_dims(embedding_dim(model)))
+        loss = MatryoshkaLoss(model, loss, matryoshka_dims=matryoshka_dims(model.get_embedding_dimension()))
 
     train_args = SentenceTransformerTrainingArguments(
         output_dir=str(args.output_dir),
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch_size,
         learning_rate=args.lr,
-        warmup_steps=0.1,
+        warmup_ratio=0.1,
         fp16=args.fp16,
         batch_sampler=BatchSamplers.NO_DUPLICATES,
         eval_strategy="epoch",
