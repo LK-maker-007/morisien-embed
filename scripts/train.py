@@ -9,7 +9,8 @@ Passing ``--mine-with <model>`` switches on the stronger recipe used by state-of
 models: hard negatives are mined with that model (skipping candidates too close to the true positive,
 so real positives are not mislabelled as negatives), and training uses
 ``CachedMultipleNegativesRankingLoss`` so a large batch of negatives fits in memory via gradient
-caching.
+caching. ``--matryoshka`` additionally trains truncatable embeddings that stay accurate at smaller
+dimensions.
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ from sentence_transformers.base.sampler import BatchSamplers
 from sentence_transformers.sentence_transformer.evaluation import InformationRetrievalEvaluator
 from sentence_transformers.sentence_transformer.losses import (
     CachedMultipleNegativesRankingLoss,
+    MatryoshkaLoss,
     MultipleNegativesRankingLoss,
 )
 from sentence_transformers.util import mine_hard_negatives
@@ -50,13 +52,19 @@ def load_training_pairs(path: Path, limit: int | None) -> Dataset:
 
 
 def mine_negatives(
-    pairs: Dataset, mining_model: str, num_negatives: int, range_min: int, relative_margin: float
+    pairs: Dataset,
+    mining_model: str,
+    num_negatives: int,
+    range_min: int,
+    range_max: int | None,
+    relative_margin: float,
 ) -> Dataset:
     """Return (anchor, positive, neg_1, …, neg_n) tuples with hard negatives from ``mining_model``.
 
     ``range_min`` skips the closest matches (which may be paraphrases of the positive) and
     ``relative_margin`` drops any candidate whose similarity comes within that fraction of the
-    positive's — both guard against mislabelling a true positive as a negative.
+    positive's — both guard against mislabelling a true positive as a negative. ``range_max`` widens
+    the candidate pool so every anchor can still reach ``num_negatives`` after that filtering.
     """
     model = SentenceTransformer(mining_model)
     mined = mine_hard_negatives(
@@ -66,6 +74,7 @@ def mine_negatives(
         positive_column_name="positive",
         num_negatives=num_negatives,
         range_min=range_min,
+        range_max=range_max,
         relative_margin=relative_margin,
         sampling_strategy="top",
         output_format="n-tuple",
@@ -76,6 +85,11 @@ def mine_negatives(
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     return mined
+
+
+def matryoshka_dims(full_dim: int) -> list[int]:
+    """Truncation sizes for Matryoshka training: the model's full dimension down to 64."""
+    return [full_dim, *(dim for dim in (512, 256, 128, 64) if dim < full_dim)]
 
 
 def dev_evaluator() -> InformationRetrievalEvaluator:
@@ -107,14 +121,21 @@ def main() -> None:
     parser.add_argument("--mine-with", default=None, help="model to mine hard negatives with; enables cached loss")
     parser.add_argument("--num-negatives", type=int, default=5)
     parser.add_argument("--range-min", type=int, default=10)
+    parser.add_argument("--range-max", type=int, default=None, help="widen candidate pool to avoid negative shortfall")
     parser.add_argument("--relative-margin", type=float, default=0.05)
     parser.add_argument("--mini-batch-size", type=int, default=32)
+    parser.add_argument("--matryoshka", action="store_true", help="train truncatable Matryoshka embeddings")
     args = parser.parse_args()
 
     train_dataset = load_training_pairs(args.train_file, args.limit)
     if args.mine_with:
         train_dataset = mine_negatives(
-            train_dataset, args.mine_with, args.num_negatives, args.range_min, args.relative_margin
+            train_dataset,
+            args.mine_with,
+            args.num_negatives,
+            args.range_min,
+            args.range_max,
+            args.relative_margin,
         )
 
     model = SentenceTransformer(args.base)
@@ -123,6 +144,8 @@ def main() -> None:
         if args.mine_with
         else MultipleNegativesRankingLoss(model)
     )
+    if args.matryoshka:
+        loss = MatryoshkaLoss(model, loss, matryoshka_dims=matryoshka_dims(model.get_sentence_embedding_dimension()))
 
     train_args = SentenceTransformerTrainingArguments(
         output_dir=str(args.output_dir),
