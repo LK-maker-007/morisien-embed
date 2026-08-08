@@ -19,10 +19,12 @@ from datasets import load_dataset
 from huggingface_hub import hf_hub_download
 
 KREYOL_REPO = "jhu-clsp/kreyol-mt"
+KREYOL_REVISION = "4be818dfd3ef6f166a9d5d3553e2b46539507ea3"  # 2024-10-24
 KREYOL_CONFIGS = {"mfe-eng": "eng", "mfe-fra": "fra"}
 CREOLE_LANG = "mfe"
 
-MORISIEN_REPO = "prajdabre/MorisienMT"
+MORISIEN_REPO = "prajdabre/KreolMorisienMT"  # canonical id; "prajdabre/MorisienMT" is a redirect
+MORISIEN_REVISION = "66c76eaf5e33b39a41c3d4c757eee3cf23b52ce5"  # 2022-06-02
 MORISIEN_PAIRS = {"en-cr": "eng", "fr-cr": "fra"}
 
 Pair = dict[str, str]
@@ -49,7 +51,7 @@ def kreyol_mt(split: str) -> list[Pair]:
     """
     pairs: list[Pair] = []
     for config, lang in KREYOL_CONFIGS.items():
-        for row in load_dataset(KREYOL_REPO, config, split=split):
+        for row in load_dataset(KREYOL_REPO, config, split=split, revision=KREYOL_REVISION):
             entry = row["translation"]
             if entry["src_lang"] == CREOLE_LANG:
                 creole, translation = entry["src_text"], entry["tgt_text"]
@@ -68,7 +70,7 @@ def morisienmt(split: str) -> list[Pair]:
     """
     pairs: list[Pair] = []
     for pair, lang in MORISIEN_PAIRS.items():
-        archive = hf_hub_download(MORISIEN_REPO, f"data/{pair}.zip", repo_type="dataset")
+        archive = hf_hub_download(MORISIEN_REPO, f"data/{pair}.zip", repo_type="dataset", revision=MORISIEN_REVISION)
         with zipfile.ZipFile(archive) as bundle, bundle.open(f"{pair}_{split}.jsonl") as handle:
             for line in io.TextIOWrapper(handle, encoding="utf-8"):
                 row = json.loads(line)

@@ -44,11 +44,13 @@ available Creole parallel data.
 ## Reproduce
 
 ```bash
-pip install -e .
+pip install -e .  # CPU-only? install torch from https://download.pytorch.org/whl/cpu first (5x smaller)
 
 python scripts/build_training.py                        # -> data/processed/train.jsonl (35K pairs)
 python scripts/build_benchmark.py --target eng          # -> benchmark/data/eng
 python scripts/evaluate.py sentence-transformers/LaBSE  # any baseline on the benchmark
+python scripts/build_flores_benchmark.py --target eng   # independent benchmark; gated — accept the
+                                                        # FLORES+ terms on the Hub and set HF_TOKEN
 
 python scripts/train.py --base intfloat/multilingual-e5-base \
   --batch-size 48 --epochs 3 --no-checkpoints --output-dir models/e5-base
@@ -59,10 +61,16 @@ python scripts/train.py --base intfloat/multilingual-e5-base \
   --seed 42 --no-checkpoints --output-dir models/morisien-embed
 ```
 
-Training runs on a single free Kaggle T4 (~45 min total); everything else runs on CPU. To smoke-test
-the training loop without a GPU, add `--no-fp16 --limit 64`.
+Training runs on a single free Kaggle T4 (~45 min total); everything else runs on CPU (a full LaBSE
+evaluation takes ~45 min on an 8-core machine). To smoke-test the training loop without a GPU, add
+`--no-fp16 --limit 64`. Dataset loads are pinned to exact Hub revisions, so rebuilds are byte-stable.
 
 ## Status
 
 Model trained and validated (3 seeds, two directions, independent-domain check); public release is in
 final review. Next: contributing the Kreol Morisien retrieval task to MMTEB.
+
+---
+
+By **Singaraj B** — [LK-maker-007](https://github.com/LK-maker-007) on GitHub,
+[Singaraj](https://huggingface.co/Singaraj) on Hugging Face.

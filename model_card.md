@@ -15,7 +15,7 @@ tags:
   - matryoshka
 base_model: intfloat/multilingual-e5-base
 datasets:
-  - prajdabre/MorisienMT
+  - prajdabre/KreolMorisienMT
   - jhu-clsp/kreyol-mt
 ---
 

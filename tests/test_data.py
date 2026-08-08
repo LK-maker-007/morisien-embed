@@ -68,7 +68,7 @@ def test_kreyol_mt_orients_pairs_creole_first_and_skips_empty_rows(monkeypatch) 
         ],
         "mfe-fra": [row("fra", "Je rentre chez moi", "mfe", "Mo pe ale  lakaz")],
     }
-    monkeypatch.setattr(data, "load_dataset", lambda repo, config, split: rows[config])
+    monkeypatch.setattr(data, "load_dataset", lambda repo, config, split, revision: rows[config])
     assert data.kreyol_mt("train") == [
         {"creole": "Mo pe ale", "translation": "I am going", "lang": "eng"},
         {"creole": "Li pe manze", "translation": "He is eating", "lang": "eng"},
@@ -85,7 +85,7 @@ def test_morisienmt_reads_zip_archives_and_skips_empty_rows(monkeypatch, tmp_pat
         "fr-cr": [{"input": "Je rentre chez moi", "target": "Mo pe ale  lakaz"}],
     }
 
-    def fake_download(repo: str, filename: str, repo_type: str) -> str:
+    def fake_download(repo: str, filename: str, repo_type: str, revision: str) -> str:
         pair_name = Path(filename).stem
         archive = tmp_path / f"{pair_name}.zip"
         buffer = io.BytesIO()
