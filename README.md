@@ -1,28 +1,31 @@
 # morisien-embed
 
-An embedding model for **Mauritian Creole (Kreol Morisien)** — the language ~86% of Mauritius speaks,
-which today's multilingual embedding models don't reliably cover.
+[![CI](https://github.com/LK-maker-007/morisien-embed/actions/workflows/ci.yml/badge.svg)](https://github.com/LK-maker-007/morisien-embed/actions/workflows/ci.yml)
 
-## Why
+The first dedicated embedding model for **Mauritian Creole (Kreol Morisien)** — the home language of
+roughly 86% of Mauritius, which general multilingual embedding models don't reliably cover.
 
-There is no dedicated embedding model for Kreol Morisien, and general multilingual models are weak on
-it. This project fine-tunes an efficient multilingual base into a Creole specialist and measures it
-honestly against the strongest general model.
+**Model:** [Singaraj/morisien-embed](https://huggingface.co/Singaraj/morisien-embed) · fine-tuned from
+multilingual-e5-base on all publicly available Creole parallel data.
 
-## Baselines — Creole→English retrieval, MorisienMT test (1,000 pairs)
+## Results — Creole→English retrieval, held-out MorisienMT test (1,000 queries)
 
 | model | params | ndcg@10 | acc@1 |
 |---|---|---|---|
 | paraphrase-multilingual-MiniLM-L12-v2 | 118M | 0.16 | 0.10 |
 | BAAI/bge-m3 | 568M | 0.46 | 0.36 |
-| intfloat/multilingual-e5-small *(base for fine-tuning)* | 118M | 0.54 | 0.42 |
+| intfloat/multilingual-e5-small | 118M | 0.54 | 0.42 |
 | intfloat/multilingual-e5-base | 278M | 0.64 | 0.53 |
 | intfloat/multilingual-e5-large | 560M | 0.73 | 0.65 |
-| **sentence-transformers/LaBSE** | 470M | **0.94** | **0.91** |
+| sentence-transformers/LaBSE | 470M | 0.94 | 0.91 |
+| **morisien-embed** | **278M** | **0.9655** | **0.9440** |
 
-Every model is evaluated under its best prompt configuration; reproduce with `scripts/evaluate.py`.
-General multilingual models — including the SOTA BGE-M3 — fall far short; only LaBSE, built for
-translation-pair retrieval, is competitive. Beating **0.94 ndcg@10** is the goal.
+- Stable across 3 seeds: ndcg@10 **0.9653 ± 0.0002**.
+- Creole→French: **0.9751** vs LaBSE's 0.9475.
+- FLORES+ `mfe` (independent domain, 1,012 unseen sentences): perfect 1.0000 retrieval — though LaBSE
+  also sits at that ceiling (0.9996), so the out-of-domain comparison is saturated rather than won.
+- Every baseline is evaluated under its best prompt configuration; reproduce any number with
+  `scripts/evaluate.py`.
 
 ## Data
 
@@ -33,21 +36,27 @@ translation-pair retrieval, is competitive. Beating **0.94 ndcg@10** is the goal
 - **Benchmark:** the held-out MorisienMT test split (CC-licensed, redistributable), the intended basis
   for a Mauritian Creole bitext-mining task on MMTEB.
 
-## Usage
+## Reproduce
 
 ```bash
 pip install -e .
 
-python scripts/build_training.py                       # -> data/processed/train.jsonl (35K pairs)
-python scripts/build_benchmark.py --target eng         # -> benchmark/data/eng
-python scripts/evaluate.py sentence-transformers/LaBSE # baseline on the benchmark
-python scripts/train.py --base intfloat/multilingual-e5-small --batch-size 128 --epochs 3
+python scripts/build_training.py                        # -> data/processed/train.jsonl (35K pairs)
+python scripts/build_benchmark.py --target eng          # -> benchmark/data/eng
+python scripts/evaluate.py sentence-transformers/LaBSE  # any baseline on the benchmark
+
+python scripts/train.py --base intfloat/multilingual-e5-base \
+  --batch-size 48 --epochs 3 --no-checkpoints --output-dir models/e5-base
+python scripts/train.py --base intfloat/multilingual-e5-base \
+  --mine-with models/e5-base/final \
+  --num-negatives 5 --range-min 10 --relative-margin 0.05 \
+  --matryoshka --batch-size 128 --mini-batch-size 32 --epochs 3 \
+  --seed 42 --no-checkpoints --output-dir models/morisien-embed
 ```
 
-Training runs on a single GPU (free Kaggle T4/P100); everything else runs on CPU.
+Training runs on a single free Kaggle T4 (~45 min total); everything else runs on CPU.
 
 ## Status
 
-Data pipeline, benchmark, and fine-tuning script are complete and tested. Training is in progress; the
-goal is to beat LaBSE (0.94 ndcg@10) on the held-out benchmark and contribute the Kreol Morisien task
-to MMTEB.
+Model trained, validated (3 seeds, two directions, independent-domain check) and published. Next:
+contributing the Kreol Morisien retrieval task to MMTEB.

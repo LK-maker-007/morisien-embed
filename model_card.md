@@ -67,26 +67,30 @@ punctuation-insensitive matching):
 | intfloat/multilingual-e5-base | 278M | 0.64 | 0.53 |
 | intfloat/multilingual-e5-large | 560M | 0.73 | 0.65 |
 | sentence-transformers/LaBSE | 470M | 0.94 | 0.91 |
-| **morisien-embed** | **278M** | **[PENDING-ENG-NDCG]** | **[PENDING-ENG-ACC]** |
+| **morisien-embed** | **278M** | **0.9655** | **0.9440** |
 
 Creole→French, same protocol:
 
 | Model | ndcg@10 | accuracy@1 |
 |---|---|---|
 | sentence-transformers/LaBSE | 0.9475 | 0.9130 |
-| **morisien-embed** | **[PENDING-FRA-NDCG]** | **[PENDING-FRA-ACC]** |
+| **morisien-embed** | **0.9751** | **0.9530** |
 
 Generalization to an independent domain — [FLORES+](https://huggingface.co/datasets/openlanguagedata/flores_plus)
 `mfe` devtest (1,012 professionally translated wikinews sentences, zero overlap with training data):
 
 | Model | ndcg@10 | accuracy@1 |
 |---|---|---|
-| sentence-transformers/LaBSE | [PENDING-FLORES-LABSE] | [PENDING-FLORES-LABSE-ACC] |
-| **morisien-embed** | **[PENDING-FLORES-NDCG]** | **[PENDING-FLORES-ACC]** |
+| sentence-transformers/LaBSE | 0.9996 | 0.9990 |
+| **morisien-embed** | **1.0000** | **1.0000** |
+
+Both models sit at the ceiling of this benchmark — FLORES+ sentences are long and distinctive, so
+1,012-way retrieval saturates. Read this as evidence of zero out-of-domain degradation, not as a
+margin over LaBSE.
 
 Training was repeated with three random seeds; Creole→English test ndcg@10 across seeds:
-**[PENDING-MEAN] ± [PENDING-STD]**. The released checkpoint is seed 42, designated before results
-were seen.
+**0.9653 ± 0.0002** (accuracy@1 **0.9433 ± 0.0006**). The released checkpoint is seed 42, designated
+before results were seen.
 
 Every number is reproducible from the [training repository](https://github.com/LK-maker-007/morisien-embed).
 
@@ -108,14 +112,15 @@ Every number is reproducible from the [training repository](https://github.com/L
 
 ## Limitations
 
-- **Not native-perfect.** Accuracy@1 around [PENDING-ENG-ACC] means roughly one query in twenty ranks
+- **Not native-perfect.** Accuracy@1 around 0.944 means roughly one query in eighteen ranks
   a wrong translation first. Strong, but below a human bilingual speaker.
 - **Register skew.** The available Creole data over-represents religious text, politics, and
   literature; highly informal or technical registers are less covered.
 - **Small evaluation universe.** Retrieval is measured over ~1,000-passage corpora — standard for
   bitext benchmarks, but absolute scores would be lower against web-scale corpora.
-- **One distribution family.** MorisienMT and Kreyòl-MT overlap heavily; FLORES+ is the only fully
-  independent evaluation domain that exists for `mfe` today.
+- **One distribution family.** MorisienMT and Kreyòl-MT overlap heavily, and the only fully
+  independent evaluation domain for `mfe` (FLORES+) is saturated at this corpus size — so the margin
+  over LaBSE is demonstrated in-domain only.
 - **Orthographic variation.** Training data mixes pre- and post-2011 (Lortograf Kreol Morisien)
   spellings; performance on older orthography is untested.
 
