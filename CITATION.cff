@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this model, please cite it as below."
+title: "morisien-embed: a dedicated text embedding model for Mauritian Creole"
+authors:
+  - family-names: "B"
+    given-names: "Singaraj"
+year: 2026
+url: "https://huggingface.co/Singaraj/morisien-embed"
+repository-code: "https://github.com/LK-maker-007/morisien-embed"
+license: MIT

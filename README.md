@@ -9,6 +9,22 @@ don't reliably cover.
 **Model:** [Singaraj/morisien-embed](https://huggingface.co/Singaraj/morisien-embed) · fine-tuned
 from multilingual-e5-base on effectively all publicly available Creole parallel data.
 
+## Usage
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("Singaraj/morisien-embed")
+
+creole = ["Mo pe al bazar aster.", "Bann zanfan pe zwe dan lakour."]
+english = ["I am going to the market now.", "The children are playing in the yard."]
+
+similarity = model.similarity(model.encode(creole), model.encode(english))
+```
+
+No prompt or prefix is required. Trained with Matryoshka loss, so embeddings can be truncated for
+faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-embed", truncate_dim=256)`.
+
 ## Results — Creole→English retrieval, held-out MorisienMT test (1,000 queries)
 
 | model | params | ndcg@10 | acc@1 |
@@ -43,6 +59,10 @@ from multilingual-e5-base on effectively all publicly available Creole parallel 
 
 ## Reproduce
 
+The exact library versions that produced the released checkpoint are pinned in
+[`requirements-lock.txt`](requirements-lock.txt); `pip install -e .` alone installs compatible
+current versions, which reproduce the reported metrics.
+
 ```bash
 pip install -e .  # CPU-only? install torch from https://download.pytorch.org/whl/cpu first (5x smaller)
 
@@ -69,6 +89,33 @@ evaluation takes ~45 min on an 8-core machine). To smoke-test the training loop 
 
 Model trained, validated (3 seeds, three retrieval directions, independent-domain check) and
 published. Next: contributing the Kreol Morisien retrieval task to MMTEB.
+
+## Citation
+
+If you use this model, please cite it along with the datasets it builds on:
+
+```bibtex
+@misc{morisien-embed,
+  author = {Singaraj B},
+  title  = {morisien-embed: a dedicated text embedding model for Mauritian Creole},
+  year   = {2026},
+  url    = {https://huggingface.co/Singaraj/morisien-embed},
+}
+
+@article{dabre2022morisienmt,
+  author  = {Dabre, Raj and Sukhoo, Aneerav},
+  title   = {MorisienMT: A Dataset for Mauritian Creole Machine Translation},
+  journal = {arXiv preprint arXiv:2206.02421},
+  year    = {2022},
+}
+
+@inproceedings{robinson2024kreyol,
+  author    = {Robinson, Nathaniel R. and others},
+  title     = {Krey{\`o}l-MT: Building MT for Latin American, Caribbean and Colonial African Creole Languages},
+  booktitle = {NAACL},
+  year      = {2024},
+}
+```
 
 ---
 

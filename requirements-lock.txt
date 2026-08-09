@@ -1,0 +1,8 @@
+# Exact versions that produced the released checkpoint, recorded in the model's own
+# config_sentence_transformers.json. Pin these to reproduce the training run faithfully.
+# (Install torch matching your hardware: https://pytorch.org/get-started/locally/)
+torch==2.10.0
+transformers==5.0.0
+sentence-transformers==5.7.0
+# Data-loading companions install as compatible dependencies of sentence-transformers[train];
+# they touch only how corpora are fetched, not the reported metrics.

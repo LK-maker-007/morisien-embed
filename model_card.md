@@ -17,6 +17,42 @@ base_model: intfloat/multilingual-e5-base
 datasets:
   - prajdabre/KreolMorisienMT
   - jhu-clsp/kreyol-mt
+model-index:
+  - name: morisien-embed
+    results:
+      - task:
+          type: bitext-mining
+          name: Bitext Retrieval
+        dataset:
+          type: prajdabre/KreolMorisienMT
+          name: MorisienMT test (Creole→English)
+        metrics:
+          - type: ndcg_at_10
+            value: 0.9655
+          - type: accuracy_at_1
+            value: 0.9440
+      - task:
+          type: bitext-mining
+          name: Bitext Retrieval
+        dataset:
+          type: prajdabre/KreolMorisienMT
+          name: MorisienMT test (Creole→French)
+        metrics:
+          - type: ndcg_at_10
+            value: 0.9751
+          - type: accuracy_at_1
+            value: 0.9530
+      - task:
+          type: bitext-mining
+          name: Bitext Retrieval
+        dataset:
+          type: prajdabre/KreolMorisienMT
+          name: MorisienMT test (English→Creole)
+        metrics:
+          - type: ndcg_at_10
+            value: 0.9588
+          - type: accuracy_at_1
+            value: 0.9309
 ---
 
 # morisien-embed
