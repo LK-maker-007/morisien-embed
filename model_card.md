@@ -27,8 +27,8 @@ To our knowledge, the first dedicated text embedding model for **Mauritian Creol
 Fine-tuned from [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) on
 effectively all publicly available Creole↔{English, French} parallel data, it outperforms every
 general multilingual embedding model we evaluated — including
-[LaBSE](https://huggingface.co/sentence-transformers/LaBSE), the strongest of them on this task — on
-held-out Creole retrieval in both directions.
+[LaBSE](https://huggingface.co/sentence-transformers/LaBSE), the strongest of them on this task — in
+all three measured retrieval directions (Creole→English, Creole→French, English→Creole).
 
 Use it for semantic search, retrieval, RAG, bitext mining, or clustering over Kreol Morisien text.
 
@@ -76,6 +76,14 @@ Creole→French, same protocol:
 |---|---|---|
 | sentence-transformers/LaBSE | 0.9475 | 0.9130 |
 | **morisien-embed** | **0.9751** | **0.9530** |
+
+English→Creole — the reversed direction over the same pairs (999 queries retrieving 1,000 Creole
+passages, built with `scripts/build_benchmark.py --reverse`):
+
+| Model | ndcg@10 | accuracy@1 |
+|---|---|---|
+| sentence-transformers/LaBSE | 0.9247 | 0.8789 |
+| **morisien-embed** | **0.9588** | **0.9309** |
 
 Generalization to an independent domain — [FLORES+](https://huggingface.co/datasets/openlanguagedata/flores_plus)
 `mfe` devtest (1,012 professionally translated sentences from Wikinews, Wikijunior and Wikivoyage,

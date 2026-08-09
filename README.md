@@ -6,9 +6,8 @@ To our knowledge, the first dedicated embedding model for **Mauritian Creole (Kr
 home language of roughly 90% of Mauritius (2022 census), which general multilingual embedding models
 don't reliably cover.
 
-**Model:** [Singaraj/morisien-embed](https://huggingface.co/Singaraj/morisien-embed) (private until
-release review completes) · fine-tuned from multilingual-e5-base on effectively all publicly
-available Creole parallel data.
+**Model:** [Singaraj/morisien-embed](https://huggingface.co/Singaraj/morisien-embed) · fine-tuned
+from multilingual-e5-base on effectively all publicly available Creole parallel data.
 
 ## Results — Creole→English retrieval, held-out MorisienMT test (1,000 queries)
 
@@ -24,6 +23,7 @@ available Creole parallel data.
 
 - Stable across 3 seeds: ndcg@10 **0.9653 ± 0.0002**.
 - Creole→French: **0.9751** vs LaBSE's 0.9475.
+- English→Creole (reversed direction): **0.9588** vs LaBSE's 0.9247.
 - FLORES+ `mfe` (independent domain, 1,012 unseen sentences): perfect 1.0000 retrieval — though LaBSE
   also sits at that ceiling (0.9996), so the out-of-domain comparison is saturated rather than won.
 - E5 baselines were ablated with and without their `query:`/`passage:` prompts on an earlier
@@ -67,8 +67,8 @@ evaluation takes ~45 min on an 8-core machine). To smoke-test the training loop 
 
 ## Status
 
-Model trained and validated (3 seeds, two directions, independent-domain check); public release is in
-final review. Next: contributing the Kreol Morisien retrieval task to MMTEB.
+Model trained, validated (3 seeds, three retrieval directions, independent-domain check) and
+published. Next: contributing the Kreol Morisien retrieval task to MMTEB.
 
 ---
 
