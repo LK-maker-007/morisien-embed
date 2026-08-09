@@ -18,10 +18,18 @@ from morisien_embed.data import normalize
 Benchmark = tuple[dict[str, str], dict[str, str], dict[str, set[str]]]
 
 
-def build(pairs: list[dict[str, str]], target_lang: str | None = None) -> Benchmark:
+def build(
+    pairs: list[dict[str, str]],
+    target_lang: str | None = None,
+    *,
+    query_field: str = "creole",
+    passage_field: str = "translation",
+) -> Benchmark:
     """Build queries, corpus and qrels from pairs, optionally restricting to one translation language.
 
-    Texts are whitespace-normalized so the written JSONL never contains line-breaking characters.
+    ``query_field``/``passage_field`` choose the retrieval direction: the defaults score
+    Creole→translation; swapping them scores translation→Creole over the same pairs. Texts are
+    whitespace-normalized so the written JSONL never contains line-breaking characters.
     """
     query_id: dict[str, str] = {}
     corpus_id: dict[str, str] = {}
@@ -29,10 +37,10 @@ def build(pairs: list[dict[str, str]], target_lang: str | None = None) -> Benchm
     for pair in pairs:
         if target_lang and pair["lang"] != target_lang:
             continue
-        creole, translation = normalize(pair["creole"]), normalize(pair["translation"])
-        query_id.setdefault(creole, f"q{len(query_id)}")
-        corpus_id.setdefault(translation, f"d{len(corpus_id)}")
-        qrels.setdefault(query_id[creole], set()).add(corpus_id[translation])
+        query, passage = normalize(pair[query_field]), normalize(pair[passage_field])
+        query_id.setdefault(query, f"q{len(query_id)}")
+        corpus_id.setdefault(passage, f"d{len(corpus_id)}")
+        qrels.setdefault(query_id[query], set()).add(corpus_id[passage])
     queries = {qid: text for text, qid in query_id.items()}
     corpus = {cid: text for text, cid in corpus_id.items()}
     return queries, corpus, qrels

@@ -34,6 +34,15 @@ def test_build_target_lang_filters_pairs() -> None:
     assert list(corpus.values()) == ["Je rentre chez moi"]
 
 
+def test_build_reversed_direction_swaps_queries_and_corpus() -> None:
+    queries, corpus, qrels = benchmark.build(PAIRS, query_field="translation", passage_field="creole")
+    assert len(queries) == 3  # "He is eating" collapses to one query
+    assert len(corpus) == 3
+    qid = next(q for q, text in queries.items() if text == "He is eating")
+    relevant_texts = {corpus[cid] for cid in qrels[qid]}
+    assert relevant_texts == {"Li pe manze", "Zot pe zwe"}  # one query, both creole translations relevant
+
+
 def test_build_normalizes_line_breaking_whitespace() -> None:
     pairs = [{"creole": "Mo pe ale", "translation": "I am\ngoing", "lang": "eng"}]
     queries, corpus, _ = benchmark.build(pairs)
