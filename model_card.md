@@ -147,7 +147,7 @@ Limitations come from an internal adversarial audit of the released checkpoint.
 
 - **Data:** 35,064 unique, leak-free Creole↔{English, French} pairs — effectively all publicly
   available Mauritian Creole parallel text — merged from
-  [MorisienMT](https://huggingface.co/datasets/prajdabre/MorisienMT) (CC) and
+  [MorisienMT](https://huggingface.co/datasets/prajdabre/KreolMorisienMT) (MIT) and
   [Kreyòl-MT](https://huggingface.co/datasets/jhu-clsp/kreyol-mt) (mixed licenses; used for training
   only, not redistributed). Every MorisienMT dev/test sentence is removed from training by exact
   matching and by a punctuation-, case- and accent-insensitive check.

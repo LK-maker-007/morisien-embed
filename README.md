@@ -49,12 +49,12 @@ faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-
 
 ## Data
 
-- **Training:** 35,064 leak-free Creole↔{English,French} pairs, merged from MorisienMT (CC) and
+- **Training:** 35,064 leak-free Creole↔{English,French} pairs, merged from MorisienMT (MIT) and
   Kreyòl-MT, with every MorisienMT dev/test sentence removed — enforced by exact matching plus a
   punctuation-, case- and accent-insensitive check (both under test). Hard-negative mining keeps
   24,100 of these for the released model's contrastive stage. Only the trained model is released,
   never the data; regenerate it with `scripts/build_training.py`.
-- **Benchmark:** the held-out MorisienMT test split (CC-licensed, redistributable), the intended basis
+- **Benchmark:** the held-out MorisienMT test split (MIT-licensed, redistributable), the intended basis
   for a Mauritian Creole bitext-mining task on MMTEB.
 
 ## Reproduce
