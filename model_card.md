@@ -129,14 +129,19 @@ Limitations come from an internal adversarial audit of the released checkpoint.
   independent evaluation domain for `mfe` (FLORES+) is saturated at this corpus size — so the margin
   over LaBSE is demonstrated in-domain only.
 - **Haitian Creole proximity.** Like every multilingual embedder we tested, the model embeds Haitian
-  Creole close to Mauritian Creole: with same-meaning Haitian sentences injected into a FLORES-based
-  corpus, mfe→eng accuracy@1 drops from 1.00 to 0.71 (the Haitian twin outranks the English
-  translation) — and LaBSE degrades less on this same trap (to 0.79). On a related eng→{mfe, hat}
-  discrimination test the fine-tune picks the correct Mauritian translation 306/400 times vs LaBSE's
-  170/400, and wrong-meaning Haitian text is never confused — but mixed mfe/hat corpora will degrade
-  retrieval.
+  Creole close to Mauritian Creole. Measured on the 1,012 aligned mfe/hat/eng FLORES+ devtest
+  triplets (`scripts/probe_haitian.py`): with every same-meaning Haitian twin injected into the
+  corpus, mfe→eng accuracy@1 drops from 1.00 to 0.68 — and LaBSE resists this trap better (0.79).
+  Asked instead to tell the two creoles apart (is the English sentence closer to its Mauritian or
+  its Haitian translation?), the fine-tune picks Mauritian 709/1012 times vs LaBSE's 351/1012.
+  Wrong-meaning Haitian text is never confused; mixed mfe/hat corpora will still degrade retrieval.
 - **Case sensitivity.** ALL-CAPS text embeds measurably differently from its lower-case form
   (cosine ≈ 0.81 to the same sentence); caps-heavy text retrieves worse.
+- **English-only regression.** Fine-tuning costs some pure-English semantic quality: STS-b test
+  Spearman ≈ 0.79 vs the base model's ≈ 0.85. Use a general model for English-only workloads; this
+  model is for Creole and Creole↔{English, French} work.
+- **Long inputs are truncated** at the encoder's maximum sequence length; chunk long documents
+  before embedding.
 - **Protocol note.** During recipe development the held-out test score was printed at the end of each
   training run, so recipe selection had test visibility; an internal adversarial audit bounded the
   resulting optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen. Leak filtering
