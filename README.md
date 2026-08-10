@@ -47,6 +47,24 @@ faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-
   no-prefix configuration. The other baselines have no prompt convention. Reproduce any number with
   `scripts/evaluate.py`.
 
+## MTEB — MorisienMTBitextMining
+
+The held-out MorisienMT test split is now a task in [MTEB](https://github.com/embeddings-benchmark/mteb),
+`MorisienMTBitextMining` — the first Mauritian Creole task in the benchmark. The model is registered in
+MTEB and its scores are on the [leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
+
+Bitext-mining F1 across the four directional subsets:
+
+| model | mfe→eng | eng→mfe | mfe→fra | fra→mfe | avg |
+|---|---|---|---|---|---|
+| intfloat/multilingual-e5-small | 0.358 | 0.454 | 0.475 | 0.495 | 0.446 |
+| sentence-transformers/LaBSE | 0.882 | 0.845 | 0.886 | 0.779 | 0.848 |
+| **morisien-embed** | **0.927** | **0.909** | **0.939** | **0.924** | **0.925** |
+
+This is bitext-mining F1, a different metric from the ndcg@10 retrieval numbers above. morisien-embed is
+trained on the MorisienMT corpus this split is drawn from, so MTEB records it as in-domain
+(via `training_datasets`), not zero-shot.
+
 ## Data
 
 - **Training:** 35,064 leak-free Creole↔{English,French} pairs, merged from MorisienMT (MIT) and
@@ -54,8 +72,8 @@ faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-
   punctuation-, case- and accent-insensitive check (both under test). Hard-negative mining keeps
   24,100 of these for the released model's contrastive stage. Only the trained model is released,
   never the data; regenerate it with `scripts/build_training.py`.
-- **Benchmark:** the held-out MorisienMT test split (MIT-licensed, redistributable), the intended basis
-  for a Mauritian Creole bitext-mining task on MMTEB.
+- **Benchmark:** the held-out MorisienMT test split (MIT-licensed, redistributable), the basis for the
+  `MorisienMTBitextMining` task on MTEB (above).
 
 ## Reproduce
 
@@ -88,7 +106,7 @@ evaluation takes ~45 min on an 8-core machine). To smoke-test the training loop 
 ## Status
 
 Model trained, validated (3 seeds, three retrieval directions, independent-domain check) and
-published. Next: contributing the Kreol Morisien retrieval task to MMTEB.
+published. The task, model, and results are merged into MTEB — see the section above.
 
 ## Citation
 
