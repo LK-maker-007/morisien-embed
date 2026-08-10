@@ -110,14 +110,16 @@ published. The task, model, and results are merged into MTEB — see the section
 
 ## Citation
 
-If you use this model, please cite it along with the datasets it builds on:
+If you use this model, please cite the report along with the datasets it builds on:
 
 ```bibtex
 @misc{morisien-embed,
-  author = {Singaraj B},
-  title  = {morisien-embed: a dedicated text embedding model for Mauritian Creole},
-  year   = {2026},
-  url    = {https://huggingface.co/Singaraj/morisien-embed},
+  author    = {Singaraj B},
+  title     = {morisien-embed: A Dedicated Text Embedding Model and Benchmark for Mauritian Creole (Kreol Morisien)},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21877805},
+  url       = {https://doi.org/10.5281/zenodo.21877805},
 }
 
 @article{dabre2022morisienmt,

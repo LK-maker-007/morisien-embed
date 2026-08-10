@@ -13,6 +13,7 @@ tags:
   - mauritian-creole
   - kreol-morisien
   - matryoshka
+  - mteb
 base_model: intfloat/multilingual-e5-base
 datasets:
   - prajdabre/KreolMorisienMT
@@ -143,6 +144,25 @@ Every number in the tables above is reproducible from the
 `scripts/evaluate.py --truncate-dim`). The Haitian-proximity and case-sensitivity figures under
 Limitations come from an internal adversarial audit of the released checkpoint.
 
+## MTEB
+
+The held-out MorisienMT test split is now a task in
+[MTEB](https://github.com/embeddings-benchmark/mteb), `MorisienMTBitextMining` — the first Mauritian
+Creole task in the benchmark. This model is registered in MTEB and its scores are on the
+[leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
+
+Bitext-mining F1 across the four directional subsets:
+
+| Model | mfe→eng | eng→mfe | mfe→fra | fra→mfe | avg |
+|---|---|---|---|---|---|
+| intfloat/multilingual-e5-small | 0.358 | 0.454 | 0.475 | 0.495 | 0.446 |
+| sentence-transformers/LaBSE | 0.882 | 0.845 | 0.886 | 0.779 | 0.848 |
+| **morisien-embed** | **0.927** | **0.909** | **0.939** | **0.924** | **0.925** |
+
+This is bitext-mining F1, a different metric from the ndcg@10 retrieval numbers above. The model is
+trained on the MorisienMT corpus this split is drawn from, so MTEB records the result as in-domain
+(via `training_datasets`), not zero-shot.
+
 ## Training
 
 - **Data:** 35,064 unique, leak-free Creole↔{English, French} pairs — effectively all publicly
@@ -199,15 +219,17 @@ Limitations come from an internal adversarial audit of the released checkpoint.
 
 ## Citation
 
-If you use this model, please cite the data sources it builds on:
+If you use this model, please cite the accompanying report along with the data sources it builds on:
 [MorisienMT](https://arxiv.org/abs/2206.02421) (Dabre & Sukhoo, 2022) and
 [Kreyòl-MT](https://arxiv.org/abs/2405.05376) (Robinson et al., NAACL 2024).
 
 ```bibtex
 @misc{morisien-embed,
-  author = {Singaraj B},
-  title = {morisien-embed: a dedicated text embedding model for Mauritian Creole},
-  year = {2026},
-  url = {https://huggingface.co/Singaraj/morisien-embed}
+  author    = {Singaraj B},
+  title     = {morisien-embed: A Dedicated Text Embedding Model and Benchmark for Mauritian Creole (Kreol Morisien)},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21877805},
+  url       = {https://doi.org/10.5281/zenodo.21877805}
 }
 ```
