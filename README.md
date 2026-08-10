@@ -9,6 +9,8 @@ don't reliably cover.
 **Model:** [Singaraj/morisien-embed](https://huggingface.co/Singaraj/morisien-embed) · fine-tuned
 from multilingual-e5-base on effectively all publicly available Creole parallel data.
 
+**Paper:** [morisien-embed on Zenodo](https://doi.org/10.5281/zenodo.21877805) (DOI 10.5281/zenodo.21877805).
+
 ## Usage
 
 ```python
