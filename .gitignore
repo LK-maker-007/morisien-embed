@@ -11,6 +11,7 @@ wandb/
 .ipynb_checkpoints/
 .DS_Store
 PLAN.md
+AGENTS.md
 data/processed/
 ENGINEERING.md
 benchmark/data/
