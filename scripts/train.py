@@ -176,6 +176,12 @@ def main() -> None:
     parser.add_argument("--range-max", type=int, default=None, help="widen candidate pool to avoid negative shortfall")
     parser.add_argument("--relative-margin", type=float, default=0.05)
     parser.add_argument("--mini-batch-size", type=int, default=32)
+    parser.add_argument(
+        "--cached-loss",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="force gradient caching on or off; defaults to on when --mine-with is given",
+    )
     parser.add_argument("--matryoshka", action="store_true", help="train truncatable Matryoshka embeddings")
     parser.add_argument("--lora", action="store_true", help="train a LoRA adapter instead of every weight")
     parser.add_argument("--lora-r", type=int, default=16)
@@ -201,9 +207,12 @@ def main() -> None:
     model = SentenceTransformer(args.base)
     if args.lora:
         apply_lora(model, args.lora_r)
+    # Gradient caching is what lets a large batch fit, so it is worth having without mining too:
+    # plain MNRL at batch 128 holds every pair in one graph and runs out of memory on a 16 GB card.
+    cached = args.cached_loss if args.cached_loss is not None else bool(args.mine_with)
     loss = (
         CachedMultipleNegativesRankingLoss(model, mini_batch_size=args.mini_batch_size)
-        if args.mine_with
+        if cached
         else MultipleNegativesRankingLoss(model)
     )
     if args.matryoshka:
