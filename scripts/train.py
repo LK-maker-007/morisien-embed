@@ -11,6 +11,10 @@ so real positives are not mislabelled as negatives), and training uses
 ``CachedMultipleNegativesRankingLoss`` so a large batch of negatives fits in memory via gradient
 caching. ``--matryoshka`` additionally trains truncatable embeddings that stay accurate at smaller
 dimensions.
+
+``--lora`` trains a low-rank adapter instead of every weight. The adapter is merged into the base
+weights before saving, because ``save_pretrained`` writes only the adapter otherwise and the
+resulting directory cannot be loaded back by ``SentenceTransformer``.
 """
 
 from __future__ import annotations
@@ -90,6 +94,54 @@ def matryoshka_dims(full_dim: int) -> list[int]:
     return [full_dim, *(dim for dim in (512, 256, 128, 64) if dim < full_dim)]
 
 
+def apply_lora(model: SentenceTransformer, rank: int) -> None:
+    """Attach a LoRA adapter to the transformer body, leaving every other weight frozen.
+
+    ``lora_alpha`` is fixed at twice the rank, the setting Shuttleworth et al. (arXiv:2410.21228)
+    find produces fewer intruder dimensions than the alternatives.
+    """
+    from peft import LoraConfig
+
+    model.add_adapter(
+        LoraConfig(
+            r=rank,
+            lora_alpha=2 * rank,
+            target_modules=["query", "key", "value", "dense"],
+            lora_dropout=0.05,
+            bias="none",
+        )
+    )
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total = sum(p.numel() for p in model.parameters())
+    print(f"LoRA r={rank}: {trainable / 1e6:.2f}M of {total / 1e6:.0f}M parameters trainable")
+
+
+def merge_lora(model: SentenceTransformer) -> None:
+    """Fold the adapter into the base weights and remove every trace of it.
+
+    Without this, `save_pretrained` takes the PEFT path: it writes `adapter_model.safetensors` and a
+    `config.json` with no `model_type`, and reloading raises `Unrecognized model`.
+    """
+    from peft.tuners.lora import LoraLayer
+
+    inner = model[0].auto_model
+    for module in inner.modules():
+        if isinstance(module, LoraLayer):
+            module.merge()
+
+    def strip(parent) -> None:
+        for name, child in list(parent.named_children()):
+            if isinstance(child, LoraLayer):
+                setattr(parent, name, child.get_base_layer())
+            else:
+                strip(child)
+
+    strip(inner)
+    inner._hf_peft_config_loaded = False
+    if hasattr(inner, "peft_config"):
+        del inner.peft_config
+
+
 def dev_evaluator() -> InformationRetrievalEvaluator:
     """Score the dev split on the same Creole→English task the final test uses, for a matched signal."""
     queries, corpus, qrels = benchmark.build(data.morisienmt("dev"), target_lang="eng")
@@ -125,6 +177,8 @@ def main() -> None:
     parser.add_argument("--relative-margin", type=float, default=0.05)
     parser.add_argument("--mini-batch-size", type=int, default=32)
     parser.add_argument("--matryoshka", action="store_true", help="train truncatable Matryoshka embeddings")
+    parser.add_argument("--lora", action="store_true", help="train a LoRA adapter instead of every weight")
+    parser.add_argument("--lora-r", type=int, default=16)
     parser.add_argument(
         "--checkpoints",
         action=argparse.BooleanOptionalAction,
@@ -145,6 +199,8 @@ def main() -> None:
         )
 
     model = SentenceTransformer(args.base)
+    if args.lora:
+        apply_lora(model, args.lora_r)
     loss = (
         CachedMultipleNegativesRankingLoss(model, mini_batch_size=args.mini_batch_size)
         if args.mine_with
@@ -177,6 +233,9 @@ def main() -> None:
         evaluator=dev_evaluator(),
     )
     trainer.train()
+
+    if args.lora:
+        merge_lora(model)
 
     final_dir = args.output_dir / "final"
     model.save_pretrained(str(final_dir))
