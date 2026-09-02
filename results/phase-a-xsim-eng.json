@@ -1,0 +1,103 @@
+{
+  "run": "phase-a-xsim-eng",
+  "utc": "2026-09-01T22:19:38+00:00",
+  "git": {
+    "sha": "386f4c7db9d8105d2ba7e1a5da5ad6aa64bf36dd",
+    "dirty": true
+  },
+  "benchmark": {
+    "dir": "benchmark/data/xsim-eng",
+    "built_by": "scripts/build_xsim_benchmark.py",
+    "queries": 996,
+    "corpus": 45029,
+    "gold_per_query": 1,
+    "leaked_dropped": 0,
+    "gold_collisions_excluded": 0,
+    "corpus_md5": "1a8ee04560089d37daf8852aba64a0ba",
+    "queries_md5": "cae545ba2b9507b8e710a9d2f0bdfa7e",
+    "sources": {
+      "flores_plus": {
+        "repo": "openlanguagedata/flores_plus",
+        "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+        "split": "devtest"
+      },
+      "xsim_plusplus": {
+        "url": "https://dl.fbaipublicfiles.com/nllb/laser/xsimplusplus/eng_Latn_errtype.devtest.json",
+        "bytes": 16051289,
+        "augmented_sentences": 44033,
+        "distinct_originals": 996,
+        "alignment_to_flores_plus": "996/996 exact string match",
+        "errtypes": {
+          "entity_mention_replacement": 38855,
+          "number_replacement": 3262,
+          "causality_alternation": 1916
+        }
+      }
+    }
+  },
+  "env": {
+    "python": "3.12.3",
+    "sentence_transformers": {
+      "dist_metadata": "5.7.0.dev0",
+      "module_version": "6.1.0.dev0",
+      "note": "editable install; the code that ran is the local clone, not a released version",
+      "path": "/home/yali/Downloads/oss-contributions/sentence-transformers",
+      "git_sha": "ec4b8ed2",
+      "branch": "fix-encode-redundant-device-move",
+      "diff_vs_origin_main": "7 files, +118/-15, touches sentence_transformer/model.py on the encode path"
+    },
+    "torch": "2.13.0+cpu",
+    "transformers": "4.57.6"
+  },
+  "lexical_control": {
+    "method": "char_wb TF-IDF 3-5grams, no neural model",
+    "acc@1": {
+      "xsim-eng": 0.3273,
+      "xsim-eng_no_entities_no_digits": 0.2841,
+      "flores-eng": 0.8221,
+      "flores-hard-eng": 0.5464,
+      "eng_in_domain": 0.236
+    },
+    "kill_criterion": "reject the benchmark if TF-IDF acc@1 > 0.50",
+    "passed": true
+  },
+  "results": {
+    "Singaraj/morisien-embed": {
+      "acc@1": 0.6857,
+      "ndcg@10": 0.8439
+    },
+    "sentence-transformers/LaBSE": {
+      "acc@1": 0.6928,
+      "ndcg@10": 0.8449
+    },
+    "intfloat/multilingual-e5-base": {
+      "acc@1": 0.4639,
+      "ndcg@10": 0.6691
+    }
+  },
+  "significance": {
+    "pair": [
+      "Singaraj/morisien-embed",
+      "sentence-transformers/LaBSE"
+    ],
+    "mcnemar_acc@1": {
+      "model_wins": 106,
+      "labse_wins": 113,
+      "exact_two_sided_p": 0.6852
+    },
+    "bootstrap_ndcg@10": {
+      "diff": -0.001,
+      "ci95": [
+        -0.016,
+        0.0135
+      ],
+      "resamples": 10000,
+      "seed": 0
+    },
+    "conclusion": "indistinguishable; the 95% CI contains zero"
+  },
+  "caveat": [
+    "Model revisions were not pinned for this run. Pin them before any published number.",
+    "sentence-transformers was an editable install of a PR branch (#3918), not a release. The change replaces an unconditional self.to(device) in encode with a guarded one. Ruled out empirically: this build reproduces the v1 published numbers exactly to four decimals (0.9655/0.9440/0.9751/0.9588/1.0000), which a build that altered embeddings could not. Re-run on a released sentence-transformers before publishing."
+  ]
+}

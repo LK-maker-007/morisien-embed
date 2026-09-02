@@ -1,0 +1,363 @@
+{
+  "run": "Phase B: component ablation and base-model choice, Creole to English",
+  "utc": "2026-09-02T23:32:55Z",
+  "git": {
+    "sha": "ef334d694e1f462ed08efe82c79c34d54321cb29",
+    "kernel_git_sha": "ef334d694e1f462ed08efe82c79c34d54321cb29"
+  },
+  "compute": {
+    "platform": "Kaggle",
+    "gpu": "Tesla T4",
+    "visible_devices": 1,
+    "note": "CUDA_VISIBLE_DEVICES=0. With 2 GPUs visible sentence-transformers picks DataParallel, which replicates the model on every mini-batch of the cached loss: measured 28.11 s/it against 0.34 s/it on one card."
+  },
+  "env": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "sentence-transformers": "6.0.1",
+    "transformers": "5.0.0",
+    "datasets": "5.0.1"
+  },
+  "benchmarks": {
+    "in-domain": "MorisienMT held-out test, 1,000 queries / 999 passages",
+    "xsim-hard": "FLORES+ devtest with xSIM++ distractors, 996 queries / 45,029 passages. Construction and lexical control: results/phase-a-xsim-eng.json"
+  },
+  "arms": {
+    "R0_stage1_batch48": {
+      "seeds": [
+        "r0-stage1"
+      ],
+      "n": 1,
+      "in_domain_ndcg10": {
+        "mean": 0.9535,
+        "values": [
+          0.9535
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8028,
+        "values": [
+          0.8028
+        ]
+      },
+      "argv": [
+        "--base",
+        "intfloat/multilingual-e5-base",
+        "--batch-size",
+        "48",
+        "--epochs",
+        "3"
+      ],
+      "train_seconds": 747.1
+    },
+    "R1_batch128": {
+      "seeds": [
+        "r1-batch128"
+      ],
+      "n": 1,
+      "in_domain_ndcg10": {
+        "mean": 0.9589,
+        "values": [
+          0.9589
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8081,
+        "values": [
+          0.8081
+        ]
+      },
+      "argv": [
+        "--base",
+        "intfloat/multilingual-e5-base",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--cached-loss",
+        "--epochs",
+        "3"
+      ],
+      "train_seconds": 797.1
+    },
+    "R2_mined": {
+      "seeds": [
+        "r2-mined"
+      ],
+      "n": 1,
+      "in_domain_ndcg10": {
+        "mean": 0.9663,
+        "values": [
+          0.9663
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8439,
+        "values": [
+          0.8439
+        ]
+      },
+      "argv": [
+        "--base",
+        "intfloat/multilingual-e5-base",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "derived_range_max": 62,
+      "negatives_shortfall": 10968,
+      "train_seconds": 1962.4
+    },
+    "R3_released_recipe": {
+      "seeds": [
+        "r3-released-s42",
+        "r3-released-s43",
+        "r3-released-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9661,
+        "values": [
+          0.9659,
+          0.9675,
+          0.965
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8426,
+        "values": [
+          0.8461,
+          0.8417,
+          0.8399
+        ],
+        "sd": 0.0032
+      },
+      "argv": [
+        "--base",
+        "intfloat/multilingual-e5-base",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "derived_range_max": 62,
+      "negatives_shortfall": 10963,
+      "train_seconds": 1956.5
+    },
+    "R4_labse_base": {
+      "seeds": [
+        "r4-labse-s42",
+        "r4-labse-s43",
+        "r4-labse-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9655,
+        "values": [
+          0.9654,
+          0.9651,
+          0.966
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8597,
+        "values": [
+          0.8616,
+          0.86,
+          0.8574
+        ],
+        "sd": 0.0021
+      },
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "derived_range_max": 62,
+      "negatives_shortfall": 10963,
+      "train_seconds": 2068.5
+    },
+    "R5_lora_e5": {
+      "seeds": [
+        "r5-lora-e5-s42"
+      ],
+      "n": 1,
+      "in_domain_ndcg10": {
+        "mean": 0.9115,
+        "values": [
+          0.9115
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.7957,
+        "values": [
+          0.7957
+        ]
+      },
+      "argv": [
+        "--base",
+        "intfloat/multilingual-e5-base",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--lora",
+        "--lora-r",
+        "16",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "derived_range_max": 62,
+      "negatives_shortfall": 10965,
+      "train_seconds": 2617.1
+    },
+    "R6_lora_labse": {
+      "seeds": [
+        "r6-lora-labse-s42"
+      ],
+      "n": 1,
+      "in_domain_ndcg10": {
+        "mean": 0.9556,
+        "values": [
+          0.9556
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8628,
+        "values": [
+          0.8628
+        ]
+      },
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--lora",
+        "--lora-r",
+        "16",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "derived_range_max": 62,
+      "negatives_shortfall": 10965,
+      "train_seconds": 2498.8
+    }
+  },
+  "baselines": {
+    "baseline-labse": {
+      "in_domain_ndcg10": 0.9393,
+      "xsim_hard_ndcg10": 0.8449
+    },
+    "baseline-e5-base": {
+      "in_domain_ndcg10": 0.6402,
+      "xsim_hard_ndcg10": 0.6691
+    }
+  },
+  "contributions_xsim_hard_ndcg10": {
+    "batch_48_to_128": 0.0053,
+    "plus_mining_and_cached_loss": 0.0358,
+    "plus_matryoshka": -0.0013,
+    "labse_instead_of_e5": 0.0171
+  },
+  "contributions_in_domain_ndcg10": {
+    "batch_48_to_128": 0.0054,
+    "plus_mining_and_cached_loss": 0.0074,
+    "plus_matryoshka": -0.0002,
+    "labse_instead_of_e5": -0.0006
+  },
+  "significance": {
+    "pair": "R4_labse_base seed 42 against R3_released_recipe seed 42, xsim-hard",
+    "mcnemar_acc@1": {
+      "r4_wins": 135,
+      "r3_wins": 100,
+      "exact_two_sided_p": 0.0263
+    },
+    "bootstrap_ndcg@10": {
+      "diff": 0.0154,
+      "ci95": [
+        0.0011,
+        0.03
+      ],
+      "resamples": 10000
+    },
+    "per_query_vectors": [
+      "results/perquery-r3-released-s42-xsim-hard.npz",
+      "results/perquery-r4-labse-s42-xsim-hard.npz"
+    ],
+    "conclusion": "R4 beats R3 out of domain. Both tests agree and the interval excludes zero. The interval's lower bound of +0.0011 is smaller than the 0.0024 run-to-run drift measured here, so the size of the effect rests on the seed spread rather than on that bound."
+  },
+  "caveats": [
+    "R5 and R6 are single seed. R6 is the highest xsim-hard number here but has no interval. It is a lead, not a finding.",
+    "The significance test compares seed 42 of each arm. The three-seed spread is separate evidence pointing the same way, but it is not the same test.",
+    "Per-query vectors exist for R3 and R4 seed 42 only. Any other pair needs a re-run.",
+    "Run-to-run drift on an identical command reaches 0.0024 on xsim-hard. R3 seed 42 gave 0.8444 then 0.8461, and R4 seed 42 gave 0.8592 then 0.8616, when both were retrained to capture per-query vectors. R0 reproduced exactly, so the nondeterminism enters with hard-negative mining, not with plain training.",
+    "That drift is larger than the bootstrap interval's lower bound of +0.0011. The conclusion still holds on the seed evidence, where the lowest R4 run (0.8574) is above the highest R3 run (0.8461), but the lower end of the interval should not be read as a floor on the effect."
+  ]
+}
