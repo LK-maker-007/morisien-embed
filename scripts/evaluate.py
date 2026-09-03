@@ -25,6 +25,9 @@ REPORTED = (
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("model")
+    parser.add_argument(
+        "--revision", default=None, help="Hub revision of the model, a branch, tag or commit. Local paths ignore it."
+    )
     parser.add_argument("--data-dir", type=Path, default=Path("benchmark/data/eng"))
     parser.add_argument("--query-prompt", default="")
     parser.add_argument("--corpus-prompt", default="")
@@ -33,7 +36,7 @@ def main() -> None:
     args = parser.parse_args()
 
     bench = benchmark.load(args.data_dir)
-    model = SentenceTransformer(args.model, truncate_dim=args.truncate_dim)
+    model = SentenceTransformer(args.model, revision=args.revision, truncate_dim=args.truncate_dim)
     results = benchmark.evaluate(
         model,
         bench,

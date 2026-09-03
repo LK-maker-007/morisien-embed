@@ -103,7 +103,9 @@ python scripts/train.py --base intfloat/multilingual-e5-base \
 
 Training runs on a single free Kaggle T4 (~45 min total); everything else runs on CPU (a full LaBSE
 evaluation takes ~45 min on an 8-core machine). To smoke-test the training loop without a GPU, add
-`--no-fp16 --limit 64`. Dataset loads are pinned to exact Hub revisions, so rebuilds are byte-stable.
+`--no-fp16 --limit 64`. Dataset loads are pinned to exact Hub revisions, so rebuilds are
+byte-stable. Model loads take `--revision` (`--base-revision` in `train.py`) and follow the
+branch head when it is omitted.
 
 ## Status
 

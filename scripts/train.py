@@ -162,6 +162,11 @@ def report_test(model: SentenceTransformer) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", default="intfloat/multilingual-e5-base")
+    parser.add_argument(
+        "--base-revision",
+        default=None,
+        help="Hub revision of the model, a branch, tag or commit. Local paths ignore it.",
+    )
     parser.add_argument("--train-file", type=Path, default=Path("data/processed/train.jsonl"))
     parser.add_argument("--output-dir", type=Path, default=Path("models/morisien-embed"))
     parser.add_argument("--epochs", type=float, default=3)
@@ -204,7 +209,7 @@ def main() -> None:
             args.relative_margin,
         )
 
-    model = SentenceTransformer(args.base)
+    model = SentenceTransformer(args.base, revision=args.base_revision)
     if args.lora:
         apply_lora(model, args.lora_r)
     # Gradient caching is what lets a large batch fit, so it is worth having without mining too:

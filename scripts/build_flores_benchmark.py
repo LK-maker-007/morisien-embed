@@ -16,20 +16,9 @@ import argparse
 import json
 from pathlib import Path
 
-from huggingface_hub import hf_hub_download
-
-from morisien_embed import benchmark, data
+from morisien_embed import benchmark
 from morisien_embed.data import loose
-
-FLORES_REPO = "openlanguagedata/flores_plus"
-LANG_FILES = {"mfe": "mfe_Latn.jsonl", "eng": "eng_Latn.jsonl", "fra": "fra_Latn.jsonl"}
-
-
-def flores_split(lang: str, split: str) -> dict[int, str]:
-    """Map sentence ``id`` to text for one language in one split."""
-    path = hf_hub_download(FLORES_REPO, f"{split}/{LANG_FILES[lang]}", repo_type="dataset")
-    rows = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines()]
-    return {row["id"]: data.normalize(row["text"]) for row in rows}
+from morisien_embed.flores import flores_split
 
 
 def main() -> None:
