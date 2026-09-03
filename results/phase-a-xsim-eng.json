@@ -50,7 +50,7 @@
     "transformers": "4.57.6"
   },
   "lexical_control": {
-    "method": "char_wb TF-IDF 3-5grams, no neural model",
+    "method": "char_wb TF-IDF 3-5grams with sublinear_tf, fitted on passages and queries together, no neural model. Reproduce with scripts/lexical_control.py",
     "acc@1": {
       "xsim-eng": 0.3273,
       "xsim-eng_no_entities_no_digits": 0.2841,
@@ -59,7 +59,8 @@
       "eng_in_domain": 0.236
     },
     "kill_criterion": "reject the benchmark if TF-IDF acc@1 > 0.50",
-    "passed": true
+    "passed": true,
+    "note": "The earlier wording, 'char_wb TF-IDF 3-5grams, no neural model', omitted sublinear_tf and the joint fit. Without them the same pool scores 0.2831 rather than 0.3273, so the recorded number was not reproducible from the description until scripts/lexical_control.py was written."
   },
   "results": {
     "Singaraj/morisien-embed": {
