@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import gc
 import json
+import random
 from pathlib import Path
 
 import torch
@@ -43,9 +44,29 @@ from sentence_transformers.util import mine_hard_negatives
 from morisien_embed import benchmark, data
 
 
-def load_training_pairs(path: Path, limit: int | None) -> Dataset:
-    """Load (anchor=creole, positive=translation) pairs. Column order is the loss contract."""
+def load_training_pairs(
+    path: Path, limit: int | None, min_words: int = 1, sample: int | None = None, sample_seed: int = 0
+) -> Dataset:
+    """Load (anchor=creole, positive=translation) pairs. Column order is the loss contract.
+
+    ``min_words`` drops rows whose Creole side is shorter than that, which is how the dictionary
+    portion is held out: 22,164 of 35,064 rows are a single word while every benchmark is sentences.
+    ``sample`` then takes a random subset, so a length-filtered run can be compared against a
+    volume-matched one instead of confounding composition with how much data was seen. It is seeded
+    separately from training so several training seeds share one subset. Sampling is random rather
+    than head-of-file because the file is grouped by source: the first rows are sentences and the
+    middle is almost entirely dictionary.
+    """
     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    if min_words > 1:
+        kept = [row for row in rows if len(row["creole"].split()) >= min_words]
+        print(f"min-words {min_words}: kept {len(kept)} of {len(rows)} pairs")
+        rows = kept
+    if sample is not None:
+        if sample > len(rows):
+            raise ValueError(f"--sample {sample} exceeds the {len(rows)} available pairs")
+        rows = random.Random(sample_seed).sample(rows, sample)
+        print(f"sampled {len(rows)} pairs with seed {sample_seed}")
     if limit is not None:
         rows = rows[:limit]
     return Dataset.from_dict(
@@ -174,6 +195,9 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--limit", type=int, default=None, help="cap training pairs (for smoke tests)")
+    parser.add_argument("--min-words", type=int, default=1, help="drop pairs whose Creole side is shorter")
+    parser.add_argument("--sample", type=int, default=None, help="random subset size, applied after --min-words")
+    parser.add_argument("--sample-seed", type=int, default=0, help="seed for --sample, separate from --seed")
     parser.add_argument("--fp16", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--mine-with", default=None, help="model to mine hard negatives with; enables cached loss")
     parser.add_argument("--num-negatives", type=int, default=5)
@@ -198,7 +222,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    train_dataset = load_training_pairs(args.train_file, args.limit)
+    train_dataset = load_training_pairs(args.train_file, args.limit, args.min_words, args.sample, args.sample_seed)
     if args.mine_with:
         train_dataset = mine_negatives(
             train_dataset,
