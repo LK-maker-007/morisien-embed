@@ -1,0 +1,188 @@
+{
+  "run": "C2: does the dictionary portion of the training set help?",
+  "utc": "2026-09-03T17:38:46Z",
+  "git": {
+    "sha": "1228463f004c7819c806f80cb61fa16fd36633f8",
+    "kernel_git_sha": "1228463f004c7819c806f80cb61fa16fd36633f8"
+  },
+  "env": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "sentence-transformers": "6.0.1",
+    "transformers": "5.0.0",
+    "datasets": "5.0.1"
+  },
+  "compute": {
+    "platform": "Kaggle",
+    "gpu": "Tesla T4",
+    "visible_devices": 1
+  },
+  "question": "22,164 of 35,064 training pairs are a single Creole word while every benchmark is sentences. Filtering them out alone would confound composition with how much data was seen, so a volume-matched random subset is run alongside.",
+  "design": {
+    "R4_full": "all 35,064 pairs, the best full fine-tune from Phase B",
+    "C2b_volume_matched": "9,183 pairs sampled at random from the same file, --sample-seed 0",
+    "C2a_sentences_only": "the 9,183 pairs whose Creole side is 6 words or more, --min-words 6",
+    "note": "The training file is grouped by source, so the subset is sampled rather than taken from the head, which is almost entirely sentences."
+  },
+  "arms": {
+    "R4_full": {
+      "seeds": [
+        "r4-labse-s42",
+        "r4-labse-s43",
+        "r4-labse-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9655,
+        "values": [
+          0.9655,
+          0.9651,
+          0.966
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8589,
+        "values": [
+          0.8592,
+          0.86,
+          0.8574
+        ],
+        "sd": 0.0013
+      },
+      "train_seconds_mean": 2122.4,
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ]
+    },
+    "C2b_volume_matched": {
+      "seeds": [
+        "c2b-volmatch-s42",
+        "c2b-volmatch-s43",
+        "c2b-volmatch-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9622,
+        "values": [
+          0.9622,
+          0.9624,
+          0.962
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8613,
+        "values": [
+          0.8639,
+          0.8603,
+          0.8596
+        ],
+        "sd": 0.0023
+      },
+      "train_seconds_mean": 651.7,
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--sample",
+        "9183",
+        "--sample-seed",
+        "0",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ]
+    },
+    "C2a_sentences_only": {
+      "seeds": [
+        "c2a-sentences-s42",
+        "c2a-sentences-s43",
+        "c2a-sentences-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9636,
+        "values": [
+          0.964,
+          0.9636,
+          0.9633
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8547,
+        "values": [
+          0.8554,
+          0.8538,
+          0.8548
+        ],
+        "sd": 0.0008
+      },
+      "train_seconds_mean": 943.4,
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--min-words",
+        "6",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ]
+    }
+  },
+  "findings": {
+    "volume_effect_ndcg10": 0.0024,
+    "composition_effect_ndcg10": -0.0066,
+    "seed_ranges_overlap": false,
+    "conclusion": "Removing the dictionary costs 0.0066 nDCG@10 out of domain and the seed ranges do not overlap, so the word pairs help rather than dilute. Training on a random quarter of the corpus scores 0.0024 above the full set, inside seed noise, so the recipe is limited by what the data contains and not by how much of it there is."
+  },
+  "caveats": [
+    "Three seeds per arm, no per-query significance test. The composition claim rests on non-overlapping seed ranges, the same standard as the Phase B base-model result.",
+    "One subset was drawn (--sample-seed 0). A different draw could shift C2b; the sample is 62.8% single-word against a 63.21% population, so it is representative, but subset variance is not measured.",
+    "C2a and C2b are not matched on token count, only on row count. Sentence rows are longer, so C2a sees more tokens than C2b while scoring lower.",
+    "Run-to-run drift on this benchmark reaches 0.0024, which is the size of the volume effect. Read that effect as no different from zero."
+  ]
+}
