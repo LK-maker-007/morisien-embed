@@ -1,0 +1,108 @@
+{
+  "run": "xSIM++ error rate and error-type breakdown, Creole to English",
+  "utc": "2026-09-04T07:37:48Z",
+  "git": {
+    "sha": "d7e4fa09fcb6209c3bbc5978de4632cee321bed6",
+    "kernel_git_sha": "d7e4fa09fcb6209c3bbc5978de4632cee321bed6"
+  },
+  "env": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "sentence-transformers": "6.0.1",
+    "transformers": "5.0.0"
+  },
+  "produced_by": "scripts/xsim_score.py <model> --data-dir benchmark/data/xsim-eng",
+  "metric": "xSIM++ error rate: the fraction of queries whose nearest passage is not a gold passage. This is the metric the method defines, so these numbers are comparable to other xSIM++ results. Chen et al., ACL 2023, https://arxiv.org/abs/2306.12907",
+  "pool": {
+    "queries": 996,
+    "passages": 45029,
+    "distractors_by_rule": {
+      "entity_mention_replacement": 38855,
+      "number_replacement": 3262,
+      "causality_alternation": 1916
+    },
+    "share": {
+      "entity_mention_replacement": 0.8824,
+      "number_replacement": 0.0741,
+      "causality_alternation": 0.0435
+    }
+  },
+  "results": {
+    "Singaraj/morisien-embed": {
+      "error_rate": 0.3143,
+      "errors": 313,
+      "queries": 996,
+      "by_rule": {
+        "entity_mention_replacement": {
+          "errors": 92,
+          "share_of_errors": 0.2939,
+          "enrichment_vs_pool": 0.33
+        },
+        "number_replacement": {
+          "errors": 62,
+          "share_of_errors": 0.1981,
+          "enrichment_vs_pool": 2.67
+        },
+        "causality_alternation": {
+          "errors": 159,
+          "share_of_errors": 0.508,
+          "enrichment_vs_pool": 11.67
+        }
+      },
+      "other_passage": 0
+    },
+    "sentence-transformers/LaBSE": {
+      "error_rate": 0.3072,
+      "errors": 306,
+      "queries": 996,
+      "by_rule": {
+        "entity_mention_replacement": {
+          "errors": 100,
+          "share_of_errors": 0.3268,
+          "enrichment_vs_pool": 0.37
+        },
+        "number_replacement": {
+          "errors": 49,
+          "share_of_errors": 0.1601,
+          "enrichment_vs_pool": 2.16
+        },
+        "causality_alternation": {
+          "errors": 157,
+          "share_of_errors": 0.5131,
+          "enrichment_vs_pool": 11.79
+        }
+      },
+      "other_passage": 0
+    },
+    "intfloat/multilingual-e5-base": {
+      "error_rate": 0.5361,
+      "errors": 534,
+      "queries": 996,
+      "by_rule": {
+        "entity_mention_replacement": {
+          "errors": 243,
+          "share_of_errors": 0.4551,
+          "enrichment_vs_pool": 0.52
+        },
+        "number_replacement": {
+          "errors": 67,
+          "share_of_errors": 0.1255,
+          "enrichment_vs_pool": 1.69
+        },
+        "causality_alternation": {
+          "errors": 216,
+          "share_of_errors": 0.4045,
+          "enrichment_vs_pool": 9.3
+        }
+      },
+      "other_passage": 8
+    }
+  },
+  "finding": "Causality alternation is 4.4% of the distractors and causes about 51% of the errors for both morisien-embed and LaBSE, an enrichment of roughly 11.7x. Entity replacement is 88.2% of the pool and causes under a third of the errors, an enrichment of 0.3x. Both models handle a substituted entity and fail on a reversed causal direction, and they fail on it to the same degree. Number replacement sits between the two at about 2.5x.",
+  "consistency_check": "morisien-embed 0.3143 against LaBSE 0.3072 puts LaBSE marginally ahead. That agrees with the nDCG@10 comparison in phase-a-xsim-eng.json, where the two are statistically indistinguishable out of domain, and it is computed by different code on a different metric.",
+  "caveats": [
+    "Enrichment is computed against each rule's share of all 44,033 distractors, not against a per-query count. A query whose distractors are all of one type is weighted the same as any other, so this measures which rule the errors land on, not a per-rule error probability.",
+    "multilingual-e5-base retrieved 8 passages that are not released distractors at all. The other two models retrieved none, so almost every error is a released distractor rather than an unrelated passage.",
+    "One run per model. The encoders are deterministic here, but this has not been repeated."
+  ]
+}
