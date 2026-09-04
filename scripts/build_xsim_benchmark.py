@@ -19,25 +19,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import urllib.request
 from pathlib import Path
 
 from morisien_embed import benchmark, data
 from morisien_embed.data import loose
 from morisien_embed.flores import flores_split
-
-XSIM_BASE = "https://dl.fbaipublicfiles.com/nllb/laser/xsimplusplus"
-ERRTYPE_FILE = "eng_Latn_errtype.devtest.json"
-
-
-def fetch_errtype(cache_dir: Path) -> dict[str, dict[str, str]]:
-    """Return the xSIM++ map of augmented English sentence -> {errtype, src}, downloading once."""
-    path = cache_dir / ERRTYPE_FILE
-    if not path.exists():
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(f"{XSIM_BASE}/{ERRTYPE_FILE}", timeout=300) as response:
-            path.write_bytes(response.read())
-    return json.loads(path.read_text(encoding="utf-8"))
+from morisien_embed.xsim import fetch_errtype
 
 
 def main() -> None:

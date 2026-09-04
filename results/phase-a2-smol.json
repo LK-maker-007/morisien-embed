@@ -1,0 +1,53 @@
+{
+  "run": "A2: SMOL as a second held-out domain. Inconclusive, the pool saturates.",
+  "utc": "2026-09-03T20:29:53Z",
+  "git": {
+    "sha": "b3fba7dde1a9074ed126f4da5166df018fe148f1",
+    "kernel_git_sha": "b3fba7dde1a9074ed126f4da5166df018fe148f1"
+  },
+  "benchmark": {
+    "dir": "benchmark/data/smol-hard",
+    "built_by": "scripts/build_smol_benchmark.py --distractors-from benchmark/data/xsim-eng/corpus.jsonl",
+    "queries": 2462,
+    "corpus": 47491,
+    "source": "google/smol smolsent + smoldoc, revision fdaff3a1a019f89fa30a562a85d7c1d3e9150444",
+    "leaked_dropped": 9
+  },
+  "exit_check": {
+    "condition_1_lexical_baseline_low": {
+      "tfidf_acc@1": 0.3643,
+      "threshold": 0.5,
+      "passed": true
+    },
+    "condition_2_strong_model_below_ceiling": {
+      "labse_acc@1": 0.974,
+      "passed": false,
+      "note": "For comparison LaBSE scores 0.6928 on the xSIM++ pool, which is why that one can separate models and this one cannot."
+    }
+  },
+  "results": {
+    "v1-released": {
+      "acc@1": 0.9874,
+      "ndcg@10": 0.9934
+    },
+    "labse": {
+      "acc@1": 0.974,
+      "ndcg@10": 0.9847
+    },
+    "e5-base": {
+      "acc@1": 0.6994,
+      "ndcg@10": 0.7583
+    },
+    "a2-labse-s42": {
+      "acc@1": 0.9931,
+      "ndcg@10": 0.9965
+    }
+  },
+  "why_it_saturates": "The distractors come from the xSIM++ FLORES pool, a different corpus from SMOL. A model can rule them out on domain alone without understanding the sentence, so the gold is effectively unopposed. xSIM++ works because each distractor is its own gold with one token changed.",
+  "conclusion": "This does not replicate the Phase B base-model finding and should not be reported as if it did. The ordering matches (LaBSE fine-tuned > v1 released > LaBSE > e5-base), but the two arms are separated by 14 queries out of 2,462, and v1 beats LaBSE here while losing to it on the xSIM++ pool, so the two pools are not measuring the same thing.",
+  "caveats": [
+    "Both exit conditions were written in Phase A. Only the lexical one was checked before this pool was built and evaluated. That is the error this file records.",
+    "A pool that would work needs distractors from SMOL itself, near neighbours of each gold, mined with a model that is not in the comparison. That is untested.",
+    "The xSIM++ perturbation code is not released, only the generated FLORES files, so the published method cannot be applied to SMOL."
+  ]
+}
