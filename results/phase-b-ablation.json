@@ -266,20 +266,28 @@
     },
     "R6_lora_labse": {
       "seeds": [
-        "r6-lora-labse-s42"
+        "r6-lora-labse-s42",
+        "r6-lora-labse-s43",
+        "r6-lora-labse-s44"
       ],
-      "n": 1,
+      "n": 3,
       "in_domain_ndcg10": {
-        "mean": 0.9556,
+        "mean": 0.9553,
         "values": [
-          0.9556
-        ]
+          0.9556,
+          0.9556,
+          0.9547
+        ],
+        "sd": 0.0005
       },
       "xsim_hard_ndcg10": {
         "mean": 0.8628,
         "values": [
-          0.8628
-        ]
+          0.8628,
+          0.8627,
+          0.8629
+        ],
+        "sd": 0.0001
       },
       "argv": [
         "--base",
@@ -305,9 +313,7 @@
         "--seed",
         "42"
       ],
-      "derived_range_max": 62,
-      "negatives_shortfall": 10965,
-      "train_seconds": 2498.8
+      "train_seconds_mean": 2395.4
     }
   },
   "baselines": {
@@ -354,7 +360,7 @@
     "conclusion": "R4 beats R3 out of domain. Both tests agree and the interval excludes zero. The interval's lower bound of +0.0011 is smaller than the 0.0024 run-to-run drift measured here, so the size of the effect rests on the seed spread rather than on that bound."
   },
   "caveats": [
-    "R5 and R6 are single seed. R6 is the highest xsim-hard number here but has no interval. It is a lead, not a finding.",
+    "R6 now has three seeds and is the most reproducible arm measured: sd 0.0001 on xsim-hard against 0.0021 for the same recipe fine-tuned in full. R5 remains one seed and is the worst arm.",
     "The significance test compares seed 42 of each arm. The three-seed spread is separate evidence pointing the same way, but it is not the same test.",
     "Per-query vectors exist for R3 and R4 seed 42 only. Any other pair needs a re-run.",
     "Run-to-run drift on an identical command reaches 0.0024 on xsim-hard. R3 seed 42 gave 0.8444 then 0.8461, and R4 seed 42 gave 0.8592 then 0.8616, when both were retrained to capture per-query vectors. R0 reproduced exactly, so the nondeterminism enters with hard-negative mining, not with plain training.",

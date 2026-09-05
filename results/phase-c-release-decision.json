@@ -1,0 +1,256 @@
+{
+  "run": "Phase C release decision: which recipe ships as v2",
+  "utc": "2026-09-05T18:29:51Z",
+  "git": {
+    "sha": "83fba9af197c9c2aa4512794ec2d4411024f1526",
+    "kernel_git_sha": "83fba9af197c9c2aa4512794ec2d4411024f1526"
+  },
+  "env": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "sentence-transformers": "6.0.1",
+    "transformers": "5.0.0"
+  },
+  "arms": {
+    "R3_e5_full_ft": {
+      "seeds": [
+        "r3-released-s42",
+        "r3-released-s43",
+        "r3-released-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9661,
+        "values": [
+          0.9659,
+          0.9675,
+          0.965
+        ],
+        "sd": 0.0013
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8426,
+        "values": [
+          0.8461,
+          0.8417,
+          0.8399
+        ],
+        "sd": 0.0032
+      },
+      "argv": [
+        "--base",
+        "intfloat/multilingual-e5-base",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "train_seconds_mean": 1994.2
+    },
+    "R4_labse_full_ft": {
+      "seeds": [
+        "r4-labse-s42",
+        "r4-labse-s43",
+        "r4-labse-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9655,
+        "values": [
+          0.9654,
+          0.9651,
+          0.966
+        ],
+        "sd": 0.0005
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8597,
+        "values": [
+          0.8616,
+          0.86,
+          0.8574
+        ],
+        "sd": 0.0021
+      },
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "train_seconds_mean": 2110.7
+    },
+    "R5_lora_e5": {
+      "seeds": [
+        "r5-lora-e5-s42"
+      ],
+      "n": 1,
+      "in_domain_ndcg10": {
+        "mean": 0.9115,
+        "values": [
+          0.9115
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.7957,
+        "values": [
+          0.7957
+        ]
+      },
+      "argv": [
+        "--base",
+        "intfloat/multilingual-e5-base",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--lora",
+        "--lora-r",
+        "16",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "train_seconds_mean": 2617.1
+    },
+    "R6_lora_labse": {
+      "seeds": [
+        "r6-lora-labse-s42",
+        "r6-lora-labse-s43",
+        "r6-lora-labse-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9553,
+        "values": [
+          0.9556,
+          0.9556,
+          0.9547
+        ],
+        "sd": 0.0005
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8628,
+        "values": [
+          0.8628,
+          0.8627,
+          0.8629
+        ],
+        "sd": 0.0001
+      },
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--lora",
+        "--lora-r",
+        "16",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "train_seconds_mean": 2395.4
+    }
+  },
+  "baselines": {
+    "baseline-labse": {
+      "in_domain_ndcg10": 0.9393,
+      "xsim_hard_ndcg10": 0.8449
+    },
+    "baseline-e5-base": {
+      "in_domain_ndcg10": 0.6402,
+      "xsim_hard_ndcg10": 0.6691
+    }
+  },
+  "decision": "R4_labse_full_ft",
+  "why": {
+    "against_the_published_v1_recipe": {
+      "R4": {
+        "in_domain": -0.0006,
+        "xsim_hard": 0.0171
+      },
+      "R6": {
+        "in_domain": -0.0108,
+        "xsim_hard": 0.0202
+      }
+    },
+    "reasoning": "R6 scores highest out of domain, but it buys that by giving up 0.0108 in domain against the recipe already published, for a gain of 0.0031 that is close to the 0.0024 run-to-run drift measured on this benchmark. R4 holds the published in-domain number to within 0.0006 and gains 0.0171 out of domain, so it improves one axis and costs nothing on the other."
+  },
+  "lora_finding": {
+    "summary": "LoRA r=16 on LaBSE trains 3.27M of 474M parameters and is the most reproducible arm measured: sd 0.0001 across three seeds against 0.0021 for the same recipe fine-tuned in full. It scores highest out of domain and lowest in domain of the two LaBSE arms, which is the trade Biderman et al. (TMLR 2024) describe as learning less and forgetting less.",
+    "on_the_weak_base": "LoRA on multilingual-e5-base is the worst arm in the phase at 0.7957. The effect belongs to the combination, not to LoRA."
+  },
+  "what_the_fine_tune_is_worth": {
+    "note": "Gains measured against each arm's own untrained base, out of domain.",
+    "on_e5_base": {
+      "gain": 0.1735,
+      "ends_at": 0.8426,
+      "untrained_labse": 0.8449,
+      "beats_untrained_labse": false
+    },
+    "on_labse": {
+      "gain": 0.0148,
+      "ends_at": 0.8597,
+      "beats_untrained_labse": true
+    },
+    "reading": "Fine-tuning adds far more to the weak base and still lands below untrained LaBSE. Fine-tuning LaBSE adds little and lands above it. A large gain from a low floor is still a worse model."
+  },
+  "caveats": [
+    "LaBSE does not list mfe among its 110 languages but does list ht. Its starting point on Mauritian Creole is transfer from a related French-lexified creole, not Creole training data, which is the likeliest reason a further 35,064 pairs move it so little.",
+    "Every arm draws its hard negatives from one r0-stage1 checkpoint, so seed variance covers training initialisation and not mining.",
+    "Run-to-run drift on this benchmark reaches 0.0024. The R6 over R4 gain of 0.0031 sits just above it; the R4 over R3 gain of 0.0171 does not.",
+    "R5 is one seed. It is the worst arm and more seeds would not change the conclusion.",
+    "No model artifact exists yet. Every arm was scored and then deleted to stay inside the disk quota, so shipping needs one further run that keeps the checkpoint."
+  ]
+}
