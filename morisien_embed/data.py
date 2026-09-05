@@ -14,6 +14,7 @@ import json
 import unicodedata
 import zipfile
 from collections import Counter
+from pathlib import Path
 
 from datasets import load_dataset
 from huggingface_hub import hf_hub_download
@@ -25,6 +26,10 @@ CREOLE_LANG = "mfe"
 
 MORISIEN_REPO = "prajdabre/KreolMorisienMT"  # canonical id; "prajdabre/MorisienMT" is a redirect
 MORISIEN_REVISION = "66c76eaf5e33b39a41c3d4c757eee3cf23b52ce5"  # 2022-06-02
+
+SMOL_REPO = "google/smol"
+SMOL_REVISION = "fdaff3a1a019f89fa30a562a85d7c1d3e9150444"  # 2026-09-03
+SMOL_SUBSETS = ("smolsent", "smoldoc")
 MORISIEN_PAIRS = {"en-cr": "eng", "fr-cr": "fra"}
 
 Pair = dict[str, str]
@@ -77,6 +82,38 @@ def morisienmt(split: str) -> list[Pair]:
                 creole, translation = normalize(row["target"]), normalize(row["input"])
                 if creole and translation:
                     pairs.append({"creole": creole, "translation": translation, "lang": lang})
+    return pairs
+
+
+def smol(revision: str | None = SMOL_REVISION) -> list[Pair]:
+    """Creole to English pairs from google/smol, sentences and document segments.
+
+    SMOL is CC-BY-4.0 and independent of MorisienMT and Kreyol-MT. Its Creole side has a median
+    length of 14 words, against a median of 1 for the merged corpus, so it adds sentence-level
+    material rather than more dictionary entries. The ``gatitos`` subset is skipped: it is a token
+    dictionary, which the corpus already has too much of.
+
+    Args:
+        revision (`str | None`): Hub revision to pin. Pass `None` to track the branch head.
+
+    Returns:
+        `list[Pair]`: Rows with `creole`, `translation` and `lang`, whitespace-normalized.
+    """
+    pairs: list[Pair] = []
+    for subset in SMOL_SUBSETS:
+        path = hf_hub_download(SMOL_REPO, f"{subset}/en_mfe.jsonl", repo_type="dataset", revision=revision)
+        for line in Path(path).read_text(encoding="utf-8").splitlines():
+            row = json.loads(line)
+            if subset == "smolsent":
+                rows = [(row["src"], row["trg"])]
+            else:
+                # smoldoc holds a whole document per row. strict=True turns a misaligned one into an
+                # error rather than silently dropping its tail.
+                rows = list(zip(row["srcs"], row["trgs"], strict=True))
+            for source, target in rows:
+                creole, translation = normalize(target), normalize(source)
+                if creole and translation:
+                    pairs.append({"creole": creole, "translation": translation, "lang": "eng"})
     return pairs
 
 

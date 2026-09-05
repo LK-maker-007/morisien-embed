@@ -1,4 +1,9 @@
-"""Assemble the merged, leak-free Mauritian Creole training set and write it as JSONL."""
+"""Assemble the merged, leak-free Mauritian Creole training set and write it as JSONL.
+
+``--with-smol`` adds google/smol. The merged corpus is 63% single Creole words, while SMOL is
+sentence-level with a median of 14, so it changes what the corpus contains rather than how much of
+it there is. It overlaps neither evaluation benchmark on either side.
+"""
 
 from __future__ import annotations
 
@@ -13,9 +18,18 @@ from morisien_embed import data
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("data/processed/train.jsonl"))
+    parser.add_argument(
+        "--with-smol",
+        action="store_true",
+        help="add google/smol, which is sentence-level and absent from the merged corpus",
+    )
     args = parser.parse_args()
 
     raw = data.morisienmt("train") + data.kreyol_mt("train")
+    if args.with_smol:
+        smol = data.smol()
+        print(f"smol pairs:      {len(smol):>7}")
+        raw += smol
     kept, dropped = data.merge(raw, data.reserved_creole())
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
