@@ -1,0 +1,132 @@
+{
+  "run": "C5: does adding sentence-level data from google/smol help?",
+  "utc": "2026-09-05T21:37:14Z",
+  "git": {
+    "sha": "ed695e2c12b7b46e65bf400eee8df8ce9d2c2ac3",
+    "kernel_git_sha": "7152c4c5ff6def2978c7ae08327bc5230ee9cb1e"
+  },
+  "env": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "sentence-transformers": "6.0.1",
+    "transformers": "5.0.0"
+  },
+  "hypothesis": "The corpus is 63% single Creole words while every benchmark is sentences, so adding 2,468 human-translated pairs with a median of 14 words should help out of domain.",
+  "corpus": {
+    "without_smol": {
+      "pairs": 35064,
+      "single_word_pct": 63.21,
+      "rows_of_6_words_or_more": 9183
+    },
+    "with_smol": {
+      "pairs": 37532,
+      "single_word_pct": 59.06,
+      "rows_of_6_words_or_more": 11545
+    },
+    "smol_rows_added": 2468,
+    "note": "4 of the 2,472 dropped as exact duplicates. Zero overlap with either benchmark on either side under the loose leak key."
+  },
+  "arms": {
+    "C5_labse_plus_smol": {
+      "seeds": [
+        "c5-smol-labse-s42"
+      ],
+      "n": 1,
+      "in_domain_ndcg10": {
+        "mean": 0.9661,
+        "values": [
+          0.9661
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8549,
+        "values": [
+          0.8549
+        ]
+      },
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--epochs",
+        "3",
+        "--seed",
+        "42",
+        "--train-file",
+        "data/processed/train-smol.jsonl"
+      ],
+      "train_seconds_mean": 2391.9
+    },
+    "R4_labse_only": {
+      "seeds": [
+        "r4-labse-s42",
+        "r4-labse-s43",
+        "r4-labse-s44"
+      ],
+      "n": 3,
+      "in_domain_ndcg10": {
+        "mean": 0.9655,
+        "values": [
+          0.9654,
+          0.9651,
+          0.966
+        ]
+      },
+      "xsim_hard_ndcg10": {
+        "mean": 0.8597,
+        "values": [
+          0.8616,
+          0.86,
+          0.8574
+        ],
+        "sd": 0.0021
+      },
+      "argv": [
+        "--base",
+        "sentence-transformers/LaBSE",
+        "--mine-with",
+        "/kaggle/tmp/models/r0-stage1/final",
+        "--num-negatives",
+        "5",
+        "--range-min",
+        "10",
+        "--relative-margin",
+        "0.05",
+        "--batch-size",
+        "128",
+        "--mini-batch-size",
+        "32",
+        "--matryoshka",
+        "--epochs",
+        "3",
+        "--seed",
+        "42"
+      ],
+      "train_seconds_mean": 2110.7
+    }
+  },
+  "result": {
+    "xsim_hard_delta": -0.0048,
+    "c5_below_r4_worst_seed": true,
+    "distance_in_r4_seed_sd": 2.3,
+    "in_domain_delta": 0.0006
+  },
+  "conclusion": "The hypothesis was wrong. Adding SMOL costs 0.0048 nDCG@10 out of domain, which puts it below R4's worst seed and 2.2 seed standard deviations from its mean, against a measured run-to-run drift of 0.0024. In domain the difference is +0.0006, inside noise. Read alongside C2, where removing the dictionary also hurt, both directions of changing the corpus composition make the model worse, which suggests the corpus sits near a local optimum for this recipe.",
+  "caveats": [
+    "One seed. R4 has three. The direction is clear and outside R4's observed range, but a single run cannot separate a real effect from an unlucky draw as precisely as three would.",
+    "SMOL grew the mining pool by 7%, so the hard negatives changed as well as the training data. Whether the loss comes from the added rows or from the mining shifting under them would need the volume-matched control C2 used.",
+    "SMOL is a different collection with a different register, so this measures adding that corpus rather than adding sentence-level data in general."
+  ]
+}
