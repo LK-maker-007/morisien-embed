@@ -37,6 +37,52 @@ def test_load_training_pairs_limit_zero_is_empty_not_unlimited(tmp_path: Path) -
     assert len(train.load_training_pairs(path, limit=None)) == 10
 
 
+def _write_pairs(tmp_path: Path, creoles: list[str]) -> Path:
+    path = tmp_path / "train.jsonl"
+    rows = (json.dumps({"creole": c, "translation": f"t{i}"}) for i, c in enumerate(creoles))
+    path.write_text("\n".join(rows), encoding="utf-8")
+    return path
+
+
+def test_min_words_keeps_a_row_of_exactly_that_length(tmp_path: Path) -> None:
+    path = _write_pairs(tmp_path, ["one", "two words", "three words here", "a b c d e f"])
+    kept = train.load_training_pairs(path, limit=None, min_words=3)["anchor"]
+    # a row of exactly min_words stays, which is the boundary a > rather than >= would get wrong
+    assert kept == ["three words here", "a b c d e f"]
+
+
+def test_min_words_one_is_a_no_op(tmp_path: Path) -> None:
+    creoles = ["one", "two words", "three words here"]
+    path = _write_pairs(tmp_path, creoles)
+    assert train.load_training_pairs(path, limit=None, min_words=1)["anchor"] == creoles
+
+
+def test_sample_is_reproducible_and_seed_dependent(tmp_path: Path) -> None:
+    path = _write_pairs(tmp_path, [f"row {i}" for i in range(40)])
+    first = train.load_training_pairs(path, limit=None, sample=10, sample_seed=0)["anchor"]
+    again = train.load_training_pairs(path, limit=None, sample=10, sample_seed=0)["anchor"]
+    other = train.load_training_pairs(path, limit=None, sample=10, sample_seed=1)["anchor"]
+    assert len(first) == 10
+    assert first == again
+    assert first != other
+
+
+def test_sample_draws_from_the_filtered_rows_not_the_whole_file(tmp_path: Path) -> None:
+    # 30 single-word rows then 8 long ones. The filter must run first, leaving 8, and the sample
+    # must then cut those to 5. If the sample were skipped the result would be 8, and if it drew
+    # from the unfiltered file it would contain single-word rows.
+    path = _write_pairs(tmp_path, ["x"] * 30 + [f"a long row number {i}" for i in range(8)])
+    got = train.load_training_pairs(path, limit=None, min_words=3, sample=5)["anchor"]
+    assert len(got) == 5
+    assert all(len(a.split()) >= 3 for a in got)
+
+
+def test_sample_larger_than_the_pool_raises(tmp_path: Path) -> None:
+    path = _write_pairs(tmp_path, [f"row {i}" for i in range(5)])
+    with pytest.raises(ValueError, match="exceeds"):
+        train.load_training_pairs(path, limit=None, sample=6)
+
+
 def _stub_evaluate(returned: dict[str, float], monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(train.data, "morisienmt", lambda split: [])
     monkeypatch.setattr(train.benchmark, "build", lambda pairs, target_lang=None: ({}, {}, {}))
