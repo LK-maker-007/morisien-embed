@@ -55,3 +55,87 @@ def test_report_test_raises_when_metric_keys_are_renamed(monkeypatch: pytest.Mon
     _stub_evaluate({"unexpected_metric": 1.0}, monkeypatch)
     with pytest.raises(RuntimeError, match="expected cosine"):
         train.report_test(object())
+
+
+def _tiny_lora_model():
+    """A stand-in for a SentenceTransformer with a LoRA adapter injected into module 0.
+
+    Building this by hand rather than loading a checkpoint keeps the test offline and fast, while
+    still exercising real peft layers.
+    """
+    torch = pytest.importorskip("torch")
+    peft = pytest.importorskip("peft")
+
+    class Attention(torch.nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.query = torch.nn.Linear(8, 8, bias=False)
+            self.value = torch.nn.Linear(8, 8, bias=False)
+
+        def forward(self, x):
+            return self.value(self.query(x))
+
+    class Inner(torch.nn.Module):
+        """Nested the way a real encoder is, so a non-recursive strip cannot reach the adapters."""
+
+        def __init__(self) -> None:
+            super().__init__()
+            self.encoder = torch.nn.ModuleList([Attention()])
+
+        def forward(self, x):
+            return self.encoder[0](x)
+
+    inner = Inner()
+    peft.inject_adapter_in_model(
+        peft.LoraConfig(r=2, lora_alpha=4, target_modules=["query", "value"], bias="none"), inner
+    )
+    inner._hf_peft_config_loaded = True
+
+    # lora_B starts at zero, so the adapter is a no-op until it is moved off it
+    with torch.no_grad():
+        for name, param in inner.named_parameters():
+            if "lora_B" in name:
+                param.add_(0.1)
+
+    class Module0:
+        def __init__(self, auto_model):
+            self.auto_model = auto_model
+
+    class Stub:
+        def __init__(self, auto_model):
+            self._m = [Module0(auto_model)]
+
+        def __getitem__(self, i):
+            return self._m[i]
+
+    return torch, peft, inner, Stub(inner)
+
+
+def test_merge_lora_keeps_the_adapter_effect_in_the_base_weights() -> None:
+    torch, _, inner, model = _tiny_lora_model()
+    x = torch.ones(1, 8)
+    with torch.no_grad():
+        before = inner(x).clone()
+
+    train.merge_lora(model)
+
+    with torch.no_grad():
+        after = model[0].auto_model(x)
+    # If merge() were skipped, stripping the adapter would throw its contribution away and the
+    # output would fall back to the untouched base weights.
+    assert torch.allclose(before, after, atol=1e-6)
+
+
+def test_merge_lora_leaves_no_peft_layers_or_flags_behind() -> None:
+    _, peft, inner, model = _tiny_lora_model()
+    from peft.tuners.lora import LoraLayer
+
+    assert any(isinstance(m, LoraLayer) for m in inner.modules())
+
+    train.merge_lora(model)
+
+    after = model[0].auto_model
+    # save_pretrained takes the adapter-only path while either of these survives
+    assert not any(isinstance(m, LoraLayer) for m in after.modules())
+    assert after._hf_peft_config_loaded is False
+    assert not hasattr(after, "peft_config")

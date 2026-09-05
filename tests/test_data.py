@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import io
+import json
 import zipfile
 from pathlib import Path
+
+import pytest
 
 from morisien_embed import data
 
@@ -101,3 +104,50 @@ def test_morisienmt_reads_zip_archives_and_skips_empty_rows(monkeypatch, tmp_pat
         {"creole": "Mo pe ale lakaz", "translation": "I am going home", "lang": "eng"},
         {"creole": "Mo pe ale lakaz", "translation": "Je rentre chez moi", "lang": "fra"},
     ]
+
+
+def test_smol_expands_documents_orients_creole_first_and_skips_gatitos(monkeypatch, tmp_path: Path) -> None:
+    rows = {
+        "smolsent": [{"src": "I am going home", "trg": "Mo pe ale lakaz"}],
+        "smoldoc": [
+            {"srcs": ["Good morning", "  ", "See you"], "trgs": ["Bonzour", "Nanye", "Bay"]},
+            {"srcs": ["It is raining"], "trgs": ["Lapli  pe tonbe"]},
+        ],
+    }
+    asked: list[str] = []
+
+    def fake_download(repo: str, filename: str, repo_type: str, revision: str) -> str:
+        asked.append(filename)
+        subset = filename.split("/")[0]
+        path = tmp_path / f"{subset}.jsonl"
+        path.write_text("\n".join(json.dumps(r) for r in rows[subset]), encoding="utf-8")
+        return str(path)
+
+    monkeypatch.setattr(data, "hf_hub_download", fake_download)
+    pairs = data.smol()
+
+    # English is the source side in SMOL, so the Creole side comes from trg/trgs
+    assert pairs == [
+        {"creole": "Mo pe ale lakaz", "translation": "I am going home", "lang": "eng"},
+        {"creole": "Bonzour", "translation": "Good morning", "lang": "eng"},
+        {"creole": "Bay", "translation": "See you", "lang": "eng"},
+        {"creole": "Lapli pe tonbe", "translation": "It is raining", "lang": "eng"},
+    ]
+    assert asked == ["smolsent/en_mfe.jsonl", "smoldoc/en_mfe.jsonl"]
+
+
+def test_smol_rejects_a_document_whose_sides_are_misaligned(monkeypatch, tmp_path: Path) -> None:
+    rows = {
+        "smolsent": [],
+        "smoldoc": [{"srcs": ["one", "two"], "trgs": ["enn"]}],
+    }
+
+    def fake_download(repo: str, filename: str, repo_type: str, revision: str) -> str:
+        subset = filename.split("/")[0]
+        path = tmp_path / f"{subset}.jsonl"
+        path.write_text("\n".join(json.dumps(r) for r in rows[subset]), encoding="utf-8")
+        return str(path)
+
+    monkeypatch.setattr(data, "hf_hub_download", fake_download)
+    with pytest.raises(ValueError):
+        data.smol()

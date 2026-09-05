@@ -35,7 +35,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - run: pip install -e .[dev]
+      - run: pip install -e .[dev,lora]
       - run: pytest
       - name: smoke-import every script
         run: |
