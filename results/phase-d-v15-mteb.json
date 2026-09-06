@@ -1,0 +1,46 @@
+{
+ "run": "MTEB MorisienMTBitextMining, F1 per directional subset",
+ "produced_by": "scripts/mteb_score.py",
+ "task": {
+  "name": "MorisienMTBitextMining",
+  "dataset": "mteb/MorisienMTBitextMining",
+  "revision": "45f511e86cc511a422a130f2d23a2697e279efa2",
+  "main_score": "f1"
+ },
+ "env": {
+  "python": "3.12.3",
+  "mteb": "2.20.10",
+  "sentence-transformers": "6.0.1",
+  "transformers": "5.16.1",
+  "torch": "2.14.0+cpu"
+ },
+ "results": {
+  "Singaraj/morisien-embed": {
+   "by_subset": {
+    "mfe_Latn-eng_Latn": 0.9267,
+    "eng_Latn-mfe_Latn": 0.9091,
+    "mfe_Latn-fra_Latn": 0.9385,
+    "fra_Latn-mfe_Latn": 0.9241
+   },
+   "mean_f1": 0.9246
+  },
+  "Singaraj/morisien-embed-v1.5": {
+   "by_subset": {
+    "mfe_Latn-eng_Latn": 0.9304,
+    "eng_Latn-mfe_Latn": 0.9202,
+    "mfe_Latn-fra_Latn": 0.933,
+    "fra_Latn-mfe_Latn": 0.9282
+   },
+   "mean_f1": 0.928
+  },
+  "sentence-transformers/LaBSE": {
+   "by_subset": {
+    "mfe_Latn-eng_Latn": 0.8819,
+    "eng_Latn-mfe_Latn": 0.8446,
+    "mfe_Latn-fra_Latn": 0.8858,
+    "fra_Latn-mfe_Latn": 0.7792
+   },
+   "mean_f1": 0.8479
+  }
+ }
+}

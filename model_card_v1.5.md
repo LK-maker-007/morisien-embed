@@ -81,6 +81,43 @@ out-of-domain pool, which is worth knowing before reading small differences.
 Against LaBSE the fine-tune is worth +0.026 in-domain and +0.015 out of domain. Against the first
 version it holds the in-domain score and adds 0.019 out of domain.
 
+### Other retrieval directions
+
+Held-out MorisienMT test, nDCG@10, all three measured in one run in which `morisien-embed`
+reproduces its published scores exactly.
+
+| direction | LaBSE | morisien-embed | **morisien-embed-v1.5** |
+|---|---|---|---|
+| Creole to English | 0.9393 | 0.9655 | **0.9658** |
+| Creole to French | 0.9475 | 0.9751 | **0.9738** |
+| English to Creole | 0.9247 | 0.9588 | **0.9642** |
+
+The in-domain figure is 0.9658 here against 0.9654 on the training run's own record, with an
+identical accuracy@1 of 0.9460. That gap is a CPU against GPU difference and is smaller than the
+0.0024 run-to-run drift.
+
+### MTEB MorisienMTBitextMining
+
+F1 on task revision `45f511e8`. LaBSE and `morisien-embed` reproduce their published means of 0.848
+and 0.925, so all three rows are on the same footing.
+
+| model | mfe>eng | eng>mfe | mfe>fra | fra>mfe | mean |
+|---|---|---|---|---|---|
+| LaBSE | 0.882 | 0.845 | 0.886 | 0.779 | 0.848 |
+| morisien-embed | 0.927 | 0.909 | **0.939** | 0.924 | 0.925 |
+| **morisien-embed-v1.5** | **0.930** | **0.920** | 0.933 | **0.928** | **0.928** |
+
+The four subsets are built over one set of 999 Creole sentences rather than four independent
+samples, so the mean is not an average of four independent measurements.
+
+### Matryoshka truncation
+
+Creole to English, nDCG@10. Half the embedding costs about 0.005.
+
+| dimensions | 768 | 512 | 256 | 128 | 64 |
+|---|---|---|---|---|---|
+| morisien-embed-v1.5 | 0.9658 | 0.9643 | 0.9612 | 0.9565 | 0.9335 |
+
 ## Usage
 
 ```python
@@ -129,11 +166,13 @@ reversing a causal relation are 4.4% of the corpus and cause about 51% of the er
 entity substitutions are 88% of the corpus and cause under a third. Neither model reads causal
 direction reliably.
 
-**Not measured for this checkpoint.** Creole to French retrieval, the MTEB
-MorisienMTBitextMining task, and Matryoshka truncation quality. All three are reported for the first
-version and none has been rerun here.
+**Sequence length is 256 tokens**, LaBSE's default, against 512 for the first version. Every
+benchmark used here is single sentences, so nothing measured exercises the difference.
 
-**Sequence length is 256 tokens**, LaBSE's default, against 512 for the first version.
+**Requires sentence-transformers 6.0 or newer.** This checkpoint was serialised by a build that
+writes `Normalize` as `sentence_transformers.base.modules.normalize`, a path that does not exist
+before 6.0, so older installs raise `ModuleNotFoundError` on load. The first version has no such
+constraint.
 
 ## Citation
 
