@@ -9,8 +9,20 @@ The released augmentation labels every distractor with the rule that produced it
 ``entity_mention_replacement`` (38,855 of 44,033), ``number_replacement`` (3,262) and
 ``causality_alternation`` (1,916).
 
-Reference: Chen et al., xSIM++: An Improved Proxy to Bitext Mining Performance for Low-Resource
-Languages, ACL 2023. https://arxiv.org/abs/2306.12907
+xSIM aligns with a margin-based similarity rather than plain cosine (Artetxe and Schwenk, 2019a),
+and LASER's reference ``xsim.py`` defaults to the ratio margin with ``k=4``. The margin reranks the
+``k`` nearest neighbours by cosine, dividing each candidate's cosine by the mean of the two sides'
+own nearest-neighbour cosines, which corrects for points that are close to everything. ``absolute``
+skips the margin and takes the nearest neighbour, which is what this script used to do and what makes
+a number no other xSIM++ result can be compared against.
+
+Because the margin only reorders the ``k`` cosine neighbours, it can never recover a gold passage
+that was not among them.
+
+References: Chen et al., xSIM++: An Improved Proxy to Bitext Mining Performance for Low-Resource
+Languages, ACL 2023, https://arxiv.org/abs/2306.12907; Artetxe and Schwenk, Margin-based Parallel
+Corpus Mining with Multilingual Sentence Embeddings, ACL 2019, https://arxiv.org/abs/1811.01136;
+reference implementation https://github.com/facebookresearch/LASER/blob/main/source/xsim.py
 """
 
 from __future__ import annotations
@@ -20,13 +32,83 @@ import json
 from collections import Counter
 from pathlib import Path
 
+import numpy as np
+import torch
 from sentence_transformers import SentenceTransformer
 
 from morisien_embed import benchmark, data
 from morisien_embed.xsim import fetch_errtype
 
+MARGINS = ("ratio", "distance", "absolute")
+CHUNK = 4096  # passages per pass; caps peak memory at queries x CHUNK floats
 
-def score(model: SentenceTransformer, data_dir: Path, errtype: dict[str, dict[str, str]], batch_size: int) -> dict:
+
+def retrieve_many(q_emb: torch.Tensor, c_emb: torch.Tensor, margins: tuple[str, ...], k: int) -> dict[str, list[int]]:
+    """Align each query to a passage under several margins, in one pass over the passage pool.
+
+    The pool is large enough that a full query-by-passage similarity matrix is worth avoiding, and
+    scoring one matrix per margin is worth avoiding three times over. Everything each margin needs
+    reduces to four small tensors, so the passages are streamed in chunks and only those are kept:
+    the ``k`` best cosines per query and their indices, each query's mean over them, and each
+    passage's mean over its own ``k`` best queries.
+
+    ``absolute`` needs no margin at all: the neighbours are held sorted, so its answer is the first
+    column.
+
+    Args:
+        q_emb (`torch.Tensor`): L2-normalized query embeddings, shape (queries, dim).
+        c_emb (`torch.Tensor`): L2-normalized passage embeddings, shape (passages, dim).
+        margins (`tuple[str, ...]`): Margin functions to score, each one of `MARGINS`.
+        k (`int`): Neighbours to rerank, and to average over when forming the denominator.
+
+    Returns:
+        `dict[str, list[int]]`: Per margin, the row of `c_emb` each query aligns to.
+    """
+    cos_xy = torch.full((q_emb.size(0), k), -torch.inf)
+    idx_xy = torch.zeros((q_emb.size(0), k), dtype=torch.long)
+    avg_yx = torch.empty(c_emb.size(0))
+
+    for start in range(0, c_emb.size(0), CHUNK):
+        chunk = c_emb[start : start + CHUNK]
+        sims = q_emb @ chunk.T
+        # Each passage averages its k best queries. Fewer queries than k would make this ill-defined.
+        avg_yx[start : start + chunk.size(0)] = sims.topk(min(k, sims.size(0)), dim=0).values.mean(dim=0)
+        # Merge this chunk's best into the running best, keeping global passage indices.
+        merged_cos = torch.cat([cos_xy, sims], dim=1)
+        merged_idx = torch.cat([idx_xy, torch.arange(start, start + chunk.size(0)).expand(q_emb.size(0), -1)], dim=1)
+        cos_xy, order = merged_cos.topk(k, dim=1)
+        idx_xy = merged_idx.gather(1, order)
+
+    avg_xy = cos_xy.mean(dim=1)
+    denominator = (avg_xy.unsqueeze(1) + avg_yx[idx_xy]) / 2
+    rows = torch.arange(idx_xy.size(0))
+
+    aligned: dict[str, list[int]] = {}
+    for margin in margins:
+        if margin == "absolute":
+            aligned[margin] = idx_xy[:, 0].tolist()
+            continue
+        scores = cos_xy / denominator if margin == "ratio" else cos_xy - denominator
+        aligned[margin] = idx_xy[rows, scores.argmax(dim=1)].tolist()
+    return aligned
+
+
+def retrieve(q_emb: torch.Tensor, c_emb: torch.Tensor, margin: str, k: int) -> list[int]:
+    """Single-margin form of :func:`retrieve_many`, following LASER's ``_score_knn``."""
+    return retrieve_many(q_emb, c_emb, (margin,), k)[margin]
+
+
+def score(
+    model: SentenceTransformer,
+    data_dir: Path,
+    errtype: dict[str, dict[str, str]],
+    batch_size: int,
+    *,
+    margins: tuple[str, ...] = ("ratio",),
+    k: int = 4,
+    per_query: Path | None = None,
+    label: str = "model",
+) -> dict:
     """Error rate over the pool, with the misses grouped by perturbation rule.
 
     Args:
@@ -34,9 +116,16 @@ def score(model: SentenceTransformer, data_dir: Path, errtype: dict[str, dict[st
         data_dir (`Path`): Benchmark directory holding queries, corpus and qrels.
         errtype (`dict[str, dict[str, str]]`): xSIM++ map of augmented sentence to its rule.
         batch_size (`int`): Encoding batch size.
+        margins (`tuple[str, ...]`): Margin functions to score, each one of `MARGINS`. Encoding the
+            45,029-passage pool dominates the runtime, so every margin is scored from one pass.
+        k (`int`): Neighbours the margin reranks. The reference default is 4.
+        per_query (`Path | None`): Directory to write one ``.npz`` per margin holding the per-query
+            hit vector. A paired test between two models needs these; an error rate alone cannot
+            say whether a difference is larger than chance.
+        label (`str`): Filename stem for those files.
 
     Returns:
-        `dict`: Error rate, error count, query count and a count per rule.
+        `dict`: Per margin, the error rate, error count, query count and a count per rule.
     """
     queries, corpus, qrels = benchmark.load(data_dir)
     qids, cids = list(queries), list(corpus)
@@ -48,23 +137,33 @@ def score(model: SentenceTransformer, data_dir: Path, errtype: dict[str, dict[st
     c_emb = model.encode(
         [corpus[c] for c in cids], batch_size=batch_size, convert_to_tensor=True, normalize_embeddings=True
     )
-    top = (q_emb @ c_emb.T).argmax(dim=1).tolist()
-
     index = {c: i for i, c in enumerate(cids)}
-    errors: Counter[str] = Counter()
-    for qid, retrieved in zip(qids, top, strict=True):
-        if retrieved in {index[g] for g in qrels[qid]}:
-            continue
-        # A miss that is not one of the released distractors is some other passage in the pool.
-        errors[rule.get(corpus[cids[retrieved]], "other_passage")] += 1
+    gold = {qid: {index[g] for g in qrels[qid]} for qid in qids}
 
-    total = sum(errors.values())
-    return {
-        "queries": len(qids),
-        "errors": total,
-        "error_rate": round(total / len(qids), 4),
-        "by_rule": {k: errors[k] for k in sorted(errors)},
-    }
+    aligned = retrieve_many(q_emb, c_emb, margins, k)
+    report: dict[str, dict] = {}
+    for margin in margins:
+        errors: Counter[str] = Counter()
+        hits = np.zeros(len(qids), dtype=np.int64)
+        for position, (qid, retrieved) in enumerate(zip(qids, aligned[margin], strict=True)):
+            if retrieved in gold[qid]:
+                hits[position] = 1
+                continue
+            # A miss that is not one of the released distractors is some other passage in the pool.
+            errors[rule.get(corpus[cids[retrieved]], "other_passage")] += 1
+        if per_query is not None:
+            per_query.mkdir(parents=True, exist_ok=True)
+            np.savez(per_query / f"{label}-{margin}.npz", hits=hits, qids=np.array(qids))
+        total = sum(errors.values())
+        assert total == len(qids) - int(hits.sum()), "error count and hit vector disagree"
+        report[margin] = {
+            "k": k if margin != "absolute" else None,
+            "queries": len(qids),
+            "errors": total,
+            "error_rate": round(total / len(qids), 4),
+            "by_rule": {name: errors[name] for name in sorted(errors)},
+        }
+    return report
 
 
 def main() -> None:
@@ -75,20 +174,40 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--revision", default=None)
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--margin",
+        nargs="+",
+        choices=MARGINS,
+        default=["ratio"],
+        help="scoring function; 'ratio' is what LASER's xsim.py defaults to and what published xSIM++ numbers use",
+    )
+    parser.add_argument("--k", type=int, default=4, help="neighbours the margin reranks, ignored for 'absolute'")
+    parser.add_argument(
+        "--per-query", type=Path, default=None, help="directory for per-query hit vectors, needed for paired tests"
+    )
     args = parser.parse_args()
 
     errtype = fetch_errtype(args.cache_dir)
     results = {}
     for name in args.model:
         results[name] = score(
-            SentenceTransformer(name, revision=args.revision), args.data_dir, errtype, args.batch_size
+            SentenceTransformer(name, revision=args.revision),
+            args.data_dir,
+            errtype,
+            args.batch_size,
+            margins=tuple(args.margin),
+            k=args.k,
+            per_query=args.per_query,
+            label=name.replace("/", "_"),
         )
-        r = results[name]
-        rules = "  ".join(f"{k} {v}" for k, v in r["by_rule"].items())
-        print(f"{name}\n  error rate {r['error_rate']:.4f}  ({r['errors']}/{r['queries']})\n  {rules}")
+        print(name)
+        for margin, r in results[name].items():
+            rules = "  ".join(f"{rule} {count}" for rule, count in r["by_rule"].items())
+            print(f"  [{margin:8}] error rate {r['error_rate']:.4f}  ({r['errors']}/{r['queries']})   {rules}")
 
     if args.output:
-        args.output.write_text(json.dumps({"data_dir": str(args.data_dir), "results": results}, indent=2) + "\n")
+        report = {"data_dir": str(args.data_dir), "margin": args.margin, "k": args.k, "results": results}
+        args.output.write_text(json.dumps(report, indent=2) + "\n")
         print(f"wrote {args.output}")
 
 

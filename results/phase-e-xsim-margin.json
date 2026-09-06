@@ -1,0 +1,225 @@
+{
+ "run": "Phase E: xSIM++ error rate under the margin scoring the method actually specifies",
+ "produced_by": "scripts/xsim_score.py <model> --margin ratio distance absolute",
+ "git": {
+  "sha": "2e03693d852ca86db16b43eaa74ad3a819fc0dd5"
+ },
+ "env": {
+  "python": "3.12.3",
+  "torch": "2.14.0+cpu",
+  "sentence-transformers": "6.0.1",
+  "transformers": "5.16.1",
+  "device": "cpu",
+  "note": "one process per model, HF_HUB_OFFLINE=1"
+ },
+ "benchmark": {
+  "dir": "benchmark/data/xsim-eng",
+  "queries": 996,
+  "passages": 45029
+ },
+ "why": "xSIM aligns with a margin-based similarity, not plain cosine (Artetxe and Schwenk 2019a), and LASER's reference xsim.py defaults to margin='ratio' with k=4. The previously recorded error rates in results/phase-a-xsim-error-rate.json used plain cosine, which is LASER's 'absolute' mode. Those numbers reproduce here exactly under 'absolute' and are not comparable to published xSIM++ results; the 'ratio' column is.",
+ "results": {
+  "Singaraj/morisien-embed-v1.5": {
+   "ratio": {
+    "k": 4,
+    "queries": 996,
+    "errors": 292,
+    "error_rate": 0.2932,
+    "by_rule": {
+     "causality_alternation": 145,
+     "entity_mention_replacement": 100,
+     "number_replacement": 47
+    }
+   },
+   "distance": {
+    "k": 4,
+    "queries": 996,
+    "errors": 286,
+    "error_rate": 0.2871,
+    "by_rule": {
+     "causality_alternation": 140,
+     "entity_mention_replacement": 101,
+     "number_replacement": 45
+    }
+   },
+   "absolute": {
+    "k": null,
+    "queries": 996,
+    "errors": 274,
+    "error_rate": 0.2751,
+    "by_rule": {
+     "causality_alternation": 137,
+     "entity_mention_replacement": 91,
+     "number_replacement": 46
+    }
+   }
+  },
+  "Singaraj/morisien-embed": {
+   "ratio": {
+    "k": 4,
+    "queries": 996,
+    "errors": 349,
+    "error_rate": 0.3504,
+    "by_rule": {
+     "causality_alternation": 168,
+     "entity_mention_replacement": 115,
+     "number_replacement": 66
+    }
+   },
+   "distance": {
+    "k": 4,
+    "queries": 996,
+    "errors": 341,
+    "error_rate": 0.3424,
+    "by_rule": {
+     "causality_alternation": 160,
+     "entity_mention_replacement": 114,
+     "number_replacement": 67
+    }
+   },
+   "absolute": {
+    "k": null,
+    "queries": 996,
+    "errors": 313,
+    "error_rate": 0.3143,
+    "by_rule": {
+     "causality_alternation": 159,
+     "entity_mention_replacement": 92,
+     "number_replacement": 62
+    }
+   }
+  },
+  "intfloat/multilingual-e5-base": {
+   "ratio": {
+    "k": 4,
+    "queries": 996,
+    "errors": 497,
+    "error_rate": 0.499,
+    "by_rule": {
+     "causality_alternation": 214,
+     "entity_mention_replacement": 207,
+     "number_replacement": 72,
+     "other_passage": 4
+    }
+   },
+   "distance": {
+    "k": 4,
+    "queries": 996,
+    "errors": 498,
+    "error_rate": 0.5,
+    "by_rule": {
+     "causality_alternation": 215,
+     "entity_mention_replacement": 206,
+     "number_replacement": 73,
+     "other_passage": 4
+    }
+   },
+   "absolute": {
+    "k": null,
+    "queries": 996,
+    "errors": 534,
+    "error_rate": 0.5361,
+    "by_rule": {
+     "causality_alternation": 216,
+     "entity_mention_replacement": 243,
+     "number_replacement": 67,
+     "other_passage": 8
+    }
+   }
+  },
+  "sentence-transformers/LaBSE": {
+   "ratio": {
+    "k": 4,
+    "queries": 996,
+    "errors": 333,
+    "error_rate": 0.3343,
+    "by_rule": {
+     "causality_alternation": 156,
+     "entity_mention_replacement": 115,
+     "number_replacement": 62
+    }
+   },
+   "distance": {
+    "k": 4,
+    "queries": 996,
+    "errors": 322,
+    "error_rate": 0.3233,
+    "by_rule": {
+     "causality_alternation": 154,
+     "entity_mention_replacement": 109,
+     "number_replacement": 59
+    }
+   },
+   "absolute": {
+    "k": null,
+    "queries": 996,
+    "errors": 306,
+    "error_rate": 0.3072,
+    "by_rule": {
+     "causality_alternation": 157,
+     "entity_mention_replacement": 100,
+     "number_replacement": 49
+    }
+   }
+  }
+ },
+ "finding": "Under the standard ratio margin every conclusion holds and two of them strengthen. morisien-embed-v1.5 beats untrained LaBSE by 0.0411 error rate against 0.0321 under cosine, and morisien-embed falls further behind it, 0.0161 against 0.0071. Margin scoring raises the error rate for the three stronger models and lowers it for multilingual-e5-base, the only model whose gold is often outside the top-4 by cosine.",
+ "caveats": [
+  "One run per model. The encoders are deterministic here, but this has not been repeated.",
+  "The margin reranks only the k=4 nearest cosine neighbours, so it can demote a gold that cosine ranked first as well as promote one it ranked second to fourth. Both directions occur.",
+  "Per-query vectors exist for LaBSE and v1.5 only. A paired test against morisien-embed or multilingual-e5-base needs a re-run with --per-query."
+ ],
+ "significance": {
+  "pair": "Singaraj/morisien-embed-v1.5 against untrained sentence-transformers/LaBSE, xSIM++ pool",
+  "produced_by": "scripts/paired_test.py <a.npz> <b.npz>",
+  "by_margin": {
+   "ratio": {
+    "a": "results/perquery-Singaraj_morisien-embed-v1.5-ratio-xsim-margin.npz",
+    "b": "results/perquery-sentence-transformers_LaBSE-ratio-xsim-margin.npz",
+    "queries": 996,
+    "alignment": "verified by query id",
+    "error_rate_a": 0.2932,
+    "error_rate_b": 0.3343,
+    "mcnemar": {
+     "a_wins": 93,
+     "b_wins": 52,
+     "discordant": 145,
+     "exact_two_sided_p": 0.000833
+    },
+    "bootstrap_error_rate": {
+     "diff": -0.0412,
+     "ci95": [
+      -0.0653,
+      -0.0181
+     ],
+     "resamples": 10000,
+     "seed": 0
+    }
+   },
+   "absolute": {
+    "a": "results/perquery-Singaraj_morisien-embed-v1.5-absolute-xsim-margin.npz",
+    "b": "results/perquery-sentence-transformers_LaBSE-absolute-xsim-margin.npz",
+    "queries": 996,
+    "alignment": "verified by query id",
+    "error_rate_a": 0.2751,
+    "error_rate_b": 0.3072,
+    "mcnemar": {
+     "a_wins": 82,
+     "b_wins": 50,
+     "discordant": 132,
+     "exact_two_sided_p": 0.006746
+    },
+    "bootstrap_error_rate": {
+     "diff": -0.0321,
+     "ci95": [
+      -0.0542,
+      -0.01
+     ],
+     "resamples": 10000,
+     "seed": 0
+    }
+   }
+  },
+  "conclusion": "v1.5 beats untrained LaBSE under both scorings and the effect is larger under the ratio margin the method specifies: error rate 0.2932 against 0.3343, McNemar exact p = 0.000833 on 93 wins to 52, and a paired bootstrap of -0.0412 with a 95% interval of [-0.0653, -0.0181]. Both tests agree and the interval excludes zero by more than the 0.0024 run-to-run drift measured on this pool."
+ }
+}
