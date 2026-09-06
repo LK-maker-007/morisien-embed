@@ -1,0 +1,55 @@
+{
+ "run": "B4 and B5: the Glot500 claim, and what the margin filter actually removes",
+ "produced_by": "manual verification, sources named per finding",
+ "git": {
+  "sha": "1414061b79862d2ea3c3bbc569c49a92bd5436ec"
+ },
+ "B4_glot500": {
+  "question": "Is cis-lmu/glot500-base a fair Phase B baseline, and does the 447,435 mfe figure hold?",
+  "is_a_sentence_embedder": false,
+  "evidence_not_an_embedder": "Model card declares pipeline_tag: fill-mask on an XLM-RoBERTa architecture, with no pooling configuration and no sentence-transformers files. Mean-pooling an untuned masked language model beside LaBSE would not be a like-for-like comparison.",
+  "mfe_sentences_in_glot500c": 447435,
+  "evidence_for_the_figure": "Glot500 (ImaniGooghari et al., ACL 2023), https://aclanthology.org/2023.acl-long.61.pdf, corpus table with header 'Language-Script |Sent| Family Head', row 'mfe_Latn 447435 indo1319'. Previously recorded as an unverified [H]; this confirms it.",
+  "not_on_the_model_card": "The card's language list does not name mfe, hat, crs or gcf, and the card never states the 447,435 figure. It is in the paper only.",
+  "corpus_not_publicly_split_by_this_language": "The public dataset cis-lmu/Glot500 exposes 412 language configs and mfe_Latn is not among them, against 511 languages claimed in the paper. The mfe portion is not downloadable there, which constrains C4.",
+  "conclusion": "Excluding Glot500 from Phase B was correct: it is a masked language model, not an embedder. The 447,435 figure holds and is roughly 13 times this project's 35,064 pairs, so Glot500 is a genuine Phase C base-model candidate. Reproducing its mfe pretraining data is a separate problem because the public release does not expose that language."
+ },
+ "B5_margin_filter": {
+  "question": "How many pairs keep a full negative set, and what are the rest?",
+  "rows_in_corpus": 35064,
+  "per_recorded_run": {
+   "R2_mined": {
+    "shortfall": 10968,
+    "full_negative_rows": 24096,
+    "derived_range_max": 62
+   },
+   "R3_released_recipe": {
+    "shortfall": 10963,
+    "full_negative_rows": 24101,
+    "derived_range_max": 62
+   },
+   "R4_labse_base": {
+    "shortfall": 10963,
+    "full_negative_rows": 24101,
+    "derived_range_max": 62
+   },
+   "R5_lora_e5": {
+    "shortfall": 10965,
+    "full_negative_rows": 24099,
+    "derived_range_max": 62
+   }
+  },
+  "full_negative_rows_range": [
+   24096,
+   24101
+  ],
+  "share_range_pct": [
+   68.72,
+   68.73
+  ],
+  "finding": "The count is not a single number. Four recorded mined runs from the same r0-stage1 checkpoint give 24096 to 24101 rows with a full negative set, a spread of 5. The paper's 'roughly 24,100' is the right precision. model_card_v1.5.md states a flat 24,096, which is one run's value presented as if fixed.",
+  "what_the_dropped_rows_contain": "NOT MEASURED",
+  "why_not_measured": "Identifying them requires re-running mine_hard_negatives against the r0-stage1 checkpoint that produced the recorded numbers. That checkpoint was on Kaggle scratch and was deleted with the arm. Mining with any other model gives a different set of dropped rows, so it would answer a different question. The shortfall counts themselves were scraped from the sentence-transformers mining log rather than computed in scripts/train.py, so there is no committed code path that reproduces them either.",
+  "what_would_settle_it": "One GPU run: retrain r0-stage1 (e5-base, batch 48, 3 epochs, roughly 12 minutes on a T4), then mine with it while recording per-row negative counts. Add that recording to scripts/train.py so the number stops depending on log scraping."
+ }
+}

@@ -135,9 +135,10 @@ No query or passage prefix is used at training or inference.
 LaBSE fine-tuned on 35,064 Creole to English and Creole to French pairs from MorisienMT and the
 Mauritian portion of Kreyol-MT. A first-stage model mines hard negatives with positive-aware
 filtering, five per anchor at a minimum rank of 10 and a relative margin of 0.05, which leaves
-24,096 pairs with a full negative set. The released checkpoint trains on those with a cached
-multiple-negatives ranking loss at batch 128, wrapped in a Matryoshka loss over 768, 512, 256, 128
-and 64 dimensions, for three epochs at learning rate 2e-5 on one T4.
+roughly 24,100 pairs with a full negative set. That count is not fixed: four recorded mined runs
+from the same first-stage checkpoint gave between 24,096 and 24,101. The released checkpoint trains
+on those with a cached multiple-negatives ranking loss at batch 128, wrapped in a Matryoshka loss
+over 768, 512, 256, 128 and 64 dimensions, for three epochs at learning rate 2e-5 on one T4.
 
 Code, data construction and the evaluation harness are at
 [LK-maker-007/morisien-embed](https://github.com/LK-maker-007/morisien-embed).
