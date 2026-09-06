@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -76,3 +77,50 @@ def test_load_rejects_duplicate_ids(tmp_path: Path) -> None:
     queries_file.write_text(first_line + "\n" + first_line + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match="duplicate _id"):
         benchmark.load(tmp_path)
+
+
+def _write(tmp_path: Path, queries: dict, corpus: dict, qrels: dict) -> Path:
+    """Write a benchmark directory by hand, so qrels can name ids the other files do not have."""
+    out = tmp_path / "bench"
+    out.mkdir()
+    for name, records in (("queries.jsonl", queries), ("corpus.jsonl", corpus)):
+        (out / name).write_text(
+            "\n".join(json.dumps({"_id": k, "text": v}, ensure_ascii=False) for k, v in records.items()),
+            encoding="utf-8",
+        )
+    (out / "qrels.json").write_text(json.dumps(qrels), encoding="utf-8")
+    return out
+
+
+def test_load_accepts_a_consistent_benchmark(tmp_path: Path) -> None:
+    path = _write(tmp_path, {"q0": "Mo pe ale"}, {"d0": "I am going"}, {"q0": ["d0"]})
+
+    queries, corpus, qrels = benchmark.load(path)
+
+    assert queries == {"q0": "Mo pe ale"}
+    assert corpus == {"d0": "I am going"}
+    assert qrels == {"q0": {"d0"}}
+
+
+def test_load_rejects_a_qrel_query_that_is_not_in_queries(tmp_path: Path) -> None:
+    """A judgement for a query the file does not contain is a broken write, not a hard query."""
+    path = _write(tmp_path, {"q0": "Mo pe ale"}, {"d0": "I am going"}, {"q0": ["d0"], "q9": ["d0"]})
+
+    with pytest.raises(ValueError, match="query ids absent"):
+        benchmark.load(path)
+
+
+def test_load_rejects_a_qrel_passage_that_is_not_in_the_corpus(tmp_path: Path) -> None:
+    """Scoring this would count as a miss for every model and look like a real accuracy drop."""
+    path = _write(tmp_path, {"q0": "Mo pe ale"}, {"d0": "I am going"}, {"q0": ["d0", "d9"]})
+
+    with pytest.raises(ValueError, match="passage ids absent"):
+        benchmark.load(path)
+
+
+def test_load_rejects_a_query_with_no_relevant_passage(tmp_path: Path) -> None:
+    """An unjudged query can never be answered correctly, so it silently caps the ceiling."""
+    path = _write(tmp_path, {"q0": "Mo pe ale", "q1": "Li pe manze"}, {"d0": "I am going"}, {"q0": ["d0"], "q1": []})
+
+    with pytest.raises(ValueError, match="no relevant passage"):
+        benchmark.load(path)

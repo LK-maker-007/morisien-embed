@@ -77,6 +77,31 @@ def test_sample_draws_from_the_filtered_rows_not_the_whole_file(tmp_path: Path) 
     assert all(len(a.split()) >= 3 for a in got)
 
 
+def test_limit_is_a_head_slice_of_the_sample_not_of_the_file(tmp_path: Path) -> None:
+    """All three filters compose in one order: min_words, then sample, then limit.
+
+    ``limit`` is a head slice, so applying it before the sample would return the head of the file.
+    The file here is grouped like the real one, short rows first, so a head slice of the file would
+    be all single-word rows and a head slice of the sample cannot be.
+    """
+    path = _write_pairs(tmp_path, ["x"] * 30 + [f"a long row number {i}" for i in range(20)])
+
+    got = train.load_training_pairs(path, limit=4, min_words=3, sample=10, sample_seed=0)["anchor"]
+
+    assert len(got) == 4, "limit must cut the sample down to its own size"
+    assert all(len(a.split()) >= 3 for a in got), "min_words must run before both"
+    sampled = train.load_training_pairs(path, limit=None, min_words=3, sample=10, sample_seed=0)["anchor"]
+    assert got == sampled[:4], "limit takes the head of the sample, in the sample's order"
+
+
+def test_limit_alone_takes_the_head_of_the_file(tmp_path: Path) -> None:
+    """Without a sample, limit is the head of the file as written, which is what --limit means."""
+    creoles = [f"row {i}" for i in range(10)]
+    path = _write_pairs(tmp_path, creoles)
+
+    assert train.load_training_pairs(path, limit=3)["anchor"] == creoles[:3]
+
+
 def test_sample_larger_than_the_pool_raises(tmp_path: Path) -> None:
     path = _write_pairs(tmp_path, [f"row {i}" for i in range(5)])
     with pytest.raises(ValueError, match="exceeds"):

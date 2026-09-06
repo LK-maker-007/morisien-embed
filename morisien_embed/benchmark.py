@@ -68,7 +68,22 @@ def load(data_dir: Path) -> Benchmark:
     queries = read("queries.jsonl")
     corpus = read("corpus.jsonl")
     qrels_raw = json.loads((data_dir / "qrels.json").read_text(encoding="utf-8"))
-    return queries, corpus, {qid: set(cids) for qid, cids in qrels_raw.items()}
+    qrels = {qid: set(cids) for qid, cids in qrels_raw.items()}
+
+    # A relevance judgement naming an id that is not in the files scores as a miss for every model,
+    # so a truncated or mismatched write would show up as a plausible drop in accuracy rather than as
+    # an error. Checking is cheap; debugging that from a score is not.
+    unknown_queries = sorted(qid for qid in qrels if qid not in queries)
+    unknown_passages = sorted({cid for cids in qrels.values() for cid in cids if cid not in corpus})
+    unjudged = sorted(qid for qid, cids in qrels.items() if not cids)
+    if unknown_queries or unknown_passages or unjudged:
+        raise ValueError(
+            f"{data_dir / 'qrels.json'} does not match the benchmark: "
+            f"{len(unknown_queries)} query ids absent from queries.jsonl (e.g. {unknown_queries[:3]}), "
+            f"{len(unknown_passages)} passage ids absent from corpus.jsonl (e.g. {unknown_passages[:3]}), "
+            f"{len(unjudged)} queries with no relevant passage (e.g. {unjudged[:3]})"
+        )
+    return queries, corpus, qrels
 
 
 def evaluate(

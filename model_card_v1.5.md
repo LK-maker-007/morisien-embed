@@ -162,9 +162,15 @@ adding 2,468 sentence-level pairs from `google/smol`, so the corpus appears to s
 optimum for this recipe rather than being straightforwardly improvable.
 
 **Both this model and LaBSE fail the same way.** On the out-of-domain pool, distractors made by
-reversing a causal relation are 4.4% of the corpus and cause about 51% of the errors for both, while
-entity substitutions are 88% of the corpus and cause under a third. Neither model reads causal
-direction reliably.
+reversing a causal relation are 4.35% of the corpus and cause 49.7% of this model's errors and 46.8%
+of LaBSE's, while entity substitutions are 88.2% of the corpus and cause about a third of each.
+Neither model reads causal direction reliably.
+
+**On the metric the benchmark defines.** xSIM++ scores with a margin-based similarity rather than
+plain cosine, and the error rates above use it: 0.2932 for this model against 0.3343 for untrained
+LaBSE, McNemar exact p = 0.00083 and a paired bootstrap 95% interval of [-0.0653, -0.0181] over 996
+queries. Under plain cosine the same comparison is 0.2751 against 0.3072, so the advantage is
+slightly larger on the specified scoring than on the one the first version reported.
 
 **Sequence length is 256 tokens**, LaBSE's default, against 512 for the first version. Every
 benchmark used here is single sentences, so nothing measured exercises the difference.
