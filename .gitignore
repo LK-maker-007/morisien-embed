@@ -15,8 +15,13 @@ PLAN-v2.md
 AGENTS.md
 data/processed/
 ENGINEERING.md
+PAPER-CORRECTIONS.md
 benchmark/data/
 benchmark/.xsim/
+
+# the paper: source and build live here, the record of it is on Zenodo
+paper/
+morisien_embed.pdf
 
 # editable-install build artifact
 *.egg-info/
