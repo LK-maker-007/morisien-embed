@@ -16,6 +16,7 @@ AGENTS.md
 data/processed/
 ENGINEERING.md
 benchmark/data/
+benchmark/.xsim/
 
 # editable-install build artifact
 *.egg-info/
@@ -23,7 +24,7 @@ benchmark/data/
 # local run reports
 *.ipynb
 
-# credentials — never commit
+# credentials, never commit
 .env
 kaggle.json
 secrets*.json
