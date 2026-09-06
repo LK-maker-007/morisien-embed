@@ -34,9 +34,7 @@ def tokenize(text: str, *, strip_punctuation: bool) -> list[str]:
     tokens = [token.casefold() for token in text.split()]
     if not strip_punctuation:
         return tokens
-    stripped = (
-        "".join(c for c in unicodedata.normalize("NFKD", token) if c.isalnum()) for token in tokens
-    )
+    stripped = ("".join(c for c in unicodedata.normalize("NFKD", token) if c.isalnum()) for token in tokens)
     return [token for token in stripped if token]
 
 
@@ -46,9 +44,7 @@ def coverage(train: list[str], test: list[str], *, strip_punctuation: bool) -> d
     tokens = [token for text in test for token in tokenize(text, strip_punctuation=strip_punctuation)]
     seen = sum(1 for token in tokens if token in vocabulary)
     no_unseen = sum(
-        1
-        for text in test
-        if all(token in vocabulary for token in tokenize(text, strip_punctuation=strip_punctuation))
+        1 for text in test if all(token in vocabulary for token in tokenize(text, strip_punctuation=strip_punctuation))
     )
     return {
         "training_vocabulary": len(vocabulary),
@@ -144,9 +140,7 @@ def main() -> None:
     }
 
     # 5. FLORES+ split sizes. The dev split is the holdout no code here has ever selected on.
-    flores_splits = {
-        split: len(flores.flores_split("mfe", split)) for split in ("dev", "devtest")
-    }
+    flores_splits = {split: len(flores.flores_split("mfe", split)) for split in ("dev", "devtest")}
 
     report = {
         "run": "Corpus and evaluation-split audit for the paper revision",
