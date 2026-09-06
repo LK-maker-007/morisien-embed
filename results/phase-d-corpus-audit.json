@@ -1,0 +1,82 @@
+{
+ "run": "Corpus and evaluation-split audit for the paper revision",
+ "produced_by": "scripts/audit_corpus.py",
+ "sources": {
+  "morisienmt": {
+   "repo": "prajdabre/KreolMorisienMT",
+   "revision": "66c76eaf5e33b39a41c3d4c757eee3cf23b52ce5"
+  },
+  "kreyol_mt": {
+   "repo": "jhu-clsp/kreyol-mt",
+   "revision": "4be818dfd3ef6f166a9d5d3553e2b46539507ea3"
+  }
+ },
+ "filters": {
+  "raw_rows": 69525,
+  "reserved_creole_keys": 1499,
+  "dropped_leak": 0,
+  "dropped_duplicate": 34461,
+  "kept": 35064,
+  "kept_without_leak_filter": 35064,
+  "rows_the_leak_filter_removes": 0,
+  "duplicates_without_leak_filter": 34461
+ },
+ "corpus": {
+  "pairs": 35064,
+  "single_word": 22164,
+  "single_word_pct": 63.21,
+  "six_words_or_more": 9183,
+  "median_words": 1.0,
+  "mean_words": 4.61,
+  "by_lang": {
+   "eng": 22211,
+   "fra": 12853
+  }
+ },
+ "evaluation_split": {
+  "morisienmt_test_rows": 2000,
+  "rows_per_direction": {
+   "eng": 1000,
+   "fra": 1000
+  },
+  "distinct_creole_sentences_per_direction": {
+   "eng": 999,
+   "fra": 999
+  },
+  "creole_sentences_shared_by_all_directions": 999,
+  "test_median_words": 15.0,
+  "test_min_words": 10,
+  "test_max_words": 49,
+  "train_median_words": 1.0,
+  "train_rows_10_words_or_more": 4936,
+  "train_rows_10_words_or_more_pct": 14.08,
+  "vocabulary_overlap": {
+   "punctuation_stripped": {
+    "training_vocabulary": 17750,
+    "test_tokens": 16005,
+    "tokens_seen_in_training": 15527,
+    "token_coverage_pct": 97.01,
+    "sentences_with_no_unseen_token": 741,
+    "sentences_with_no_unseen_token_pct": 74.1
+   },
+   "whitespace_only": {
+    "training_vocabulary": 26827,
+    "test_tokens": 16018,
+    "tokens_seen_in_training": 14869,
+    "token_coverage_pct": 92.83,
+    "sentences_with_no_unseen_token": 456,
+    "sentences_with_no_unseen_token_pct": 45.6
+   },
+   "method": "Creole side only, whitespace tokens, lower-cased. The punctuation_stripped variant additionally decomposes accents and keeps alphanumeric characters, so a word with attached punctuation is not counted as unseen. It is the figure the paper quotes."
+  }
+ },
+ "flores_plus": {
+  "repo": "openlanguagedata/flores_plus",
+  "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+  "mfe_sentences": {
+   "dev": 997,
+   "devtest": 1012
+  },
+  "note": "Only devtest has been used. dev is an untouched holdout."
+ }
+}

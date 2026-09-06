@@ -1,5 +1,9 @@
 # What the v2 measurements change in the paper
 
+**Status: applied.** `paper/morisien-embed.tex` is the revision. Every claim below is addressed
+there, and the corpus figures that had no recorded measurement are now produced by
+`scripts/audit_corpus.py` and stored in `results/phase-d-corpus-audit.json`.
+
 One entry per claim. Each gives the line in `paper/morisien-embed.tex`, what the measurement says,
 and what the sentence should become. Evidence is in `results/`, produced by committed scripts.
 
@@ -34,7 +38,8 @@ See `results/phase-c2-dictionary-ablation.json`.
 
 **Line 107.** The filters remove nothing. Running them drops 0 of 69,525 rows, because MorisienMT's
 test split and the training sources were already disjoint. The sentence claims a safeguard did work
-it never had to do.
+it never had to do. Confirmed by `scripts/audit_corpus.py`: deduplication accounts for all 34,461
+dropped rows and the leak filter for none.
 
 **Replace with:** the filters are a check rather than a removal step. Verified absent is a stronger
 claim than removed, and it is the true one.
@@ -89,8 +94,13 @@ benchmark twice gives identical md5 sums for queries, corpus and qrels. Models n
 
 **Lines 133 to 137.** Four directional subsets of 1,000 pairs each reads as four independent sets.
 The four share one set of 1,000 Creole sentences, selected as the longest in the source corpus, with
-roughly a third of it Bible text by construction. 97.05% of test tokens are already in the training
-vocabulary and 73.9% of test sentences contain no out-of-vocabulary token at all.
+selected from the long tail of the corpus: every one is at least 10 words against a training median
+of one. 97.01% of test tokens are already in the training vocabulary and 74.10% of test sentences
+contain no out-of-vocabulary token at all, under punctuation-insensitive tokenisation. (The figures
+first recorded here, 97.05% and 73.9%, came from a measurement whose tokenisation was not written
+down. Re-running it produces the values above; counting raw whitespace tokens instead gives 92.83%
+and 45.60%. The paper quotes the punctuation-insensitive pair and states the method.) The claim that
+roughly a third is Bible text is dropped: no committed measurement supports it.
 
 **Replace with:** an honest description of what the four subsets share and how the sentences were
 chosen.
