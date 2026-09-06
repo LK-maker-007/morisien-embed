@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "morisien-embed"
-version = "0.1.0"
+version = "0.2.0"
 description = "An embedding model for Mauritian Creole (Kreol Morisien)"
 readme = "README.md"
 license = "MIT"
