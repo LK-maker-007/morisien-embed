@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/LK-maker-007/morisien-embed/actions/workflows/ci.yml/badge.svg)](https://github.com/LK-maker-007/morisien-embed/actions/workflows/ci.yml)
 
-To our knowledge, the first dedicated embedding model for **Mauritian Creole (Kreol Morisien)** — the
+To our knowledge, the first dedicated embedding model for **Mauritian Creole (Kreol Morisien)**, the
 home language of roughly 90% of Mauritius (2022 census), which general multilingual embedding models
 don't reliably cover.
 
@@ -27,7 +27,7 @@ similarity = model.similarity(model.encode(creole), model.encode(english))
 No prompt or prefix is required. Trained with Matryoshka loss, so embeddings can be truncated for
 faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-embed", truncate_dim=256)`.
 
-## Results — Creole→English retrieval, held-out MorisienMT test (1,000 queries)
+## Results: Creole→English retrieval, held-out MorisienMT test (1,000 queries)
 
 | model | params | ndcg@10 | acc@1 |
 |---|---|---|---|
@@ -42,17 +42,17 @@ faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-
 - Stable across 3 seeds: ndcg@10 **0.9653 ± 0.0002**.
 - Creole→French: **0.9751** vs LaBSE's 0.9475.
 - English→Creole (reversed direction): **0.9588** vs LaBSE's 0.9247.
-- FLORES+ `mfe` (independent domain, 1,012 unseen sentences): perfect 1.0000 retrieval — though LaBSE
+- FLORES+ `mfe` (independent domain, 1,012 unseen sentences): perfect 1.0000 retrieval, though LaBSE
   also sits at that ceiling (0.9996), so the out-of-domain comparison is saturated rather than won.
 - E5 baselines were ablated with and without their `query:`/`passage:` prompts on an earlier
   iteration of the benchmark (no prefix won every time); final-benchmark numbers use the winning
   no-prefix configuration. The other baselines have no prompt convention. Reproduce any number with
   `scripts/evaluate.py`.
 
-## MTEB — MorisienMTBitextMining
+## MTEB: MorisienMTBitextMining
 
 The held-out MorisienMT test split is now a task in [MTEB](https://github.com/embeddings-benchmark/mteb),
-`MorisienMTBitextMining` — the first Mauritian Creole task in the benchmark. The model is registered in
+`MorisienMTBitextMining`, the first Mauritian Creole task in the benchmark. The model is registered in
 MTEB and its scores are on the [leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
 
 Bitext-mining F1 across the four directional subsets:
@@ -70,7 +70,7 @@ trained on the MorisienMT corpus this split is drawn from, so MTEB records it as
 ## Data
 
 - **Training:** 35,064 leak-free Creole↔{English,French} pairs, merged from MorisienMT (MIT) and
-  Kreyòl-MT, with every MorisienMT dev/test sentence removed — enforced by exact matching plus a
+  Kreyòl-MT, with every MorisienMT dev/test sentence removed, enforced by exact matching plus a
   punctuation-, case- and accent-insensitive check (both under test). Hard-negative mining keeps
   24,100 of these for the released model's contrastive stage. Only the trained model is released,
   never the data; regenerate it with `scripts/build_training.py`.
@@ -89,7 +89,7 @@ pip install -e .  # CPU-only? install torch from https://download.pytorch.org/wh
 python scripts/build_training.py                        # -> data/processed/train.jsonl (35K pairs)
 python scripts/build_benchmark.py --target eng          # -> benchmark/data/eng
 python scripts/evaluate.py sentence-transformers/LaBSE  # any baseline on the benchmark
-python scripts/build_flores_benchmark.py --target eng   # independent benchmark; gated — accept the
+python scripts/build_flores_benchmark.py --target eng   # independent benchmark; gated, so accept the
                                                         # FLORES+ terms on the Hub and set HF_TOKEN
 
 python scripts/train.py --base intfloat/multilingual-e5-base \
@@ -110,7 +110,7 @@ branch head when it is omitted.
 ## Status
 
 Model trained, validated (3 seeds, three retrieval directions, independent-domain check) and
-published. The task, model, and results are merged into MTEB — see the section above.
+published. The task, model, and results are merged into MTEB. See the section above.
 
 ## Citation
 
@@ -143,5 +143,5 @@ If you use this model, please cite the report along with the datasets it builds 
 
 ---
 
-By **Singaraj B** — [LK-maker-007](https://github.com/LK-maker-007) on GitHub,
+By **Singaraj B**, [LK-maker-007](https://github.com/LK-maker-007) on GitHub,
 [Singaraj](https://huggingface.co/Singaraj) on Hugging Face.

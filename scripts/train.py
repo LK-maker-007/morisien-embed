@@ -3,9 +3,9 @@
 Trains with in-batch-negatives contrastive learning on the merged Creole↔{English,French} pairs:
 each Creole sentence is the anchor and its translation the positive. The dev split scores retrieval
 each epoch; the held-out test split is scored once at the end, next to LaBSE for reference. No E5
-prefix is applied — it scores best without one on this task.
+prefix is applied, because it scores best without one on this task.
 
-Passing ``--mine-with <model>`` switches on the stronger recipe used by state-of-the-art embedding
+Passing ``--mine-with <model>`` switches on the stronger recipe used by current embedding
 models: hard negatives are mined with that model (skipping candidates too close to the true positive,
 so real positives are not mislabelled as negatives), and training uses
 ``CachedMultipleNegativesRankingLoss`` so a large batch of negatives fits in memory via gradient
@@ -86,7 +86,7 @@ def mine_negatives(
 
     ``range_min`` skips the closest matches (which may be paraphrases of the positive) and
     ``relative_margin`` drops any candidate whose similarity comes within that fraction of the
-    positive's — both guard against mislabelling a true positive as a negative. ``range_max`` widens
+    positive's. Both guard against mislabelling a true positive as a negative. ``range_max`` widens
     the candidate pool so every anchor can still reach ``num_negatives`` after that filtering.
     """
     model = SentenceTransformer(mining_model)

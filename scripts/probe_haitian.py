@@ -3,8 +3,8 @@
 FLORES+ translates the same sentences into Mauritian (``mfe``) and Haitian (``hat``) Creole, which
 makes two probes possible for any embedding model:
 
-- **trap**: mfe→English retrieval with every same-meaning Haitian twin injected into the corpus —
-  how often does the Haitian twin outrank the correct English translation?
+- **trap**: mfe→English retrieval with every same-meaning Haitian twin injected into the corpus.
+  How often does the Haitian twin outrank the correct English translation?
 - **discrimination**: given the English sentence, is the Mauritian translation ranked above the
   Haitian one?
 

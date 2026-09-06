@@ -59,12 +59,12 @@ model-index:
 # morisien-embed
 
 To our knowledge, the first dedicated text embedding model for **Mauritian Creole (Kreol Morisien,
-`mfe`)** — the home language of roughly 90% of Mauritius (2022 census).
+`mfe`)**, the home language of roughly 90% of Mauritius (2022 census).
 
 Fine-tuned from [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) on
 effectively all publicly available Creole↔{English, French} parallel data, it outperforms every
-general multilingual embedding model we evaluated — including
-[LaBSE](https://huggingface.co/sentence-transformers/LaBSE), the strongest of them on this task — in
+general multilingual embedding model we evaluated, including
+[LaBSE](https://huggingface.co/sentence-transformers/LaBSE), the strongest of them on this task, in
 all three measured retrieval directions (Creole→English, Creole→French, English→Creole).
 
 Use it for semantic search, retrieval, RAG, bitext mining, or clustering over Kreol Morisien text.
@@ -94,7 +94,7 @@ No prompt/prefix is required.
 ## Results
 
 Creole→English retrieval on the held-out [MorisienMT](https://huggingface.co/datasets/prajdabre/MorisienMT)
-test split (1,000 queries, leak-free against training data — enforced in the data pipeline by exact
+test split (1,000 queries, leak-free against training data, enforced in the data pipeline by exact
 matching and by a punctuation-, case- and accent-insensitive check):
 
 | Model | Params | ndcg@10 | accuracy@1 |
@@ -114,7 +114,7 @@ Creole→French, same protocol:
 | sentence-transformers/LaBSE | 0.9475 | 0.9130 |
 | **morisien-embed** | **0.9751** | **0.9530** |
 
-English→Creole — the reversed direction over the same pairs (999 queries retrieving 1,000 Creole
+English→Creole, the reversed direction over the same pairs (999 queries retrieving 1,000 Creole
 passages, built with `scripts/build_benchmark.py --reverse`):
 
 | Model | ndcg@10 | accuracy@1 |
@@ -122,7 +122,7 @@ passages, built with `scripts/build_benchmark.py --reverse`):
 | sentence-transformers/LaBSE | 0.9247 | 0.8789 |
 | **morisien-embed** | **0.9588** | **0.9309** |
 
-Generalization to an independent domain — [FLORES+](https://huggingface.co/datasets/openlanguagedata/flores_plus)
+Generalization to an independent domain, [FLORES+](https://huggingface.co/datasets/openlanguagedata/flores_plus)
 `mfe` devtest (1,012 professionally translated sentences from Wikinews, Wikijunior and Wikivoyage,
 zero overlap with training data):
 
@@ -131,7 +131,7 @@ zero overlap with training data):
 | sentence-transformers/LaBSE | 0.9996 | 0.9990 |
 | **morisien-embed** | **1.0000** | **1.0000** |
 
-Both models sit at the ceiling of this benchmark — FLORES+ sentences are long and distinctive, so
+Both models sit at the ceiling of this benchmark. FLORES+ sentences are long and distinctive, so
 1,012-way retrieval saturates. Read this as evidence of zero out-of-domain degradation, not as a
 margin over LaBSE.
 
@@ -147,7 +147,7 @@ Limitations come from an internal adversarial audit of the released checkpoint.
 ## MTEB
 
 The held-out MorisienMT test split is now a task in
-[MTEB](https://github.com/embeddings-benchmark/mteb), `MorisienMTBitextMining` — the first Mauritian
+[MTEB](https://github.com/embeddings-benchmark/mteb), `MorisienMTBitextMining`, the first Mauritian
 Creole task in the benchmark. This model is registered in MTEB and its scores are on the
 [leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
 
@@ -165,8 +165,7 @@ trained on the MorisienMT corpus this split is drawn from, so MTEB records the r
 
 ## Training
 
-- **Data:** 35,064 unique, leak-free Creole↔{English, French} pairs — effectively all publicly
-  available Mauritian Creole parallel text — merged from
+- **Data:** 35,064 unique, leak-free Creole↔{English, French} pairs, merged from
   [MorisienMT](https://huggingface.co/datasets/prajdabre/KreolMorisienMT) (MIT) and
   [Kreyòl-MT](https://huggingface.co/datasets/jhu-clsp/kreyol-mt) (mixed licenses; used for training
   only, not redistributed). Every MorisienMT dev/test sentence is removed from training by exact
@@ -187,15 +186,15 @@ trained on the MorisienMT corpus this split is drawn from, so MTEB records the r
   a wrong translation first. Strong, but below a human bilingual speaker.
 - **Register skew.** The available Creole data over-represents religious text, politics, and
   literature; highly informal or technical registers are less covered.
-- **Small evaluation universe.** Retrieval is measured over ~1,000-passage corpora — standard for
+- **Small evaluation universe.** Retrieval is measured over ~1,000-passage corpora, standard for
   bitext benchmarks, but absolute scores would be lower against web-scale corpora.
 - **One distribution family.** MorisienMT and Kreyòl-MT overlap heavily, and the only fully
-  independent evaluation domain for `mfe` (FLORES+) is saturated at this corpus size — so the margin
+  independent evaluation domain for `mfe` (FLORES+) is saturated at this corpus size, so the margin
   over LaBSE is demonstrated in-domain only.
 - **Haitian Creole proximity.** Like every multilingual embedder we tested, the model embeds Haitian
   Creole close to Mauritian Creole. Measured on the 1,012 aligned mfe/hat/eng FLORES+ devtest
   triplets (`scripts/probe_haitian.py`): with every same-meaning Haitian twin injected into the
-  corpus, mfe→eng accuracy@1 drops from 1.00 to 0.68 — and LaBSE resists this trap better (0.79).
+  corpus, mfe→eng accuracy@1 drops from 1.00 to 0.68, and LaBSE resists this trap better (0.79).
   Asked instead to tell the two creoles apart (is the English sentence closer to its Mauritian or
   its Haitian translation?), the fine-tune picks Mauritian 709/1012 times vs LaBSE's 351/1012.
   Wrong-meaning Haitian text is never confused; mixed mfe/hat corpora will still degrade retrieval.

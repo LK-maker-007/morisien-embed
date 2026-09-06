@@ -4,8 +4,8 @@ FLORES+ (``openlanguagedata/flores_plus``, CC-BY-SA-4.0, gated) added Mauritian 
 professionally translated sentences from Wikinews, Wikijunior and Wikivoyage, native-reviewed,
 aligned across languages by ``id``. Unlike the MorisienMT test split, this data shares no source
 with the training corpora, so scores here measure generalization to an independent domain. Any pair
-whose Creole sentence nevertheless appears in the training set — compared case-, punctuation- and
-accent-insensitively — is dropped and reported.
+whose Creole sentence nevertheless appears in the training set, compared case-, punctuation- and
+accent-insensitively, is dropped and reported.
 
 Access requires accepting the dataset's terms on the Hugging Face Hub and an ``HF_TOKEN``.
 """

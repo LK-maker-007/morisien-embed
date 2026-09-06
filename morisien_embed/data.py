@@ -52,7 +52,8 @@ def loose(text: str) -> str:
 def kreyol_mt(split: str) -> list[Pair]:
     """Creole↔{English,French} pairs from Kreyòl-MT's ``mfe-eng`` and ``mfe-fra`` configs.
 
-    ``split`` is ``train``, ``validation`` or ``test`` (Kreyòl-MT's names — not MorisienMT's ``dev``).
+    ``split`` is ``train``, ``validation`` or ``test``, which are Kreyòl-MT's names rather than
+    MorisienMT's ``dev``.
     """
     pairs: list[Pair] = []
     for config, lang in KREYOL_CONFIGS.items():
