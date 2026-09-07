@@ -1,10 +1,35 @@
 cff-version: 1.2.0
-message: "If you use this model, please cite it as below."
-title: "morisien-embed: a dedicated text embedding model for Mauritian Creole"
+message: "If you use this software, the models or the benchmark, please cite the preprint below."
+title: "morisien-embed: text embedding models and evaluation for Mauritian Creole"
+abstract: >-
+  Training, evaluation and benchmark-construction code for morisien-embed, sentence embedding models
+  for Mauritian Creole (Kreol Morisien, ISO 639-3 mfe), together with the MorisienMTBitextMining task
+  contributed to MTEB and a hardened out-of-domain retrieval pool built from FLORES+ using the
+  released xSIM++ augmentation.
+type: software
 authors:
   - family-names: "B"
     given-names: "Singaraj"
-year: 2026
-url: "https://huggingface.co/Singaraj/morisien-embed"
+version: "0.2.0"
+date-released: "2026-09-06"
+doi: "10.5281/zenodo.21877805"
+url: "https://github.com/LK-maker-007/morisien-embed"
 repository-code: "https://github.com/LK-maker-007/morisien-embed"
 license: MIT
+keywords:
+  - sentence embeddings
+  - Mauritian Creole
+  - Kreol Morisien
+  - low-resource languages
+  - bitext mining
+preferred-citation:
+  type: article
+  # Matches the record currently at the concept DOI. Update together with the README bibtex
+  # when the revised version is published on Zenodo, not before.
+  title: "morisien-embed: A Dedicated Text Embedding Model and Benchmark for Mauritian Creole (Kreol Morisien)"
+  authors:
+    - family-names: "B"
+      given-names: "Singaraj"
+  year: 2026
+  doi: "10.5281/zenodo.21877805"
+  url: "https://doi.org/10.5281/zenodo.21877805"
