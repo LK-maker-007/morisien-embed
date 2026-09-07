@@ -1,0 +1,88 @@
+{
+ "run": "B5: which pairs the margin filter removes",
+ "utc": "2026-09-07",
+ "produced_by": "Kaggle T4, singarajb/morisien-embed-b5-margin-filter. Stage 1 retrained with the R0 recipe (multilingual-e5-base, batch 48, 3 epochs, no mining), then scripts/train.py mine_negatives with --dropped-negatives at 5 negatives, range_min 10, relative_margin 0.05, range_max left to the miner, which derived 62.",
+ "git": {
+  "sha": "9fc9cd5973d712f61336890a9bd9541e1f21537f"
+ },
+ "reproduction_of_the_recorded_arms": {
+  "kept_rows_here": 24100,
+  "recorded_arms": {
+   "R2": 24096,
+   "R3": 24101,
+   "R4": 24101,
+   "R5": 24099
+  },
+  "recorded_range": [
+   24096,
+   24101
+  ],
+  "inside_recorded_range": true,
+  "derived_range_max_here": 62,
+  "derived_range_max_recorded": 62,
+  "note": "The stage-1 checkpoint the recorded arms used was deleted, so this is a retrain of the same recipe rather than the same weights. It lands inside the recorded spread and derives the same range_max, which is the strongest available evidence that it mines like the originals."
+ },
+ "corpus_rows": 35064,
+ "kept_rows": 24100,
+ "dropped_rows": 10964,
+ "profiles": [
+  {
+   "label": "whole corpus",
+   "rows": 35064,
+   "single_word": 22164,
+   "single_word_pct": 63.21,
+   "six_or_more": 9183,
+   "median_words": 1.0,
+   "mean_words": 4.61,
+   "by_lang": {
+    "eng": 22211,
+    "fra": 12853
+   }
+  },
+  {
+   "label": "kept",
+   "rows": 24100,
+   "single_word": 11638,
+   "single_word_pct": 48.29,
+   "six_or_more": 8937,
+   "median_words": 3.0,
+   "mean_words": 6.11,
+   "by_lang": {
+    "eng": 16112,
+    "fra": 7988
+   }
+  },
+  {
+   "label": "dropped",
+   "rows": 10964,
+   "single_word": 10526,
+   "single_word_pct": 96.01,
+   "six_or_more": 246,
+   "median_words": 1.0,
+   "mean_words": 1.3,
+   "by_lang": {
+    "eng": 6099,
+    "fra": 4865
+   }
+  }
+ ],
+ "dropped_word_count_distribution": {
+  "1": 10526,
+  "2": 40,
+  "3": 62,
+  "4": 54,
+  "5": 36,
+  "6": 49,
+  "7": 27,
+  "8": 29,
+  "9": 27,
+  "10": 11
+ },
+ "finding": "The margin filter is a dictionary filter. 96.01% of the 10,964 discarded rows are a single Creole word, and it removes 47.49% of all single-word rows against 2.68% of rows with six words or more. The corpus is 63.21% single-word; what survives mining is 48.29%.",
+ "why_it_matters": "C2 measured that removing the dictionary makes the model worse, costing 0.0066 nDCG@10 out of domain with non-overlapping seed ranges. The mining step already discards close to half of those rows before training sees them, so the recipe is discarding the material C2 showed helps. Whether relaxing relative_margin for short anchors recovers anything is untested.",
+ "caveats": [
+  "One run. The stage-1 retrain is a different checkpoint from the one the recorded arms used, so the exact set of dropped rows will differ even though the totals match.",
+  "The discarded rows themselves are not committed. They are Kreyol-MT and MorisienMT content, which this project uses for training and does not redistribute. Reproduce them with scripts/train.py --dropped-negatives.",
+  "A single Creole word is dropped because too many corpus entries score within 5% of its positive, which is expected for short text. This measures what the filter removes, not that the filter is wrong to remove it."
+ ]
+}
