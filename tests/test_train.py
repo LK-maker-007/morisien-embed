@@ -210,3 +210,48 @@ def test_merge_lora_leaves_no_peft_layers_or_flags_behind() -> None:
     assert not any(isinstance(m, LoraLayer) for m in after.modules())
     assert after._hf_peft_config_loaded is False
     assert not hasattr(after, "peft_config")
+
+
+def _ds(rows: list[tuple[str, str]]):
+    from datasets import Dataset
+
+    return Dataset.from_dict({"anchor": [a for a, _ in rows], "positive": [p for _, p in rows]})
+
+
+def test_dropped_rows_recovers_exactly_what_mining_discarded() -> None:
+    """The miner returns fixed-width tuples, so short anchors vanish. Recover them by difference."""
+    pairs = _ds([("a", "A"), ("b", "B"), ("c", "C"), ("d", "D")])
+    mined = _ds([("a", "A"), ("c", "C")])
+
+    assert train.dropped_rows(pairs, mined) == [
+        {"anchor": "b", "positive": "B"},
+        {"anchor": "d", "positive": "D"},
+    ]
+
+
+def test_dropped_rows_is_empty_when_nothing_was_discarded() -> None:
+    pairs = _ds([("a", "A"), ("b", "B")])
+
+    assert train.dropped_rows(pairs, pairs) == []
+
+
+def test_dropped_rows_counts_duplicates_rather_than_matching_by_membership() -> None:
+    """The same pair can appear twice. If one copy survives, exactly one copy is dropped.
+
+    A set-based check would report neither as dropped and undercount the shortfall.
+    """
+    pairs = _ds([("a", "A"), ("a", "A"), ("b", "B")])
+    mined = _ds([("a", "A")])
+
+    dropped = train.dropped_rows(pairs, mined)
+
+    assert dropped == [{"anchor": "a", "positive": "A"}, {"anchor": "b", "positive": "B"}]
+    assert len(dropped) == len(pairs) - len(mined)
+
+
+def test_dropped_rows_distinguishes_pairs_that_share_an_anchor() -> None:
+    """One Creole sentence can have an English and a French positive. They are different rows."""
+    pairs = _ds([("mo pe ale", "I am going"), ("mo pe ale", "je pars")])
+    mined = _ds([("mo pe ale", "je pars")])
+
+    assert train.dropped_rows(pairs, mined) == [{"anchor": "mo pe ale", "positive": "I am going"}]

@@ -23,6 +23,7 @@ import argparse
 import gc
 import json
 import random
+from collections import Counter
 from pathlib import Path
 
 import torch
@@ -74,6 +75,32 @@ def load_training_pairs(
     )
 
 
+def dropped_rows(pairs: Dataset, mined: Dataset) -> list[dict[str, str]]:
+    """The rows mining discarded, recovered by comparing its input with its output.
+
+    ``mine_hard_negatives`` emits fixed-width n-tuples, so an anchor that cannot reach
+    ``num_negatives`` surviving candidates is dropped from the result rather than returned short.
+    The discarded rows are therefore exactly the input rows absent from the output, which is worth
+    computing here: the alternative is reading the count off the miner's own log line, and a printed
+    number is not a record.
+
+    Args:
+        pairs (`Dataset`): What was passed to the miner, with `anchor` and `positive` columns.
+        mined (`Dataset`): What it returned.
+
+    Returns:
+        `list[dict[str, str]]`: One entry per discarded row, in input order.
+    """
+    kept = Counter(zip(mined["anchor"], mined["positive"], strict=True))
+    dropped = []
+    for anchor, positive in zip(pairs["anchor"], pairs["positive"], strict=True):
+        if kept[(anchor, positive)]:
+            kept[(anchor, positive)] -= 1
+        else:
+            dropped.append({"anchor": anchor, "positive": positive})
+    return dropped
+
+
 def mine_negatives(
     pairs: Dataset,
     mining_model: str,
@@ -81,6 +108,7 @@ def mine_negatives(
     range_min: int,
     range_max: int | None,
     relative_margin: float,
+    dropped_path: Path | None = None,
 ) -> Dataset:
     """Return (anchor, positive, neg_1, …, neg_n) tuples with hard negatives from ``mining_model``.
 
@@ -88,6 +116,9 @@ def mine_negatives(
     ``relative_margin`` drops any candidate whose similarity comes within that fraction of the
     positive's. Both guard against mislabelling a true positive as a negative. ``range_max`` widens
     the candidate pool so every anchor can still reach ``num_negatives`` after that filtering.
+
+    ``dropped_path`` writes the rows that did not survive as JSONL, so which pairs the filter removes
+    is a file rather than a line in a log.
     """
     model = SentenceTransformer(mining_model)
     mined = mine_hard_negatives(
@@ -107,6 +138,20 @@ def mine_negatives(
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+
+    dropped = dropped_rows(pairs, mined)
+    # A disagreement here means the input and output could not be matched up, which would make the
+    # written file wrong rather than merely incomplete.
+    assert len(dropped) == len(pairs) - len(mined), (
+        f"recovered {len(dropped)} dropped rows but the miner returned {len(pairs) - len(mined)} fewer"
+    )
+    print(f"negatives shortfall: {len(dropped)} of {len(pairs)} pairs ({len(dropped) / len(pairs):.2%})")
+    if dropped_path is not None:
+        dropped_path.parent.mkdir(parents=True, exist_ok=True)
+        with dropped_path.open("w", encoding="utf-8") as handle:
+            for row in dropped:
+                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+        print(f"wrote {dropped_path}")
     return mined
 
 
@@ -203,6 +248,12 @@ def main() -> None:
     parser.add_argument("--num-negatives", type=int, default=5)
     parser.add_argument("--range-min", type=int, default=10)
     parser.add_argument("--range-max", type=int, default=None, help="widen candidate pool to avoid negative shortfall")
+    parser.add_argument(
+        "--dropped-negatives",
+        type=Path,
+        default=None,
+        help="write the pairs mining discarded to this JSONL, so the shortfall is a file not a log line",
+    )
     parser.add_argument("--relative-margin", type=float, default=0.05)
     parser.add_argument("--mini-batch-size", type=int, default=32)
     parser.add_argument(
@@ -231,6 +282,7 @@ def main() -> None:
             args.range_min,
             args.range_max,
             args.relative_margin,
+            args.dropped_negatives,
         )
 
     model = SentenceTransformer(args.base, revision=args.base_revision)
