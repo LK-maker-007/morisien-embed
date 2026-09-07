@@ -135,8 +135,27 @@ An fp16 ONNX export of the transformer is published at `onnx/model.onnx`. It out
 Embeddings agree with the PyTorch weights to 1.7e-04, and in-domain Creole to English retrieval
 scores the same accuracy@1 of 0.9460.
 
+A second export at `browser/model.onnx` carries the whole pipeline, 531 MB. CLS pooling, the dense
+layer with tanh and L2 normalisation are inside the graph, so it returns `sentence_embedding` and
+needs no pooling from the caller. It sits outside `onnx/` on purpose: everything in that directory
+is expected to return `last_hidden_state`, and both the sentence-transformers backend and a
+transformers.js `dtype` lookup would pool a finished embedding a second time if they found this one
+there. Load it by path with onnxruntime, not through either of those.
+
+| file | size | output | for |
+|---|---|---|---|
+| `onnx/model.onnx` | 897 MB | `last_hidden_state` | the sentence-transformers backend, optimum, servers |
+| `browser/model.onnx` | 531 MB | `sentence_embedding` | in-browser use, pipeline included |
+
 There is deliberately no int8 export. LaBSE does not survive dynamic int8 quantisation here:
 accuracy@1 falls from 0.9460 to 0.7420, so a `q8` file would quietly serve a much worse model.
+
+The split that does work is the reverse of what saves the most bytes by instinct. Quantising the
+embedding table, which is 82% of the file, costs almost nothing; quantising the transformer matrix
+multiplications is what breaks the model. Measured on Creole to English retrieval against 0.9460 for
+the PyTorch weights: int8 everywhere 0.7420, int8 matrix multiplications only 0.8520, int8 embedding
+table only 0.9440. `browser/model.onnx` is the last of those with the remainder in fp16, and it holds
+in all three directions, scoring 0.9440, 0.9480 and 0.9379 against 0.9460, 0.9490 and 0.9389.
 
 ## Training
 
