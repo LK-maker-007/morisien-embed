@@ -119,7 +119,7 @@ If you use this model, please cite the report along with the datasets it builds 
 ```bibtex
 @misc{morisien-embed,
   author    = {Singaraj B},
-  title     = {morisien-embed: A Dedicated Text Embedding Model and Benchmark for Mauritian Creole (Kreol Morisien)},
+  title     = {morisien-embed: Text Embedding Models and Evaluation for Mauritian Creole (Kreol Morisien)},
   year      = {2026},
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.21877805},

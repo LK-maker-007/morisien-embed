@@ -24,9 +24,7 @@ keywords:
   - bitext mining
 preferred-citation:
   type: article
-  # Matches the record currently at the concept DOI. Update together with the README bibtex
-  # when the revised version is published on Zenodo, not before.
-  title: "morisien-embed: A Dedicated Text Embedding Model and Benchmark for Mauritian Creole (Kreol Morisien)"
+  title: "morisien-embed: Text Embedding Models and Evaluation for Mauritian Creole (Kreol Morisien)"
   authors:
     - family-names: "B"
       given-names: "Singaraj"
