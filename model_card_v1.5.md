@@ -130,6 +130,14 @@ english = model.encode(["I am going to the market now."])
 
 No query or passage prefix is used at training or inference.
 
+An fp16 ONNX export of the transformer is published at `onnx/model.onnx`. It outputs
+`last_hidden_state`, so pooling, the dense layer and normalisation still come from `modules.json`.
+Embeddings agree with the PyTorch weights to 1.7e-04, and in-domain Creole to English retrieval
+scores the same accuracy@1 of 0.9460.
+
+There is deliberately no int8 export. LaBSE does not survive dynamic int8 quantisation here:
+accuracy@1 falls from 0.9460 to 0.7420, so a `q8` file would quietly serve a much worse model.
+
 ## Training
 
 LaBSE fine-tuned on 35,064 Creole to English and Creole to French pairs from MorisienMT and the
