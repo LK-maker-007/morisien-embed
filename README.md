@@ -6,17 +6,30 @@ To our knowledge, the first dedicated embedding model for **Mauritian Creole (Kr
 home language of roughly 90% of Mauritius (2022 census), which general multilingual embedding models
 don't reliably cover.
 
-**Model:** [Singaraj/morisien-embed](https://huggingface.co/Singaraj/morisien-embed) · fine-tuned
-from multilingual-e5-base on effectively all publicly available Creole parallel data.
+**Models.** Two are released, both MIT:
 
-**Paper:** [morisien-embed on Zenodo](https://doi.org/10.5281/zenodo.21877805) (DOI 10.5281/zenodo.21877805).
+| | base | params | use |
+|---|---|---|---|
+| [**morisien-embed-v1.5**](https://huggingface.co/Singaraj/morisien-embed-v1.5) | LaBSE | 471M | current, strongest on every measure below |
+| [morisien-embed](https://huggingface.co/Singaraj/morisien-embed) | multilingual-e5-base | 278M | smaller and faster, superseded |
+
+Trained on 35,064 Creole↔{English,French} pairs from MorisienMT and Kreyòl-MT. That is not all the
+public Creole parallel text — `google/smol` holds further pairs the training set does not contain,
+enough to build a 2,462-query benchmark from, held out deliberately and
+[measured](results/phase-c5-smol-training.json) as making the model worse when added.
+
+**Paper:** [morisien-embed on Zenodo](https://doi.org/10.5281/zenodo.21877805) (concept DOI
+10.5281/zenodo.21877805, always resolves to the newest version).
+
+**Demo:** [in-browser Space](https://huggingface.co/spaces/Singaraj/morisien-embed-demo) — runs
+v1.5 locally in the browser via ONNX, no server.
 
 ## Usage
 
 ```python
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("Singaraj/morisien-embed")
+model = SentenceTransformer("Singaraj/morisien-embed-v1.5")
 
 creole = ["Mo pe al bazar aster.", "Bann zanfan pe zwe dan lakour."]
 english = ["I am going to the market now.", "The children are playing in the yard."]
@@ -24,8 +37,11 @@ english = ["I am going to the market now.", "The children are playing in the yar
 similarity = model.similarity(model.encode(creole), model.encode(english))
 ```
 
-No prompt or prefix is required. Trained with Matryoshka loss, so embeddings can be truncated for
-faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-embed", truncate_dim=256)`.
+No prompt or prefix is required. v1 was trained with Matryoshka loss, so its embeddings can be
+truncated for faster search at a small accuracy cost:
+`SentenceTransformer("Singaraj/morisien-embed", truncate_dim=256)`. v1.5 also publishes ONNX
+exports — `onnx/model.onnx` (fp16, transformer only) and `browser/model.onnx` (full pipeline, for
+in-browser use).
 
 ## Results: Creole→English retrieval, held-out MorisienMT test (1,000 queries)
 
@@ -37,11 +53,13 @@ faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-
 | intfloat/multilingual-e5-base | 278M | 0.64 | 0.53 |
 | intfloat/multilingual-e5-large | 560M | 0.73 | 0.65 |
 | sentence-transformers/LaBSE | 470M | 0.94 | 0.91 |
-| **morisien-embed** | **278M** | **0.9655** | **0.9440** |
+| morisien-embed | 278M | 0.9655 | 0.9440 |
+| **morisien-embed-v1.5** | **471M** | **0.9658** | **0.9460** |
 
-- Stable across 3 seeds: ndcg@10 **0.9653 ± 0.0002**.
-- Creole→French: **0.9751** vs LaBSE's 0.9475.
-- English→Creole (reversed direction): **0.9588** vs LaBSE's 0.9247.
+- v1 is stable across 3 seeds: ndcg@10 **0.9653 ± 0.0002**.
+- v1 Creole→French: **0.9751** vs LaBSE's 0.9475. English→Creole: **0.9588** vs LaBSE's 0.9247.
+- v1.5 across all three directions: Creole→English acc@1 **0.9460**, Creole→French **0.9490**,
+  English→Creole **0.9389**.
 - FLORES+ `mfe` (independent domain, 1,012 unseen sentences): perfect 1.0000 retrieval, though LaBSE
   also sits at that ceiling (0.9996), so the out-of-domain comparison is saturated rather than won.
 - E5 baselines were ablated with and without their `query:`/`passage:` prompts on an earlier
@@ -52,8 +70,9 @@ faster search at a small accuracy cost: `SentenceTransformer("Singaraj/morisien-
 ## MTEB: MorisienMTBitextMining
 
 The held-out MorisienMT test split is now a task in [MTEB](https://github.com/embeddings-benchmark/mteb),
-`MorisienMTBitextMining`, the first Mauritian Creole task in the benchmark. The model is registered in
-MTEB and its scores are on the [leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
+`MorisienMTBitextMining`, the first Mauritian Creole task in the benchmark. Both models are
+registered in MTEB and their scores are on the
+[leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
 
 Bitext-mining F1 across the four directional subsets:
 
@@ -61,11 +80,39 @@ Bitext-mining F1 across the four directional subsets:
 |---|---|---|---|---|---|
 | intfloat/multilingual-e5-small | 0.358 | 0.454 | 0.475 | 0.495 | 0.446 |
 | sentence-transformers/LaBSE | 0.882 | 0.845 | 0.886 | 0.779 | 0.848 |
-| **morisien-embed** | **0.927** | **0.909** | **0.939** | **0.924** | **0.925** |
+| morisien-embed | 0.927 | 0.909 | 0.939 | 0.924 | 0.925 |
+| **morisien-embed-v1.5** | **0.930** | **0.920** | 0.933 | **0.928** | **0.928** |
 
 This is bitext-mining F1, a different metric from the ndcg@10 retrieval numbers above. morisien-embed is
 trained on the MorisienMT corpus this split is drawn from, so MTEB records it as in-domain
 (via `training_datasets`), not zero-shot.
+
+## xSIM++: hard negatives
+
+The retrieval and MTEB numbers above are both in-domain and, at the top of the table, close to
+saturated. To separate the strong models, the benchmark builder in `scripts/build_xsim_benchmark.py`
+applies the released [xSIM++](https://aclanthology.org/2023.emnlp-main.452/) augmentation to FLORES+,
+generating adversarial distractors that differ from the gold sentence by an entity swap, a number
+change, or a reversed causal clause. 996 queries against a pool of 45,029 passages.
+
+Error rate under the `ratio` margin, which is the mode LASER's reference `xsim.py` defaults to and
+the one comparable to published xSIM++ figures. Lower is better:
+
+| model | error rate | errors |
+|---|---|---|
+| intfloat/multilingual-e5-base | 0.4990 | 497 / 996 |
+| morisien-embed | 0.3504 | 349 / 996 |
+| sentence-transformers/LaBSE | 0.3343 | 333 / 996 |
+| **morisien-embed-v1.5** | **0.2932** | **292 / 996** |
+
+v1.5 against its own untrained base, LaBSE, is significant: exact McNemar **p = 0.00083**, bootstrap
+95% interval on the difference **[−0.065, −0.018]**, which excludes zero.
+
+These error rates were originally published scored with plain cosine similarity, which is LASER's
+`absolute` mode and is *not* comparable to published xSIM++ numbers. On re-reading the method the
+scoring was corrected to the margin the method specifies and every model was rescored; the
+conclusions held and two of them strengthened. `scripts/xsim_score.py --margin ratio distance
+absolute` reproduces all three modes, and `scripts/paired_test.py` reproduces the significance tests.
 
 ## Data
 
@@ -109,8 +156,15 @@ branch head when it is omitted.
 
 ## Status
 
-Model trained, validated (3 seeds, three retrieval directions, independent-domain check) and
-published. The task, model, and results are merged into MTEB. See the section above.
+Both models are trained, validated and published; v1.5 is current. Validation covers 3 seeds, three
+retrieval directions, an independent-domain FLORES+ check, and the xSIM++ hard-negative pool above.
+The task and both model entries are merged into MTEB, with v1 marked `superseded_by` v1.5.
+
+Known limits, all measured and recorded under `results/`: 63% of the training corpus is a single
+word rather than a sentence, so bare words score materially lower than sentences; the training data
+leans towards religious text, politics and literature, so slang and SMS-style spelling perform
+worse; the FLORES+ comparison is saturated rather than won; and `google/smol` is held out because
+adding it made the model worse.
 
 ## Citation
 

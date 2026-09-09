@@ -211,13 +211,16 @@ constraint.
 
 ## Citation
 
-The preprint describes the first version. A revision covering this one is in preparation.
+The preprint covers both released versions. The DOI below is the concept DOI, so it always resolves
+to the newest revision.
 
 ```bibtex
 @misc{morisien-embed,
-  title  = {morisien-embed: A Dedicated Text Embedding Model and Benchmark for Mauritian Creole},
-  author = {Singaraj B},
-  year   = {2026},
-  doi    = {10.5281/zenodo.21877806}
+  author    = {Singaraj B},
+  title     = {morisien-embed: Text Embedding Models and Evaluation for Mauritian Creole (Kreol Morisien)},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21877805},
+  url       = {https://doi.org/10.5281/zenodo.21877805}
 }
 ```
