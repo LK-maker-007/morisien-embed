@@ -73,7 +73,6 @@ def main() -> None:
     scores: dict[str, dict[str, float | None]] = {}
 
     model = SentenceTransformer(args.model, revision=args.revision)
-    # Renamed in sentence-transformers 5.7; the old name still works but warns.
     dimension = getattr(model, "get_embedding_dimension", None) or model.get_sentence_embedding_dimension
     full_dim = dimension()
     for data_dir in args.data_dirs:
