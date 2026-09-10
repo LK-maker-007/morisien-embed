@@ -1,8 +1,4 @@
-"""Build the Kreol Morisien retrieval benchmark from the held-out MorisienMT test split.
-
-By default queries are Creole and passages are translations; ``--reverse`` swaps the direction
-(translation queries retrieving Creole passages) over the same pairs.
-"""
+"""Build the Kreol Morisien retrieval benchmark from the held-out MorisienMT test split."""
 
 from __future__ import annotations
 

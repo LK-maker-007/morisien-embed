@@ -1,15 +1,3 @@
-"""End-to-end contract tests for the stages the pipeline chains together.
-
-Every other test file covers one function. These cover the seams: the corpus loader writes a file
-that the training loader reads, and the benchmark builder writes a directory that the benchmark
-loader reads and the scorers consume. A change to either side of one of those seams passes its own
-unit tests and breaks the pipeline, which is the failure these exist to catch.
-
-They deliberately do not run an encoder. The suite is offline by design, and a model download would
-make the seam tests depend on the Hub. What is tested here is the data contract; the scoring itself
-is covered by `test_xsim_margin.py` against the LASER reference.
-"""
-
 from __future__ import annotations
 
 import importlib.util

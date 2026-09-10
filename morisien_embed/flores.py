@@ -1,13 +1,3 @@
-"""Load FLORES+ splits, the independent Mauritian Creole evaluation source.
-
-FLORES+ (``openlanguagedata/flores_plus``, CC-BY-SA-4.0, gated) carries Mauritian Creole: professionally
-translated sentences aligned across languages by ``id``, sharing no source with the training corpora.
-The devtest split holds 1,012 sentences. A dev split also exists and no code here has ever loaded it;
-it is the untouched holdout a recipe should be selected on.
-
-Access requires accepting the dataset's terms on the Hugging Face Hub and an ``HF_TOKEN``.
-"""
-
 from __future__ import annotations
 
 import json

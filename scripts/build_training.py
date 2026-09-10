@@ -1,9 +1,4 @@
-"""Assemble the merged, leak-free Mauritian Creole training set and write it as JSONL.
-
-``--with-smol`` adds google/smol. The merged corpus is 63% single Creole words, while SMOL is
-sentence-level with a median of 14, so it changes what the corpus contains rather than how much of
-it there is. It overlaps neither evaluation benchmark on either side.
-"""
+"""Assemble the merged, leak-free Mauritian Creole training set and write it as JSONL."""
 
 from __future__ import annotations
 

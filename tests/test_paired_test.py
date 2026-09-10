@@ -1,14 +1,3 @@
-"""Tests for the paired significance tests in ``scripts/paired_test.py``.
-
-The expected p-values here are computed by hand from the binomial tail rather than taken from the
-implementation, so a change to the formula fails the test instead of moving the target with it.
-
-The implementation is separately checked against a recorded result: run it on
-``results/perquery-r4-labse-s42-xsim-hard.npz`` against ``results/perquery-r3-released-s42-xsim-hard.npz``
-and it returns 135/100 with p 0.02635, matching the 135/100 and 0.0263 in
-``results/phase-b-ablation.json``.
-"""
-
 from __future__ import annotations
 
 import importlib.util

@@ -1,15 +1,4 @@
-"""Measure Haitian-vs-Mauritian Creole confusion on FLORES+ aligned triplets.
-
-FLORES+ translates the same sentences into Mauritian (``mfe``) and Haitian (``hat``) Creole, which
-makes two probes possible for any embedding model:
-
-- **trap**: mfe→English retrieval with every same-meaning Haitian twin injected into the corpus.
-  How often does the Haitian twin outrank the correct English translation?
-- **discrimination**: given the English sentence, is the Mauritian translation ranked above the
-  Haitian one?
-
-Access to FLORES+ is gated: accept the dataset's terms on the Hugging Face Hub and set ``HF_TOKEN``.
-"""
+"""Measure Haitian-vs-Mauritian Creole confusion on FLORES+ aligned triplets."""
 
 from __future__ import annotations
 

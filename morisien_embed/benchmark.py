@@ -1,10 +1,3 @@
-"""Turn Creole↔translation pairs into a retrieval benchmark and evaluate models on it.
-
-A benchmark is the standard ``(queries, corpus, qrels)`` triple that ``InformationRetrievalEvaluator``
-consumes: each unique Creole sentence is a query, each unique translation a passage, and the relevance
-judgements link a query to the passage(s) that translate it.
-"""
-
 from __future__ import annotations
 
 import json

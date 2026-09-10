@@ -1,29 +1,4 @@
-"""Score a model with the xSIM++ error rate and a breakdown of which errors it makes.
-
-xSIM++ reports an error rate, not a retrieval metric, and LASER's own script breaks those errors down
-by the kind of perturbation the model fell for. Reporting nDCG instead makes a number that cannot be
-compared against any other xSIM++ result, and throws away the diagnostic: a model that confuses
-entities is failing differently from one that confuses numbers.
-
-The released augmentation labels every distractor with the rule that produced it. There are three:
-``entity_mention_replacement`` (38,855 of 44,033), ``number_replacement`` (3,262) and
-``causality_alternation`` (1,916).
-
-xSIM aligns with a margin-based similarity rather than plain cosine (Artetxe and Schwenk, 2019a),
-and LASER's reference ``xsim.py`` defaults to the ratio margin with ``k=4``. The margin reranks the
-``k`` nearest neighbours by cosine, dividing each candidate's cosine by the mean of the two sides'
-own nearest-neighbour cosines, which corrects for points that are close to everything. ``absolute``
-skips the margin and takes the nearest neighbour, which is what this script used to do and what makes
-a number no other xSIM++ result can be compared against.
-
-Because the margin only reorders the ``k`` cosine neighbours, it can never recover a gold passage
-that was not among them.
-
-References: Chen et al., xSIM++: An Improved Proxy to Bitext Mining Performance for Low-Resource
-Languages, ACL 2023, https://arxiv.org/abs/2306.12907; Artetxe and Schwenk, Margin-based Parallel
-Corpus Mining with Multilingual Sentence Embeddings, ACL 2019, https://arxiv.org/abs/1811.01136;
-reference implementation https://github.com/facebookresearch/LASER/blob/main/source/xsim.py
-"""
+"""Score a model with the xSIM++ error rate and a breakdown of which errors it makes."""
 
 from __future__ import annotations
 

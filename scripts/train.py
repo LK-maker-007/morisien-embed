@@ -1,21 +1,4 @@
-"""Fine-tune a multilingual base into a Mauritian Creole embedding model.
-
-Trains with in-batch-negatives contrastive learning on the merged Creole↔{English,French} pairs:
-each Creole sentence is the anchor and its translation the positive. The dev split scores retrieval
-each epoch; the held-out test split is scored once at the end, next to LaBSE for reference. No E5
-prefix is applied, because it scores best without one on this task.
-
-Passing ``--mine-with <model>`` switches on the stronger recipe used by current embedding
-models: hard negatives are mined with that model (skipping candidates too close to the true positive,
-so real positives are not mislabelled as negatives), and training uses
-``CachedMultipleNegativesRankingLoss`` so a large batch of negatives fits in memory via gradient
-caching. ``--matryoshka`` additionally trains truncatable embeddings that stay accurate at smaller
-dimensions.
-
-``--lora`` trains a low-rank adapter instead of every weight. The adapter is merged into the base
-weights before saving, because ``save_pretrained`` writes only the adapter otherwise and the
-resulting directory cannot be loaded back by ``SentenceTransformer``.
-"""
+"""Fine-tune a multilingual base into a Mauritian Creole embedding model."""
 
 from __future__ import annotations
 

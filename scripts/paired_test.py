@@ -1,18 +1,4 @@
-"""Paired significance tests between two models on the same queries.
-
-An error rate on its own cannot say whether one model beats another: 292 misses against 333 could be
-41 queries the better model genuinely handles, or the same queries falling either way. Both tests
-here are paired, so they use the fact that the two models saw identical queries.
-
-McNemar's exact test looks only at the queries where the two disagree. Under the null the winner of
-each disagreement is a coin flip, so the two-sided p-value is the exact binomial tail, computed with
-``math.comb`` rather than a normal approximation because the discordant count is small.
-
-The bootstrap resamples queries with replacement and reports the 95 percentile interval on the
-difference in error rate. It answers a different question from McNemar, how far the estimate would
-move on another sample of queries, and the two are reported together because agreement between them
-is what makes a difference credible.
-"""
+"""Paired significance tests between two models on the same queries."""
 
 from __future__ import annotations
 

@@ -1,19 +1,4 @@
-"""Build a Creole retrieval benchmark from google/smol, a second held-out domain.
-
-Every v2 conclusion so far rests on one pool built from FLORES+. SMOL is independent of it: Google
-collected it separately, it is CC-BY-4.0, and only 9 of its 2,472 Creole sides appear in this
-project's training data under the loose leak key. A result that holds here as well as on the xSIM++
-pool is much harder to dismiss as a property of one benchmark's construction.
-
-Two of SMOL's three Creole subsets are used. ``smolsent`` is 863 standalone sentences. ``smoldoc`` is
-130 documents whose ``srcs`` and ``trgs`` hold 1,609 aligned segments. ``gatitos`` is skipped: it is a
-token dictionary, and this benchmark measures sentence retrieval.
-
-The pool is small. On SMOL's own 2,462 passages a character n-gram TF-IDF baseline reaches 0.4606
-accuracy@1, close to the 0.50 threshold at which a benchmark stops being able to separate models, so
-``--distractors-from`` widens it with passages from another corpus. Score whatever comes out with
-``scripts/lexical_control.py`` before publishing a number from it.
-"""
+"""Build a Creole retrieval benchmark from google/smol, a second held-out domain."""
 
 from __future__ import annotations
 

@@ -151,3 +151,21 @@ def test_smol_rejects_a_document_whose_sides_are_misaligned(monkeypatch, tmp_pat
     monkeypatch.setattr(data, "hf_hub_download", fake_download)
     with pytest.raises(ValueError):
         data.smol()
+
+
+def test_merge_accounts_for_every_input_row() -> None:
+    reserved = {data.loose("Sa fraz la reserve.")}
+    pairs = [
+        pair("Sa fraz la reserve.", "This sentence is reserved."),
+        pair("SA FRAZ LA RESERVE!", "Reserved again, punctuated."),
+        pair("Enn fraz normal.", "An ordinary sentence."),
+        pair("enn fraz normal.", "An ordinary sentence."),
+        pair("Enn lot fraz.", "Another sentence."),
+    ]
+
+    kept, dropped = data.merge(pairs, reserved)
+
+    assert len(kept) + dropped["leak"] + dropped["duplicate"] == len(pairs)
+    assert dropped["leak"] == 2
+    assert dropped["duplicate"] == 1
+    assert [row["creole"] for row in kept] == ["Enn fraz normal.", "Enn lot fraz."]

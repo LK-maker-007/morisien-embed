@@ -1,9 +1,4 @@
-"""Push a trained model and the repository's model card to the Hugging Face Hub in one step.
-
-``SentenceTransformer.push_to_hub`` alone regenerates an automatic card that headlines dev-split
-metrics and carries no license or language metadata, so this script uploads the hand-written
-``model_card.md`` as the final step, so the Hub page always matches the reviewed card.
-"""
+"""Push a trained model and the repository's model card to the Hugging Face Hub in one step."""
 
 from __future__ import annotations
 

@@ -1,19 +1,4 @@
-"""Build a hard Creole retrieval benchmark from FLORES+ and the released xSIM++ distractors.
-
-The plain FLORES+ benchmark saturates: morisien-embed and LaBSE both sit at the ceiling over its own
-1,012-passage corpus, and a char-n-gram TF-IDF baseline with no model reaches 0.82 accuracy@1, so the
-pool cannot separate models. xSIM++ (Chen et al., ACL 2023) is the published fix: it perturbs the
-English side of FLORES with rule-based edits -- entity replacement, number replacement and causality
-alternation -- so each distractor is the gold passage with one semantically critical token changed.
-Nothing but meaning separates a distractor from its gold, which is what corpus-mined distractors
-cannot offer.
-
-The released augmentation covers the English side only and is shared across source languages, so it
-applies to Creole->English unchanged. Its 996 originals were verified to match the FLORES+ devtest
-English text exactly, so gold passages align by string despite xSIM++ being built on FLORES200.
-
-Access to FLORES+ is gated: accept the dataset's terms on the Hugging Face Hub and set ``HF_TOKEN``.
-"""
+"""Build a hard Creole retrieval benchmark from FLORES+ and the released xSIM++ distractors."""
 
 from __future__ import annotations
 

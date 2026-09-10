@@ -1,13 +1,4 @@
-"""Score one model across several retrieval benchmarks and Matryoshka truncation dimensions.
-
-``scripts/evaluate.py`` scores one model on one benchmark at one dimension, which means a full
-picture of a checkpoint costs a dozen invocations and a dozen model loads. This driver loads the
-model once per truncation dimension and writes every score to a single JSON file, so a release can
-report the same set of measurements for every checkpoint instead of leaving gaps.
-
-Reported figures are whatever :func:`morisien_embed.benchmark.evaluate` returns, which is the
-``InformationRetrievalEvaluator`` the published numbers were produced with.
-"""
+"""Score one model across several retrieval benchmarks and Matryoshka truncation dimensions."""
 
 from __future__ import annotations
 

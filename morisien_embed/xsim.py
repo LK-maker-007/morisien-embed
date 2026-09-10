@@ -1,16 +1,3 @@
-"""Fetch the released xSIM++ augmentation for FLORES English.
-
-xSIM++ (Chen et al., ACL 2023) extends a bitext evaluation set with synthetic distractors built by
-rule from the English side: an entity, a number or a causal connective is replaced, so a distractor
-differs from its gold passage by one semantically critical token and nothing else.
-
-Meta released the generated files but not the code that produces them, so these cannot be regenerated
-for another corpus. The augmentation covers English only and is shared across source languages, which
-is why it applies to Creole to English unchanged.
-
-Reference: https://arxiv.org/abs/2306.12907
-"""
-
 from __future__ import annotations
 
 import json

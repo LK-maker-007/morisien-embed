@@ -1,16 +1,4 @@
-"""Score a model on the MorisienMTBitextMining task in MTEB and record the per-subset F1.
-
-The task is the held-out MorisienMT test split contributed to MTEB. Its four directional subsets
-are built over one set of 999 distinct Creole sentences rather than four independent samples, so the
-mean across them is not an average of four independent measurements. It is reported here because it
-is the number the leaderboard shows.
-
-The task landed in MTEB after 2.18, so an older install raises a KeyError on the task name rather
-than reporting that the version is too old. That case is caught and explained.
-
-``mteb`` is not a dependency of this package, so it is imported inside the functions that use it.
-That keeps ``--help`` working, and the CI step that runs it, without pulling the benchmark in.
-"""
+"""Score a model on the MorisienMTBitextMining task in MTEB and record the per-subset F1."""
 
 from __future__ import annotations
 

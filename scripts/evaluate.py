@@ -1,8 +1,4 @@
-"""Evaluate a SentenceTransformer model on the Kreol Morisien retrieval benchmark.
-
-Retrieval prompts are passed explicitly so E5-style models get their prefixes while prefix-free models
-(LaBSE, MiniLM) get none. For this bitext task, E5 scores best with no prefix (verified empirically).
-"""
+"""Evaluate a SentenceTransformer model on the Kreol Morisien retrieval benchmark."""
 
 from __future__ import annotations
 

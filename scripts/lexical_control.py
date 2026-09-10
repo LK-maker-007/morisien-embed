@@ -1,12 +1,4 @@
-"""Score a retrieval benchmark with a character n-gram TF-IDF baseline and no neural model.
-
-A benchmark this baseline does well on cannot separate models: it is being solved by surface overlap
-between the Creole query and its English passage, not by meaning. The FLORES+ pool as this project
-first used it scores 0.822 accuracy@1 here, which is why nothing measured on it was citable.
-
-The threshold is a kill criterion, declared before a benchmark is built rather than after its numbers
-come in. Above it, rebuild the benchmark and publish nothing from the old one.
-"""
+"""Score a retrieval benchmark with a character n-gram TF-IDF baseline and no neural model."""
 
 from __future__ import annotations
 

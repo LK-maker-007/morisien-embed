@@ -1,12 +1,4 @@
-"""Measure what the training corpus and the evaluation split actually contain.
-
-The paper makes claims about corpus composition, leakage filtering and the MTEB task that were not
-backed by a recorded measurement. This script produces them all in one pass and writes the result as
-JSON, so each number in the paper points at a file rather than at a recollection.
-
-Every figure here is derived from the pinned loaders in :mod:`morisien_embed.data`, so re-running it
-reproduces the same values.
-"""
+"""Measure what the training corpus and the evaluation split actually contain."""
 
 from __future__ import annotations
 

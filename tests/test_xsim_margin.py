@@ -1,19 +1,3 @@
-"""Tests for the xSIM margin scoring in ``scripts/xsim_score.py``.
-
-The reference is LASER's ``source/xsim.py``. Its ``_score_knn`` reranks the ``k`` nearest cosine
-neighbours by a margin that divides (ratio) or subtracts (distance) the mean of the two sides' own
-nearest-neighbour cosines. Getting any part of that wrong produces a plausible number that no
-published xSIM++ result can be compared against, which is the failure these tests exist to catch, so
-the reference is transcribed here rather than imported.
-
-Checked by mutation. Reverting any of these fails at least one test: which side the denominator
-averages, ratio against distance, the mean over the k neighbours, the argmax, and how many
-neighbours are reranked. Dropping the division by two is equivalent under ``ratio``, where it scales
-every candidate's score by the same constant and cannot change the argmax, so it is caught only by
-the ``distance`` parametrization. That is why both margins are parametrized rather than just the
-default.
-"""
-
 from __future__ import annotations
 
 import importlib.util

@@ -1,12 +1,3 @@
-"""Load and merge the Mauritian Creole parallel corpora into a common schema.
-
-Two corpora feed the model: MorisienMT (``prajdabre/MorisienMT``, CC) and Kreyòl-MT
-(``jhu-clsp/kreyol-mt``). Both align Mauritian Creole (``mfe``) with English and French. Every loader
-returns pairs shaped as ``{creole, translation, lang}`` with whitespace normalized and case
-preserved. Deduplication compares exact lower-cased text; evaluation-leak filtering additionally
-uses :func:`loose`, which is insensitive to case, punctuation and accents.
-"""
-
 from __future__ import annotations
 
 import io

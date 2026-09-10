@@ -1,23 +1,4 @@
-"""Build a hard-negative retrieval benchmark from the FLORES+ devtest split.
-
-The plain FLORES+ benchmark saturates: over its own 1,012-passage corpus both morisien-embed
-(1.0000) and LaBSE (0.9996) sit at the ceiling, so it cannot separate models. Adding random
-passages does not help either: measured over 46,012 passages, both stay above 0.99, because a
-random sentence is never a plausible confusion for the correct translation.
-
-This script instead enlarges the corpus with *hard* negatives: for every Creole query, the English
-passages a mining model ranks closest to the true translation. ``range_min`` skips the very closest
-candidates and ``relative_margin`` drops any candidate scoring within that fraction of the true
-positive, the same false-negative guards :mod:`scripts.train` applies when mining training
-negatives, and the mitigation the hard-negative literature recommends. Without them a near-paraphrase
-of the correct translation would be added as a distractor and the benchmark would penalise the model
-that retrieves it.
-
-The mining model must be neither model under test, or the mined negatives would be adversarial to
-one side only. The default is the base checkpoint morisien-embed was fine-tuned from; that descent
-is a disclosed asymmetry, and the mined negatives are hard in the *base* model's space, not in the
-fine-tune's.
-"""
+"""Build a hard-negative retrieval benchmark from the FLORES+ devtest split."""
 
 from __future__ import annotations
 
