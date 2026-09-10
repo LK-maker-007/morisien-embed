@@ -17,14 +17,6 @@ SUBSETS = ("smolsent", "smoldoc")
 
 
 def smol_pairs(revision: str | None = SMOL_REVISION) -> list[dict[str, str]]:
-    """Every aligned Creole to English pair in SMOL's sentence and document subsets.
-
-    Args:
-        revision (`str | None`): Hub revision to pin. Pass `None` to track the branch head.
-
-    Returns:
-        `list[dict[str, str]]`: Rows with `creole` and `translation`, whitespace-normalized.
-    """
     pairs: list[dict[str, str]] = []
     for subset in SUBSETS:
         path = hf_hub_download(SMOL_REPO, f"{subset}/en_mfe.jsonl", repo_type="dataset", revision=revision)

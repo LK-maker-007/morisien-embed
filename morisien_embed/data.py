@@ -31,21 +31,11 @@ def normalize(text: str) -> str:
 
 
 def loose(text: str) -> str:
-    """Case-, punctuation- and accent-insensitive key, used to catch near-duplicate leakage.
-
-    Casefolds, decomposes accents (NFKD) and keeps only alphanumeric characters, so curly quotes,
-    zero-width characters, combining marks and spacing differences all collapse away.
-    """
     decomposed = unicodedata.normalize("NFKD", text.casefold())
     return "".join(char for char in decomposed if char.isalnum())
 
 
 def kreyol_mt(split: str) -> list[Pair]:
-    """Creole↔{English,French} pairs from Kreyòl-MT's ``mfe-eng`` and ``mfe-fra`` configs.
-
-    ``split`` is ``train``, ``validation`` or ``test``, which are Kreyòl-MT's names rather than
-    MorisienMT's ``dev``.
-    """
     pairs: list[Pair] = []
     for config, lang in KREYOL_CONFIGS.items():
         for row in load_dataset(KREYOL_REPO, config, split=split, revision=KREYOL_REVISION):
@@ -61,10 +51,6 @@ def kreyol_mt(split: str) -> list[Pair]:
 
 
 def morisienmt(split: str) -> list[Pair]:
-    """Creole↔{English,French} pairs from MorisienMT. ``split`` is ``train``, ``dev`` or ``test``.
-
-    The dataset's loader script is deprecated, so the split archives are fetched and read directly.
-    """
     pairs: list[Pair] = []
     for pair, lang in MORISIEN_PAIRS.items():
         archive = hf_hub_download(MORISIEN_REPO, f"data/{pair}.zip", repo_type="dataset", revision=MORISIEN_REVISION)
@@ -78,19 +64,6 @@ def morisienmt(split: str) -> list[Pair]:
 
 
 def smol(revision: str | None = SMOL_REVISION) -> list[Pair]:
-    """Creole to English pairs from google/smol, sentences and document segments.
-
-    SMOL is CC-BY-4.0 and independent of MorisienMT and Kreyol-MT. Its Creole side has a median
-    length of 14 words, against a median of 1 for the merged corpus, so it adds sentence-level
-    material rather than more dictionary entries. The ``gatitos`` subset is skipped: it is a token
-    dictionary, which the corpus already has too much of.
-
-    Args:
-        revision (`str | None`): Hub revision to pin. Pass `None` to track the branch head.
-
-    Returns:
-        `list[Pair]`: Rows with `creole`, `translation` and `lang`, whitespace-normalized.
-    """
     pairs: list[Pair] = []
     for subset in SMOL_SUBSETS:
         path = hf_hub_download(SMOL_REPO, f"{subset}/en_mfe.jsonl", repo_type="dataset", revision=revision)
@@ -110,7 +83,6 @@ def smol(revision: str | None = SMOL_REVISION) -> list[Pair]:
 
 
 def reserved_creole(splits: tuple[str, ...] = ("dev", "test")) -> set[str]:
-    """Loose keys of the MorisienMT evaluation sentences that training must never contain."""
     reserved: set[str] = set()
     for split in splits:
         reserved.update(loose(pair["creole"]) for pair in morisienmt(split))
@@ -118,12 +90,6 @@ def reserved_creole(splits: tuple[str, ...] = ("dev", "test")) -> set[str]:
 
 
 def merge(pairs: list[Pair], reserved: set[str]) -> tuple[list[Pair], Counter]:
-    """Drop evaluation-leaking and duplicate pairs, keeping the first occurrence of each.
-
-    Leak filtering matches ``reserved`` (a set of :func:`loose` keys) loosely, so punctuation,
-    case and accent variants of an evaluation sentence are dropped too. Deduplication is exact
-    lower-cased comparison of the full pair.
-    """
     kept: list[Pair] = []
     seen: set[tuple[str, str]] = set()
     dropped: Counter = Counter()

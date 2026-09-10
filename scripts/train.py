@@ -31,16 +31,6 @@ from morisien_embed import benchmark, data
 def load_training_pairs(
     path: Path, limit: int | None, min_words: int = 1, sample: int | None = None, sample_seed: int = 0
 ) -> Dataset:
-    """Load (anchor=creole, positive=translation) pairs. Column order is the loss contract.
-
-    ``min_words`` drops rows whose Creole side is shorter than that, which is how the dictionary
-    portion is held out: 22,164 of 35,064 rows are a single word while every benchmark is sentences.
-    ``sample`` then takes a random subset, so a length-filtered run can be compared against a
-    volume-matched one instead of confounding composition with how much data was seen. It is seeded
-    separately from training so several training seeds share one subset. Sampling is random rather
-    than head-of-file because the file is grouped by source: the first rows are sentences and the
-    middle is almost entirely dictionary.
-    """
     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
     if min_words > 1:
         kept = [row for row in rows if len(row["creole"].split()) >= min_words]
@@ -59,21 +49,6 @@ def load_training_pairs(
 
 
 def dropped_rows(pairs: Dataset, mined: Dataset) -> list[dict[str, str]]:
-    """The rows mining discarded, recovered by comparing its input with its output.
-
-    ``mine_hard_negatives`` emits fixed-width n-tuples, so an anchor that cannot reach
-    ``num_negatives`` surviving candidates is dropped from the result rather than returned short.
-    The discarded rows are therefore exactly the input rows absent from the output, which is worth
-    computing here: the alternative is reading the count off the miner's own log line, and a printed
-    number is not a record.
-
-    Args:
-        pairs (`Dataset`): What was passed to the miner, with `anchor` and `positive` columns.
-        mined (`Dataset`): What it returned.
-
-    Returns:
-        `list[dict[str, str]]`: One entry per discarded row, in input order.
-    """
     kept = Counter(zip(mined["anchor"], mined["positive"], strict=True))
     dropped = []
     for anchor, positive in zip(pairs["anchor"], pairs["positive"], strict=True):
@@ -93,16 +68,6 @@ def mine_negatives(
     relative_margin: float,
     dropped_path: Path | None = None,
 ) -> Dataset:
-    """Return (anchor, positive, neg_1, …, neg_n) tuples with hard negatives from ``mining_model``.
-
-    ``range_min`` skips the closest matches (which may be paraphrases of the positive) and
-    ``relative_margin`` drops any candidate whose similarity comes within that fraction of the
-    positive's. Both guard against mislabelling a true positive as a negative. ``range_max`` widens
-    the candidate pool so every anchor can still reach ``num_negatives`` after that filtering.
-
-    ``dropped_path`` writes the rows that did not survive as JSONL, so which pairs the filter removes
-    is a file rather than a line in a log.
-    """
     model = SentenceTransformer(mining_model)
     mined = mine_hard_negatives(
         pairs,
@@ -139,16 +104,10 @@ def mine_negatives(
 
 
 def matryoshka_dims(full_dim: int) -> list[int]:
-    """Truncation sizes for Matryoshka training: the model's full dimension down to 64."""
     return [full_dim, *(dim for dim in (512, 256, 128, 64) if dim < full_dim)]
 
 
 def apply_lora(model: SentenceTransformer, rank: int) -> None:
-    """Attach a LoRA adapter to the transformer body, leaving every other weight frozen.
-
-    ``lora_alpha`` is fixed at twice the rank, the setting Shuttleworth et al. (arXiv:2410.21228)
-    find produces fewer intruder dimensions than the alternatives.
-    """
     from peft import LoraConfig
 
     model.add_adapter(
@@ -166,11 +125,6 @@ def apply_lora(model: SentenceTransformer, rank: int) -> None:
 
 
 def merge_lora(model: SentenceTransformer) -> None:
-    """Fold the adapter into the base weights and remove every trace of it.
-
-    Without this, `save_pretrained` takes the PEFT path: it writes `adapter_model.safetensors` and a
-    `config.json` with no `model_type`, and reloading raises `Unrecognized model`.
-    """
     from peft.tuners.lora import LoraLayer
 
     inner = model[0].auto_model
@@ -192,7 +146,6 @@ def merge_lora(model: SentenceTransformer) -> None:
 
 
 def dev_evaluator() -> InformationRetrievalEvaluator:
-    """Score the dev split on the same Creole→English task the final test uses, for a matched signal."""
     queries, corpus, qrels = benchmark.build(data.morisienmt("dev"), target_lang="eng")
     return InformationRetrievalEvaluator(
         queries=queries, corpus=corpus, relevant_docs=qrels, name="morisienmt-dev-eng", batch_size=64

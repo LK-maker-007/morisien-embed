@@ -80,7 +80,6 @@ def test_load_rejects_duplicate_ids(tmp_path: Path) -> None:
 
 
 def _write(tmp_path: Path, queries: dict, corpus: dict, qrels: dict) -> Path:
-    """Write a benchmark directory by hand, so qrels can name ids the other files do not have."""
     out = tmp_path / "bench"
     out.mkdir()
     for name, records in (("queries.jsonl", queries), ("corpus.jsonl", corpus)):
@@ -103,7 +102,6 @@ def test_load_accepts_a_consistent_benchmark(tmp_path: Path) -> None:
 
 
 def test_load_rejects_a_qrel_query_that_is_not_in_queries(tmp_path: Path) -> None:
-    """A judgement for a query the file does not contain is a broken write, not a hard query."""
     path = _write(tmp_path, {"q0": "Mo pe ale"}, {"d0": "I am going"}, {"q0": ["d0"], "q9": ["d0"]})
 
     with pytest.raises(ValueError, match="query ids absent"):
@@ -111,7 +109,6 @@ def test_load_rejects_a_qrel_query_that_is_not_in_queries(tmp_path: Path) -> Non
 
 
 def test_load_rejects_a_qrel_passage_that_is_not_in_the_corpus(tmp_path: Path) -> None:
-    """Scoring this would count as a miss for every model and look like a real accuracy drop."""
     path = _write(tmp_path, {"q0": "Mo pe ale"}, {"d0": "I am going"}, {"q0": ["d0", "d9"]})
 
     with pytest.raises(ValueError, match="passage ids absent"):
@@ -119,7 +116,6 @@ def test_load_rejects_a_qrel_passage_that_is_not_in_the_corpus(tmp_path: Path) -
 
 
 def test_load_rejects_a_query_with_no_relevant_passage(tmp_path: Path) -> None:
-    """An unjudged query can never be answered correctly, so it silently caps the ceiling."""
     path = _write(tmp_path, {"q0": "Mo pe ale", "q1": "Li pe manze"}, {"d0": "I am going"}, {"q0": ["d0"], "q1": []})
 
     with pytest.raises(ValueError, match="no relevant passage"):

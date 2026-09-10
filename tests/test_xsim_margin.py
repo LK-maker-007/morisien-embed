@@ -18,7 +18,6 @@ def load_module():
 
 
 def laser_reference(x: np.ndarray, y: np.ndarray, margin: str, k: int) -> np.ndarray:
-    """Transcription of LASER's ``_score_knn`` and ``score_margin``, deliberately literal."""
     x = x / np.linalg.norm(x, axis=1, keepdims=True)
     y = y / np.linalg.norm(y, axis=1, keepdims=True)
     if margin == "absolute":
@@ -55,7 +54,6 @@ def test_retrieve_matches_the_laser_reference(margin: str, queries: int, passage
 
 
 def test_margin_reranks_only_the_k_nearest_neighbours() -> None:
-    """The margin cannot promote a passage outside the top ``k`` by cosine, however good its margin."""
     module = load_module()
     rng = np.random.default_rng(7)
     x = rng.normal(size=(25, 16)).astype(np.float32)
@@ -70,7 +68,6 @@ def test_margin_reranks_only_the_k_nearest_neighbours() -> None:
 
 
 def test_absolute_is_plain_nearest_neighbour_and_ignores_k() -> None:
-    """``absolute`` is the pre-margin behaviour, and it must not depend on k."""
     module = load_module()
     rng = np.random.default_rng(3)
     q = normalized(rng.normal(size=(20, 12)).astype(np.float32))
@@ -83,7 +80,6 @@ def test_absolute_is_plain_nearest_neighbour_and_ignores_k() -> None:
 
 
 def test_ratio_and_absolute_disagree_somewhere() -> None:
-    """A margin that never changed the answer would make the whole distinction untestable."""
     module = load_module()
     rng = np.random.default_rng(11)
     q = normalized(rng.normal(size=(120, 16)).astype(np.float32))
@@ -95,11 +91,6 @@ def test_ratio_and_absolute_disagree_somewhere() -> None:
 @pytest.mark.parametrize("margin", ["ratio", "distance", "absolute"])
 @pytest.mark.parametrize("chunk", [7, 32, 99, 1000])
 def test_chunking_does_not_change_the_answer(margin: str, chunk: int) -> None:
-    """The pool is streamed in chunks, so the running top-k merge must survive any chunk boundary.
-
-    With the default chunk size no test pool is large enough to take the loop round twice, which
-    would leave the merge unexercised. Forcing small chunks is what makes it real.
-    """
     module = load_module()
     module.CHUNK = chunk
     rng = np.random.default_rng(5)
@@ -112,7 +103,6 @@ def test_chunking_does_not_change_the_answer(margin: str, chunk: int) -> None:
 
 
 def test_retrieve_many_agrees_with_one_margin_at_a_time() -> None:
-    """Scoring every margin from one pass must equal scoring each on its own."""
     module = load_module()
     rng = np.random.default_rng(13)
     q = normalized(rng.normal(size=(60, 16)).astype(np.float32))

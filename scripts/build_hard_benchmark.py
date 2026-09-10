@@ -16,11 +16,6 @@ from morisien_embed.flores import flores_split
 
 
 def candidate_pool(target_lang: str, exclude: set[str]) -> list[str]:
-    """Translation-side sentences usable as distractors, excluding anything in ``exclude``.
-
-    Drawn from the MorisienMT and Kreyol-MT training splits, so no gold passage and no evaluation
-    sentence can enter the pool.
-    """
     pairs = data.morisienmt("train") + data.kreyol_mt("train")
     pool: list[str] = []
     seen: set[str] = set()

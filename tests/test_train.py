@@ -78,12 +78,6 @@ def test_sample_draws_from_the_filtered_rows_not_the_whole_file(tmp_path: Path) 
 
 
 def test_limit_is_a_head_slice_of_the_sample_not_of_the_file(tmp_path: Path) -> None:
-    """All three filters compose in one order: min_words, then sample, then limit.
-
-    ``limit`` is a head slice, so applying it before the sample would return the head of the file.
-    The file here is grouped like the real one, short rows first, so a head slice of the file would
-    be all single-word rows and a head slice of the sample cannot be.
-    """
     path = _write_pairs(tmp_path, ["x"] * 30 + [f"a long row number {i}" for i in range(20)])
 
     got = train.load_training_pairs(path, limit=4, min_words=3, sample=10, sample_seed=0)["anchor"]
@@ -95,7 +89,6 @@ def test_limit_is_a_head_slice_of_the_sample_not_of_the_file(tmp_path: Path) -> 
 
 
 def test_limit_alone_takes_the_head_of_the_file(tmp_path: Path) -> None:
-    """Without a sample, limit is the head of the file as written, which is what --limit means."""
     creoles = [f"row {i}" for i in range(10)]
     path = _write_pairs(tmp_path, creoles)
 
@@ -129,11 +122,6 @@ def test_report_test_raises_when_metric_keys_are_renamed(monkeypatch: pytest.Mon
 
 
 def _tiny_lora_model():
-    """A stand-in for a SentenceTransformer with a LoRA adapter injected into module 0.
-
-    Building this by hand rather than loading a checkpoint keeps the test offline and fast, while
-    still exercising real peft layers.
-    """
     torch = pytest.importorskip("torch")
     peft = pytest.importorskip("peft")
 
@@ -147,8 +135,6 @@ def _tiny_lora_model():
             return self.value(self.query(x))
 
     class Inner(torch.nn.Module):
-        """Nested the way a real encoder is, so a non-recursive strip cannot reach the adapters."""
-
         def __init__(self) -> None:
             super().__init__()
             self.encoder = torch.nn.ModuleList([Attention()])
@@ -219,7 +205,6 @@ def _ds(rows: list[tuple[str, str]]):
 
 
 def test_dropped_rows_recovers_exactly_what_mining_discarded() -> None:
-    """The miner returns fixed-width tuples, so short anchors vanish. Recover them by difference."""
     pairs = _ds([("a", "A"), ("b", "B"), ("c", "C"), ("d", "D")])
     mined = _ds([("a", "A"), ("c", "C")])
 
@@ -236,10 +221,6 @@ def test_dropped_rows_is_empty_when_nothing_was_discarded() -> None:
 
 
 def test_dropped_rows_counts_duplicates_rather_than_matching_by_membership() -> None:
-    """The same pair can appear twice. If one copy survives, exactly one copy is dropped.
-
-    A set-based check would report neither as dropped and undercount the shortfall.
-    """
     pairs = _ds([("a", "A"), ("a", "A"), ("b", "B")])
     mined = _ds([("a", "A")])
 
@@ -250,7 +231,6 @@ def test_dropped_rows_counts_duplicates_rather_than_matching_by_membership() -> 
 
 
 def test_dropped_rows_distinguishes_pairs_that_share_an_anchor() -> None:
-    """One Creole sentence can have an English and a French positive. They are different rows."""
     pairs = _ds([("mo pe ale", "I am going"), ("mo pe ale", "je pars")])
     mined = _ds([("mo pe ale", "je pars")])
 

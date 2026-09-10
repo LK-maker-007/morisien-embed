@@ -18,12 +18,6 @@ def build(
     query_field: str = "creole",
     passage_field: str = "translation",
 ) -> Benchmark:
-    """Build queries, corpus and qrels from pairs, optionally restricting to one translation language.
-
-    ``query_field``/``passage_field`` choose the retrieval direction: the defaults score
-    Creole→translation; swapping them scores translation→Creole over the same pairs. Texts are
-    whitespace-normalized so the written JSONL never contains line-breaking characters.
-    """
     query_id: dict[str, str] = {}
     corpus_id: dict[str, str] = {}
     qrels: dict[str, set[str]] = {}

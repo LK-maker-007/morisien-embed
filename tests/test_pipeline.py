@@ -22,7 +22,6 @@ PAIRS = [
 
 
 def test_merge_output_feeds_the_training_loader(tmp_path: Path) -> None:
-    """`build_training.py` writes what `train.load_training_pairs` reads, field names included."""
     kept, _ = data.merge(PAIRS, reserved=set())
     path = tmp_path / "train.jsonl"
     path.write_text("\n".join(json.dumps(p, ensure_ascii=False) for p in kept), encoding="utf-8")
@@ -35,7 +34,6 @@ def test_merge_output_feeds_the_training_loader(tmp_path: Path) -> None:
 
 
 def test_benchmark_survives_a_write_and_load_round_trip(tmp_path: Path) -> None:
-    """Ids are assigned at build time and resolved at load time, so the round trip must be lossless."""
     built = benchmark.build(PAIRS, target_lang="eng")
     benchmark.write(tmp_path / "eng", built)
 
@@ -45,7 +43,6 @@ def test_benchmark_survives_a_write_and_load_round_trip(tmp_path: Path) -> None:
 
 
 def test_a_freshly_built_benchmark_passes_the_loader_validation(tmp_path: Path) -> None:
-    """The builder must never emit qrels the loader rejects, or no benchmark could be built at all."""
     for lang in ("eng", "fra"):
         benchmark.write(tmp_path / lang, benchmark.build(PAIRS, target_lang=lang))
         queries, corpus, qrels = benchmark.load(tmp_path / lang)
@@ -55,8 +52,6 @@ def test_a_freshly_built_benchmark_passes_the_loader_validation(tmp_path: Path) 
 
 
 def test_one_creole_sentence_with_two_translations_keeps_both_judgements(tmp_path: Path) -> None:
-    """ "Mo pe ale lakaz" has an English and a French translation. Building without restricting the
-    language must give that query both passages rather than silently dropping one."""
     benchmark.write(tmp_path / "both", benchmark.build(PAIRS, target_lang=None))
     queries, corpus, qrels = benchmark.load(tmp_path / "both")
 
@@ -65,7 +60,6 @@ def test_one_creole_sentence_with_two_translations_keeps_both_judgements(tmp_pat
 
 
 def test_reserved_creole_removes_the_evaluation_side_from_training(tmp_path: Path) -> None:
-    """The leak guard and the benchmark must agree on which sentences are reserved."""
     reserved = {data.loose(PAIRS[0]["creole"])}
     kept, dropped = data.merge(PAIRS, reserved=reserved)
 

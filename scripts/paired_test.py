@@ -11,7 +11,6 @@ import numpy as np
 
 
 def mcnemar_exact(hits_a: np.ndarray, hits_b: np.ndarray) -> dict[str, float | int]:
-    """Two-sided exact McNemar on paired hit vectors, where 1 is a correct retrieval."""
     a_only = int(np.sum((hits_a == 1) & (hits_b == 0)))
     b_only = int(np.sum((hits_a == 0) & (hits_b == 1)))
     n = a_only + b_only
@@ -27,7 +26,6 @@ def mcnemar_exact(hits_a: np.ndarray, hits_b: np.ndarray) -> dict[str, float | i
 
 
 def paired_bootstrap(hits_a: np.ndarray, hits_b: np.ndarray, resamples: int, seed: int) -> dict[str, float | int]:
-    """Percentile interval on the error-rate difference, a minus b. Negative means a errs less."""
     rng = np.random.default_rng(seed)
     errors_a, errors_b = 1 - hits_a, 1 - hits_b
     n = len(hits_a)
@@ -45,12 +43,6 @@ def paired_bootstrap(hits_a: np.ndarray, hits_b: np.ndarray, resamples: int, see
 
 
 def load(path: Path) -> tuple[np.ndarray, np.ndarray | None]:
-    """Hit vector and, when the file carries them, the query ids it is ordered by.
-
-    Files written before query ids were saved have only the hits. They are still usable, but the
-    alignment between the two models cannot be checked, so the caller is told rather than left to
-    assume it held.
-    """
     data = np.load(path, allow_pickle=True)
     return data["hits"], (data["qids"] if "qids" in data.files else None)
 

@@ -12,16 +12,6 @@ from morisien_embed import benchmark
 
 
 def lexical_accuracy(queries: dict[str, str], corpus: dict[str, str], qrels: dict[str, list[str]]) -> float:
-    """Accuracy@1 of a char_wb 3-5gram TF-IDF retriever over the pool.
-
-    Args:
-        queries (`dict[str, str]`): Query id to text.
-        corpus (`dict[str, str]`): Passage id to text.
-        qrels (`dict[str, list[str]]`): Query id to the passage ids that count as correct.
-
-    Returns:
-        `float`: Fraction of queries whose top passage is a gold passage.
-    """
     qids, cids = list(queries), list(corpus)
     passage_texts = [corpus[c] for c in cids]
     query_texts = [queries[q] for q in qids]

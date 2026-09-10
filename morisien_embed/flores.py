@@ -13,16 +13,6 @@ LANG_FILES = {"mfe": "mfe_Latn.jsonl", "eng": "eng_Latn.jsonl", "fra": "fra_Latn
 
 
 def flores_split(lang: str, split: str, *, revision: str | None = FLORES_REVISION) -> dict[int, str]:
-    """Map sentence ``id`` to text for one language in one split.
-
-    Args:
-        lang (`str`): A key of `LANG_FILES`.
-        split (`str`): `"dev"` or `"devtest"`.
-        revision (`str | None`): Hub revision to pin. Pass `None` to track the branch head.
-
-    Returns:
-        `dict[int, str]`: Sentence id to whitespace-normalized text.
-    """
     if lang not in LANG_FILES:
         raise ValueError(f"Unknown FLORES+ language {lang!r}, expected one of {sorted(LANG_FILES)}")
     path = hf_hub_download(FLORES_REPO, f"{split}/{LANG_FILES[lang]}", repo_type="dataset", revision=revision)

@@ -19,26 +19,6 @@ CHUNK = 4096  # passages per pass; caps peak memory at queries x CHUNK floats
 
 
 def retrieve_many(q_emb: torch.Tensor, c_emb: torch.Tensor, margins: tuple[str, ...], k: int) -> dict[str, list[int]]:
-    """Align each query to a passage under several margins, in one pass over the passage pool.
-
-    The pool is large enough that a full query-by-passage similarity matrix is worth avoiding, and
-    scoring one matrix per margin is worth avoiding three times over. Everything each margin needs
-    reduces to four small tensors, so the passages are streamed in chunks and only those are kept:
-    the ``k`` best cosines per query and their indices, each query's mean over them, and each
-    passage's mean over its own ``k`` best queries.
-
-    ``absolute`` needs no margin at all: the neighbours are held sorted, so its answer is the first
-    column.
-
-    Args:
-        q_emb (`torch.Tensor`): L2-normalized query embeddings, shape (queries, dim).
-        c_emb (`torch.Tensor`): L2-normalized passage embeddings, shape (passages, dim).
-        margins (`tuple[str, ...]`): Margin functions to score, each one of `MARGINS`.
-        k (`int`): Neighbours to rerank, and to average over when forming the denominator.
-
-    Returns:
-        `dict[str, list[int]]`: Per margin, the row of `c_emb` each query aligns to.
-    """
     cos_xy = torch.full((q_emb.size(0), k), -torch.inf)
     idx_xy = torch.zeros((q_emb.size(0), k), dtype=torch.long)
     avg_yx = torch.empty(c_emb.size(0))
@@ -69,7 +49,6 @@ def retrieve_many(q_emb: torch.Tensor, c_emb: torch.Tensor, margins: tuple[str, 
 
 
 def retrieve(q_emb: torch.Tensor, c_emb: torch.Tensor, margin: str, k: int) -> list[int]:
-    """Single-margin form of :func:`retrieve_many`, following LASER's ``_score_knn``."""
     return retrieve_many(q_emb, c_emb, (margin,), k)[margin]
 
 
@@ -84,24 +63,6 @@ def score(
     per_query: Path | None = None,
     label: str = "model",
 ) -> dict:
-    """Error rate over the pool, with the misses grouped by perturbation rule.
-
-    Args:
-        model (`SentenceTransformer`): Encoder to score.
-        data_dir (`Path`): Benchmark directory holding queries, corpus and qrels.
-        errtype (`dict[str, dict[str, str]]`): xSIM++ map of augmented sentence to its rule.
-        batch_size (`int`): Encoding batch size.
-        margins (`tuple[str, ...]`): Margin functions to score, each one of `MARGINS`. Encoding the
-            45,029-passage pool dominates the runtime, so every margin is scored from one pass.
-        k (`int`): Neighbours the margin reranks. The reference default is 4.
-        per_query (`Path | None`): Directory to write one ``.npz`` per margin holding the per-query
-            hit vector. A paired test between two models needs these; an error rate alone cannot
-            say whether a difference is larger than chance.
-        label (`str`): Filename stem for those files.
-
-    Returns:
-        `dict`: Per margin, the error rate, error count, query count and a count per rule.
-    """
     queries, corpus, qrels = benchmark.load(data_dir)
     qids, cids = list(queries), list(corpus)
     rule = {data.normalize(sentence): meta["errtype"] for sentence, meta in errtype.items()}

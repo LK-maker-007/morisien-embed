@@ -169,3 +169,15 @@ def test_merge_accounts_for_every_input_row() -> None:
     assert dropped["leak"] == 2
     assert dropped["duplicate"] == 1
     assert [row["creole"] for row in kept] == ["Enn fraz normal.", "Enn lot fraz."]
+
+
+def test_loose_ignores_unicode_line_separators() -> None:
+    assert data.loose("mo pe ale") == data.loose("mo pe ale")
+    assert data.loose("mo pe ale") == data.loose("mo pe ale")
+    assert data.loose("mo\x85pe ale") == data.loose("mo pe ale")
+
+    reserved = {data.loose("Mo pe ale.")}
+    kept, dropped = data.merge([pair("Mo pe ale.", "I am going.")], reserved)
+
+    assert kept == []
+    assert dropped["leak"] == 1

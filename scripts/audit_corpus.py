@@ -17,12 +17,6 @@ def word_count(text: str) -> int:
 
 
 def tokenize(text: str, *, strip_punctuation: bool) -> list[str]:
-    """Split on whitespace, lower-cased.
-
-    With ``strip_punctuation`` the accents are decomposed and non-alphanumeric characters dropped, so
-    a word carrying a trailing comma is not counted as a different word from the bare form. The two
-    settings answer different questions and the coverage figures below report both.
-    """
     tokens = [token.casefold() for token in text.split()]
     if not strip_punctuation:
         return tokens
@@ -31,7 +25,6 @@ def tokenize(text: str, *, strip_punctuation: bool) -> list[str]:
 
 
 def coverage(train: list[str], test: list[str], *, strip_punctuation: bool) -> dict[str, object]:
-    """How much of the evaluation split's wording already appears in training."""
     vocabulary = {token for text in train for token in tokenize(text, strip_punctuation=strip_punctuation)}
     tokens = [token for text in test for token in tokenize(text, strip_punctuation=strip_punctuation)]
     seen = sum(1 for token in tokens if token in vocabulary)
@@ -49,7 +42,6 @@ def coverage(train: list[str], test: list[str], *, strip_punctuation: bool) -> d
 
 
 def composition(pairs: list[dict[str, str]]) -> dict[str, object]:
-    """Length profile of the Creole side, which is what the model is trained to encode."""
     lengths = [word_count(pair["creole"]) for pair in pairs]
     return {
         "pairs": len(pairs),

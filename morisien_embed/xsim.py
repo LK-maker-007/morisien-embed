@@ -9,14 +9,6 @@ ERRTYPE_FILE = "eng_Latn_errtype.devtest.json"
 
 
 def fetch_errtype(cache_dir: Path) -> dict[str, dict[str, str]]:
-    """Map each augmented English sentence to the rule that made it and the sentence it came from.
-
-    Args:
-        cache_dir (`Path`): Directory the file is downloaded into once and read from after.
-
-    Returns:
-        `dict[str, dict[str, str]]`: Augmented sentence to `{"errtype": ..., "src": ...}`.
-    """
     path = cache_dir / ERRTYPE_FILE
     if not path.exists():
         cache_dir.mkdir(parents=True, exist_ok=True)
