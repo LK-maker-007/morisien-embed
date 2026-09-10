@@ -140,6 +140,8 @@ def merge_lora(model: SentenceTransformer) -> None:
                 strip(child)
 
     strip(inner)
+    # peft internal: clears the flag that routes save_pretrained down the adapter-only path.
+    # Checked against peft 0.18.0; if it is renamed the merged weights save as an adapter.
     inner._hf_peft_config_loaded = False
     if hasattr(inner, "peft_config"):
         del inner.peft_config

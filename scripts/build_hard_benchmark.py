@@ -42,7 +42,13 @@ def main() -> None:
     parser.add_argument("--relative-margin", type=float, default=0.05)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument("--not-for-comparison", action="store_true")
     args = parser.parse_args()
+    if not args.not_for_comparison:
+        raise SystemExit(
+            "distractors are mined from the training corpus, so this benchmark cannot compare "
+            "models: use scripts/build_xsim_benchmark.py, or pass --not-for-comparison"
+        )
 
     creole = flores_split("mfe", args.split)
     target = flores_split(args.target, args.split)

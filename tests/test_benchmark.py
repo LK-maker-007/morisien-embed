@@ -120,3 +120,16 @@ def test_load_rejects_a_query_with_no_relevant_passage(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="no relevant passage"):
         benchmark.load(path)
+
+
+def test_build_assigns_ids_independently_of_input_order() -> None:
+    pairs = [
+        {"creole": "Mo pe ale", "translation": "I am going", "lang": "eng"},
+        {"creole": "Li pe manze", "translation": "He is eating", "lang": "eng"},
+        {"creole": "Nou pe dormi", "translation": "We are sleeping", "lang": "eng"},
+    ]
+
+    forward = benchmark.build(pairs)
+    reverse = benchmark.build(list(reversed(pairs)))
+
+    assert forward == reverse

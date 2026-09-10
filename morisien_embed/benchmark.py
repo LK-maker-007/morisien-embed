@@ -21,7 +21,7 @@ def build(
     query_id: dict[str, str] = {}
     corpus_id: dict[str, str] = {}
     qrels: dict[str, set[str]] = {}
-    for pair in pairs:
+    for pair in sorted(pairs, key=lambda p: (p[query_field], p[passage_field])):
         if target_lang and pair["lang"] != target_lang:
             continue
         query, passage = normalize(pair[query_field]), normalize(pair[passage_field])

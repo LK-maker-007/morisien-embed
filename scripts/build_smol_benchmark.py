@@ -6,32 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
-from huggingface_hub import hf_hub_download
-
 from morisien_embed import benchmark, data
 from morisien_embed.data import loose
-
-SMOL_REPO = "google/smol"
-SMOL_REVISION = "fdaff3a1a019f89fa30a562a85d7c1d3e9150444"  # 2026-09-03
-SUBSETS = ("smolsent", "smoldoc")
-
-
-def smol_pairs(revision: str | None = SMOL_REVISION) -> list[dict[str, str]]:
-    pairs: list[dict[str, str]] = []
-    for subset in SUBSETS:
-        path = hf_hub_download(SMOL_REPO, f"{subset}/en_mfe.jsonl", repo_type="dataset", revision=revision)
-        for line in Path(path).read_text(encoding="utf-8").splitlines():
-            row = json.loads(line)
-            if subset == "smolsent":
-                pairs.append({"creole": data.normalize(row["trg"]), "translation": data.normalize(row["src"])})
-                continue
-            # smoldoc stores a whole document per row, aligned segment by segment. strict=True turns a
-            # misaligned document into an error instead of silently dropping its tail.
-            pairs += [
-                {"creole": data.normalize(t), "translation": data.normalize(s)}
-                for s, t in zip(row["srcs"], row["trgs"], strict=True)
-            ]
-    return pairs
 
 
 def main() -> None:
@@ -46,7 +22,7 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=Path("benchmark/data/smol-eng"))
     args = parser.parse_args()
 
-    pairs = smol_pairs()
+    pairs = data.smol()
     print(f"smol pairs: {len(pairs)}")
 
     seen_train = {
