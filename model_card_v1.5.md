@@ -2,6 +2,7 @@
 language:
   - mfe
   - en
+  - fr
 license: mit
 library_name: sentence-transformers
 pipeline_tag: sentence-similarity
@@ -11,6 +12,7 @@ tags:
   - feature-extraction
   - mauritian-creole
   - kreol-morisien
+  - mteb
 base_model: sentence-transformers/LaBSE
 datasets:
   - prajdabre/KreolMorisienMT
