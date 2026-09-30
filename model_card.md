@@ -158,8 +158,8 @@ negative set; Creole→English test ndcg@10 across seeds: **0.9653 ± 0.0002** (
 
 Every number in the tables above is reproducible from the
 [training repository](https://github.com/LK-maker-007/morisien-embed) (Matryoshka figures via
-`scripts/evaluate.py --truncate-dim`). The Haitian-proximity and case-sensitivity figures under
-Limitations come from an internal adversarial audit of the released checkpoint.
+`scripts/evaluate.py --truncate-dim`). The Haitian-proximity figures under Limitations come from
+`scripts/probe_haitian.py`.
 
 ## MTEB
 
@@ -208,9 +208,9 @@ trained on the MorisienMT corpus this split is drawn from, so MTEB records the r
   literature; highly informal or technical registers are less covered.
 - **Small evaluation universe.** Retrieval is measured over ~1,000-passage corpora, standard for
   bitext benchmarks, but absolute scores would be lower against web-scale corpora.
-- **One distribution family.** MorisienMT and Kreyòl-MT overlap heavily, and the only fully
-  independent evaluation domain for `mfe` (FLORES+) is saturated at this corpus size, so the margin
-  over LaBSE is demonstrated in-domain only.
+- **The margin over LaBSE is in-domain only.** MorisienMT and Kreyòl-MT overlap heavily. On the
+  harder xSIM++ pool built from FLORES+, this model does not beat untrained LaBSE; see the preprint
+  and [morisien-embed-v1.5](https://huggingface.co/Singaraj/morisien-embed-v1.5).
 - **Haitian Creole proximity.** Like every multilingual embedder we tested, the model embeds Haitian
   Creole close to Mauritian Creole. Measured on the 1,012 aligned mfe/hat/eng FLORES+ devtest
   triplets (`scripts/probe_haitian.py`): with every same-meaning Haitian twin injected into the
@@ -218,19 +218,17 @@ trained on the MorisienMT corpus this split is drawn from, so MTEB records the r
   Asked instead to tell the two creoles apart (is the English sentence closer to its Mauritian or
   its Haitian translation?), the fine-tune picks Mauritian 709/1012 times vs LaBSE's 351/1012.
   Wrong-meaning Haitian text is never confused; mixed mfe/hat corpora will still degrade retrieval.
-- **Case sensitivity.** ALL-CAPS text embeds measurably differently from its lower-case form
-  (cosine ≈ 0.81 to the same sentence); caps-heavy text retrieves worse.
-- **English-only regression.** Fine-tuning costs some pure-English semantic quality: STS-b test
-  Spearman ≈ 0.79 vs the base model's ≈ 0.85. Use a general model for English-only workloads; this
-  model is for Creole and Creole↔{English, French} work.
+- **Not measured here:** pure-English quality after fine-tuning, and behaviour on ALL-CAPS text. Use
+  a general model for English-only workloads; this model is for Creole and Creole↔{English, French}
+  work.
 - **Long inputs are truncated** at the encoder's maximum sequence length; chunk long documents
   before embedding.
 - **Protocol note.** During recipe development the held-out test score was printed at the end of each
-  training run, so recipe selection had test visibility; an internal adversarial audit bounded the
-  resulting optimism at ≤ ~0.01 ndcg. The 3-seed replication was run after the recipe was frozen. Leak filtering
-  reserves the Creole side of every evaluation pair; English/French target texts are not reserved, and
-  an audit found 1 of 999 benchmark passages also occurring in training as the translation of a
-  different Creole sentence (dropping it moves ndcg@10 by less than 0.0001). The accent-insensitive
+  training run, so recipe selection had test visibility. An earlier version of this card bounded the
+  resulting optimism at about 0.01 ndcg; that bound is withdrawn, because no committed script produces
+  it. The 3-seed replication was run after the recipe was frozen. Leak filtering reserves the Creole
+  side of every evaluation pair; English/French target texts are not reserved, so a benchmark passage
+  can also occur in training as the translation of a different Creole sentence. The accent-insensitive
   half of the leak check was added after the released run; it verifiably leaves the training set
   byte-identical, since the sources were already disjoint at that level.
 - **Orthographic variation.** Training data mixes pre- and post-2011 (Lortograf Kreol Morisien)
