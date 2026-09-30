@@ -209,6 +209,11 @@ def main() -> None:
         default=True,
         help="write per-epoch checkpoints; disable to save only the final model (checkpoints cost ~3x model size)",
     )
+    parser.add_argument(
+        "--report-test",
+        action="store_true",
+        help="score the held-out test split after training; off by default so recipe choices never see it",
+    )
     args = parser.parse_args()
 
     train_dataset = load_training_pairs(args.train_file, args.limit, args.min_words, args.sample, args.sample_seed)
@@ -268,7 +273,8 @@ def main() -> None:
     final_dir = args.output_dir / "final"
     model.save_pretrained(str(final_dir))
     print(f"saved model -> {final_dir}")
-    report_test(model)
+    if args.report_test:
+        report_test(model)
 
 
 if __name__ == "__main__":
