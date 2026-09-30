@@ -42,10 +42,16 @@ def main() -> None:
         batch_size=args.batch_size,
     )
 
+    scores = {
+        label: next((v for key, v in results.items() if key.endswith(suffix)), None) for label, suffix in REPORTED
+    }
+    missing = [label for label, value in scores.items() if value is None]
+    if missing:
+        raise RuntimeError(f"expected cosine {', '.join(missing)} in evaluator output, got: {sorted(results)}")
+
     print(f"\n{args.model}")
-    for label, suffix in REPORTED:
-        value = next((v for key, v in results.items() if key.endswith(suffix)), None)
-        print(f"  {label:12} {value:.4f}" if value is not None else f"  {label:12} n/a")
+    for label, value in scores.items():
+        print(f"  {label:12} {value:.4f}")
 
 
 if __name__ == "__main__":
