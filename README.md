@@ -10,18 +10,18 @@ don't reliably cover.
 
 | | base | params | use |
 |---|---|---|---|
-| [**morisien-embed-v1.5**](https://huggingface.co/Singaraj/morisien-embed-v1.5) | LaBSE | 471M | current, strongest on every measure below |
+| [**morisien-embed-v1.5**](https://huggingface.co/Singaraj/morisien-embed-v1.5) | LaBSE | 471M | current, the only one ahead of LaBSE out of domain |
 | [morisien-embed](https://huggingface.co/Singaraj/morisien-embed) | multilingual-e5-base | 278M | smaller and faster, superseded |
 
 Trained on 35,064 Creole↔{English,French} pairs from MorisienMT and Kreyòl-MT. That is not all the
-public Creole parallel text — `google/smol` holds further pairs the training set does not contain,
+public Creole parallel text: `google/smol` holds further pairs the training set does not contain,
 enough to build a 2,462-query benchmark from, held out deliberately and
 [measured](results/phase-c5-smol-training.json) as making the model worse when added.
 
 **Paper:** [morisien-embed on Zenodo](https://doi.org/10.5281/zenodo.21877805) (concept DOI
 10.5281/zenodo.21877805, always resolves to the newest version).
 
-**Demo:** [in-browser Space](https://huggingface.co/spaces/Singaraj/morisien-embed-demo) — runs
+**Demo:** [in-browser Space](https://huggingface.co/spaces/Singaraj/morisien-embed-demo), which runs
 v1.5 locally in the browser via ONNX, no server.
 
 ## Usage
@@ -40,7 +40,7 @@ similarity = model.similarity(model.encode(creole), model.encode(english))
 No prompt or prefix is required. v1 was trained with Matryoshka loss, so its embeddings can be
 truncated for faster search at a small accuracy cost:
 `SentenceTransformer("Singaraj/morisien-embed", truncate_dim=256)`. v1.5 also publishes ONNX
-exports — `onnx/model.onnx` (fp16, transformer only) and `browser/model.onnx` (full pipeline, for
+exports: `onnx/model.onnx` (fp16, transformer only) and `browser/model.onnx` (full pipeline, for
 in-browser use).
 
 ## Results: Creole→English retrieval, held-out MorisienMT test (1,000 queries)
