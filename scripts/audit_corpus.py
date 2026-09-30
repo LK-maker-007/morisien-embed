@@ -59,7 +59,6 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("results/phase-d-corpus-audit.json"))
     args = parser.parse_args()
 
-    # 1. Corpus accounting. How many rows each filter actually removes.
     raw = data.morisienmt("train") + data.kreyol_mt("train")
     reserved = data.reserved_creole()
     kept, dropped = data.merge(raw, reserved)
@@ -79,10 +78,8 @@ def main() -> None:
         "duplicates_without_leak_filter": dropped_unfiltered["duplicate"],
     }
 
-    # 2. Composition of the corpus the released model trains on.
     corpus = composition(kept)
 
-    # 3. The evaluation split, and what the four MTEB subsets share.
     test_pairs = data.morisienmt("test")
     by_lang: dict[str, list[dict[str, str]]] = {}
     for pair in test_pairs:
@@ -95,7 +92,6 @@ def main() -> None:
     test_lengths = [word_count(text) for text in creole_by_lang[langs[0]]]
     train_lengths = [word_count(pair["creole"]) for pair in kept]
 
-    # 4. Vocabulary overlap. How much of the test split's wording the model has already seen.
     train_creole = [pair["creole"] for pair in kept]
     test_creole = creole_by_lang[langs[0]]
 
@@ -123,7 +119,6 @@ def main() -> None:
         },
     }
 
-    # 5. FLORES+ split sizes. The dev split is the holdout no code here has ever selected on.
     flores_splits = {split: len(flores.flores_split("mfe", split)) for split in ("dev", "devtest")}
 
     report = {
