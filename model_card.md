@@ -58,14 +58,24 @@ model-index:
 
 # morisien-embed
 
+> **A newer model exists.** [morisien-embed-v1.5](https://huggingface.co/Singaraj/morisien-embed-v1.5)
+> is fine-tuned from LaBSE instead and scores better out of domain, where this model does not beat
+> untrained LaBSE. This checkpoint is unchanged and stays available: it is the one described in the
+> preprint and registered in the MTEB task.
+
 To our knowledge, the first dedicated text embedding model for **Mauritian Creole (Kreol Morisien,
 `mfe`)**, the home language of roughly 90% of Mauritius (2022 census).
 
 Fine-tuned from [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) on
-effectively all publicly available Creole↔{English, French} parallel data, it outperforms every
-general multilingual embedding model we evaluated, including
-[LaBSE](https://huggingface.co/sentence-transformers/LaBSE), the strongest of them on this task, in
-all three measured retrieval directions (Creole→English, Creole→French, English→Creole).
+35,064 Creole↔{English, French} pairs from MorisienMT and the Mauritian portion of Kreyòl-MT. On the
+held-out MorisienMT test split it beats every general multilingual embedding model we evaluated,
+including [LaBSE](https://huggingface.co/sentence-transformers/LaBSE), in all three measured
+retrieval directions (Creole→English, Creole→French, English→Creole).
+
+Two corrections to earlier wording on this card. The corpus is not all publicly available Creole
+parallel text: [google/smol](https://huggingface.co/datasets/google/smol) carries 2,472 further gold
+pairs that it does not contain. And the margin over LaBSE holds in domain but not outside it, which
+is what the section below on FLORES+ now says.
 
 Use it for semantic search, retrieval, RAG, bitext mining, or clustering over Kreol Morisien text.
 
@@ -132,8 +142,15 @@ zero overlap with training data):
 | **morisien-embed** | **1.0000** | **1.0000** |
 
 Both models sit at the ceiling of this benchmark. FLORES+ sentences are long and distinctive, so
-1,012-way retrieval saturates. Read this as evidence of zero out-of-domain degradation, not as a
+1,012-way retrieval saturates, and this is evidence of no out-of-domain degradation rather than a
 margin over LaBSE.
+
+That reading was still too generous to the pool. A character n-gram TF-IDF baseline with no neural
+model scores 0.8221 accuracy@1 on it, so retrieving the right passage among 1,012 needs little more
+than surface overlap. On a harder pool built from the same sentences with
+[xSIM++](https://arxiv.org/abs/2306.12907) distractors, this model does not beat untrained LaBSE.
+See the [preprint](https://doi.org/10.5281/zenodo.21877805) and
+[morisien-embed-v1.5](https://huggingface.co/Singaraj/morisien-embed-v1.5).
 
 The contrastive stage was repeated with three random seeds over the same deterministically mined
 negative set; Creole→English test ndcg@10 across seeds: **0.9653 ± 0.0002** (accuracy@1
@@ -168,8 +185,11 @@ trained on the MorisienMT corpus this split is drawn from, so MTEB records the r
 - **Data:** 35,064 unique, leak-free Creole↔{English, French} pairs, merged from
   [MorisienMT](https://huggingface.co/datasets/prajdabre/KreolMorisienMT) (MIT) and
   [Kreyòl-MT](https://huggingface.co/datasets/jhu-clsp/kreyol-mt) (mixed licenses; used for training
-  only, not redistributed). Every MorisienMT dev/test sentence is removed from training by exact
-  matching and by a punctuation-, case- and accent-insensitive check.
+  only, not redistributed). Every MorisienMT dev/test sentence is checked against training by exact
+  matching and by a punctuation-, case- and accent-insensitive check. Both are checks rather than
+  removal steps: they drop 0 of the 69,525 raw rows, because the evaluation splits and the training
+  sources are already disjoint. Verifiably absent is a stronger claim than removed, and it is the
+  one the measurement supports.
 - **Recipe:** hard-negative mining with positive-aware false-negative filtering
   (`mine_hard_negatives`: 5 negatives/anchor, `range_min=10`, `relative_margin=0.05`). The margin
   filter is strict: 24,100 of the 35,064 pairs survived with a full negative set, and the released
