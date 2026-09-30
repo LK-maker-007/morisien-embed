@@ -28,6 +28,9 @@ def load_task() -> object:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("models", nargs="+", help="Hub ids or local paths")
+    parser.add_argument(
+        "--revision", default=None, help="Hub revision of the model, a branch, tag or commit. Local paths ignore it."
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -54,13 +57,14 @@ def main() -> None:
     }
 
     for name in args.models:
-        result = mteb.evaluate(SentenceTransformer(name), tasks, show_progress_bar=False)
+        result = mteb.evaluate(SentenceTransformer(name, revision=args.revision), tasks, show_progress_bar=False)
         subsets: dict[str, float] = {}
         for task_result in result.task_results:
             for entries in task_result.scores.values():
                 for entry in entries:
                     subsets[entry["hf_subset"]] = round(float(entry["f1"]), 4)
         report["results"][name] = {
+            "revision": args.revision,
             "by_subset": subsets,
             "mean_f1": round(statistics.fmean(subsets.values()), 4),
         }
