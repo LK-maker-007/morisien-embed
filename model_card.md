@@ -204,8 +204,9 @@ trained on the MorisienMT corpus this split is drawn from, so MTEB records the r
 
 - **Not native-perfect.** Accuracy@1 around 0.944 means roughly one query in eighteen ranks
   a wrong translation first. Strong, but below a human bilingual speaker.
-- **Register skew.** The available Creole data over-represents religious text, politics, and
-  literature; highly informal or technical registers are less covered.
+- **Register.** MorisienMT's authors built it from books translated from English, the Bible among
+  them, plus basic sentences written by hand ([Dabre and Sukhoo 2022](https://arxiv.org/abs/2206.02421),
+  §4). Informal and technical text are untested.
 - **Small evaluation universe.** Retrieval is measured over ~1,000-passage corpora, standard for
   bitext benchmarks, but absolute scores would be lower against web-scale corpora.
 - **The margin over LaBSE is in-domain only.** MorisienMT and Kreyòl-MT overlap heavily. On the
