@@ -206,10 +206,10 @@ slightly larger on the specified scoring than on the one the first version repor
 **Sequence length is 256 tokens**, LaBSE's default, against 512 for the first version. Every
 benchmark used here is single sentences, so nothing measured exercises the difference.
 
-**Requires sentence-transformers 6.0 or newer.** This checkpoint was serialised by a build that
-writes `Normalize` as `sentence_transformers.base.modules.normalize`, a path that does not exist
-before 6.0, so older installs raise `ModuleNotFoundError` on load. The first version has no such
-constraint.
+**Loads on sentence-transformers 5.4 and newer.** On 5.4.0 and 5.7.0 it gives identical embeddings,
+and on 5.7.0 it reproduces the Creole to English figures above exactly, 0.9658 nDCG@10 and 0.9460
+accuracy@1. An earlier revision of this card said 6.0 was required. That stopped being true on
+2026-09-06, when `modules.json` was changed to load `Normalize` from a path that 5.x has too.
 
 ## Citation
 
