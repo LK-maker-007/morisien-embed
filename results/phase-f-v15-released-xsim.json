@@ -1,0 +1,39 @@
+{
+ "run": "Released morisien-embed-v1.5 on the xSIM++ pool, at a pinned revision, on the phase-e stack",
+ "utc": "2026-10-15T16:48:59Z",
+ "produced_by": "HF_HUB_OFFLINE=1 OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 PYTHONPATH=. python scripts/evaluate.py Singaraj/morisien-embed-v1.5 --revision 954c0137a5ba8e95d9b7d90dbaf821b77519579d --data-dir benchmark/data/xsim-eng",
+ "git": {
+  "sha": "6560ab670223820325cc24d23116af1cc50db5c0"
+ },
+ "model": {
+  "name": "Singaraj/morisien-embed-v1.5",
+  "revision": "954c0137a5ba8e95d9b7d90dbaf821b77519579d",
+  "model_safetensors_lfs_oid": "42dafa970cd6a62b1cc25dae4dedfc49bc8c37ac7c9081eb355baf26dd69e634",
+  "note": "Every Hub commit since the weights were uploaded on 2026-09-06 carries this oid, so the unpinned v1.5 measurements elsewhere in results/ are of these weights."
+ },
+ "env": {
+  "python": "3.12.3",
+  "torch": "2.14.0+cpu",
+  "sentence-transformers": "6.0.1",
+  "transformers": "5.16.1",
+  "device": "cpu",
+  "note": "The stack results/phase-e-xsim-margin.json records."
+ },
+ "benchmark": {
+  "dir": "benchmark/data/xsim-eng",
+  "queries": 996,
+  "passages": 45029,
+  "corpus_md5": "1a8ee04560089d37daf8852aba64a0ba",
+  "queries_md5": "cae545ba2b9507b8e710a9d2f0bdfa7e",
+  "note": "Both md5s match results/phase-a-xsim-eng.json."
+ },
+ "results": {
+  "accuracy@1": 0.7249,
+  "accuracy@10": 0.9779,
+  "mrr@10": 0.8205,
+  "ndcg@10": 0.8593,
+  "map@100": 0.8219
+ },
+ "acceptance_check": "accuracy@1 had to be 722/996, which results/phase-e-xsim-margin.json implies for this model under plain cosine (274 errors). It is, so this stack reproduces phase-e and the nDCG@10 is comparable.",
+ "why": "The preprint's out-of-domain table and the v1.5 model card gave 0.8616 nDCG@10 and 0.7239 accuracy@1 for the released checkpoint. Those are the R4 seed-42 rerun in results/phase-b-ablation.json, a training run deleted before release (results/phase-c-release-decision.json). The released weights come from a later run, uploaded 2026-09-06, and score 0.8593 and 0.7249."
+}

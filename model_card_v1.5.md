@@ -28,7 +28,7 @@ model-index:
           name: MorisienMT test (Creole to English)
         metrics:
           - type: ndcg_at_10
-            value: 0.9654
+            value: 0.9658
           - type: accuracy_at_1
             value: 0.9460
       - task:
@@ -39,9 +39,9 @@ model-index:
           name: FLORES+ devtest with xSIM++ distractors (Creole to English)
         metrics:
           - type: ndcg_at_10
-            value: 0.8616
+            value: 0.8593
           - type: accuracy_at_1
-            value: 0.7239
+            value: 0.7249
 ---
 
 # morisien-embed-v1.5
@@ -73,15 +73,18 @@ each distractor is a gold passage with one meaning-critical token changed.
 |---|---|---|
 | multilingual-e5-base | 0.6402 | 0.6691 |
 | LaBSE | 0.9393 | 0.8449 |
-| morisien-embed | 0.9661 | 0.8426 |
-| **morisien-embed-v1.5** | **0.9654** | **0.8616** |
+| morisien-embed (three-seed mean) | 0.9661 | 0.8426 |
+| **morisien-embed-v1.5** | **0.9658** | **0.8593** |
 
 Three seeds of this recipe give 0.9655 (sd 0.0005) in-domain and 0.8597 (sd 0.0021) out of domain.
-The released checkpoint is seed 42. Run-to-run drift on an identical command reaches 0.0024 on the
-out-of-domain pool, which is worth knowing before reading small differences.
+The released checkpoint is seed 42, from its own release run, and its row above is measured on the
+released weights at revision `954c0137`. Earlier versions of this card showed 0.9654 and 0.8616
+there, which were a different seed-42 run's training-time scores. Run-to-run drift on an identical
+command reaches 0.0024 on the out-of-domain pool, which is worth knowing before reading small
+differences.
 
-Against LaBSE the fine-tune is worth +0.026 in-domain and +0.015 out of domain. Against the first
-version it holds the in-domain score and adds 0.019 out of domain.
+On three-seed means, the fine-tune is worth +0.026 in-domain and +0.015 out of domain against LaBSE.
+Against the first version's recipe it holds the in-domain score and adds 0.017 out of domain.
 
 ### Other retrieval directions
 
@@ -93,10 +96,6 @@ reproduces its published scores exactly.
 | Creole to English | 0.9393 | 0.9655 | **0.9658** |
 | Creole to French | 0.9475 | 0.9751 | **0.9738** |
 | English to Creole | 0.9247 | 0.9588 | **0.9642** |
-
-The in-domain figure is 0.9658 here against 0.9654 on the training run's own record, with an
-identical accuracy@1 of 0.9460. That gap is a CPU against GPU difference and is smaller than the
-0.0024 run-to-run drift.
 
 ### MTEB MorisienMTBitextMining
 
