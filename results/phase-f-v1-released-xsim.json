@@ -1,0 +1,166 @@
+{
+ "run": "Released morisien-embed on the xSIM++ pool, at a pinned revision, on the phase-e stack",
+ "utc": "2026-10-16",
+ "git": {
+  "sha": "c20e85b0527460f25c2479b863303542d452cfd1"
+ },
+ "env": {
+  "python": "3.12.3",
+  "torch": "2.14.0+cpu",
+  "sentence-transformers": "6.0.1",
+  "transformers": "5.16.1",
+  "mteb": "2.20.10",
+  "device": "cpu",
+  "threads": 6,
+  "note": "The stack results/phase-e-xsim-margin.json records. Models were loaded offline from pinned revisions."
+ },
+ "model": {
+  "name": "Singaraj/morisien-embed",
+  "revision": "daa39be6a63727a2462df043cd73ee5823b7137e",
+  "model_safetensors_lfs_oid_prefix": "3faed65786f80f14",
+  "note": "Every Hub commit since the upload on 2026-08-08 carries this weights oid."
+ },
+ "retrieval": {
+  "command": "python scripts/evaluate.py Singaraj/morisien-embed --revision daa39be6a63727a2462df043cd73ee5823b7137e --data-dir benchmark/data/xsim-eng",
+  "revision": "daa39be6a63727a2462df043cd73ee5823b7137e",
+  "scores": {
+   "accuracy@1": 0.6857,
+   "accuracy@10": 0.9789,
+   "mrr@10": 0.7994,
+   "ndcg@10": 0.8439,
+   "map@100": 0.8007
+  }
+ },
+ "error_rate": {
+  "command": "python scripts/xsim_score.py Singaraj/morisien-embed --revision daa39be6a63727a2462df043cd73ee5823b7137e --data-dir benchmark/data/xsim-eng --margin ratio distance absolute --per-query <dir>",
+  "ratio": {
+   "k": 4,
+   "queries": 996,
+   "errors": 349,
+   "error_rate": 0.3504,
+   "by_rule": {
+    "causality_alternation": 168,
+    "entity_mention_replacement": 115,
+    "number_replacement": 66
+   }
+  },
+  "distance": {
+   "k": 4,
+   "queries": 996,
+   "errors": 341,
+   "error_rate": 0.3424,
+   "by_rule": {
+    "causality_alternation": 160,
+    "entity_mention_replacement": 114,
+    "number_replacement": 67
+   }
+  },
+  "absolute": {
+   "k": null,
+   "queries": 996,
+   "errors": 313,
+   "error_rate": 0.3143,
+   "by_rule": {
+    "causality_alternation": 159,
+    "entity_mention_replacement": 92,
+    "number_replacement": 62
+   }
+  }
+ },
+ "acceptance_check": "accuracy@1 0.6857 and errors 349 / 341 / 313 had to match results/phase-a-xsim-eng.json and results/phase-e-xsim-margin.json. They do.",
+ "paired_tests": {
+  "produced_by": "python scripts/paired_test.py <a.npz> <b.npz>",
+  "v1-vs-labse-absolute": {
+   "a": "results/perquery-Singaraj_morisien-embed-absolute-xsim-margin.npz",
+   "b": "results/perquery-sentence-transformers_LaBSE-absolute-xsim-margin.npz",
+   "queries": 996,
+   "alignment": "verified by query id",
+   "error_rate_a": 0.3143,
+   "error_rate_b": 0.3072,
+   "mcnemar": {
+    "a_wins": 106,
+    "b_wins": 113,
+    "discordant": 219,
+    "exact_two_sided_p": 0.685248
+   },
+   "bootstrap_error_rate": {
+    "diff": 0.007,
+    "ci95": [
+     -0.0211,
+     0.0361
+    ],
+    "resamples": 10000,
+    "seed": 0
+   }
+  },
+  "v1-vs-labse-ratio": {
+   "a": "results/perquery-Singaraj_morisien-embed-ratio-xsim-margin.npz",
+   "b": "results/perquery-sentence-transformers_LaBSE-ratio-xsim-margin.npz",
+   "queries": 996,
+   "alignment": "verified by query id",
+   "error_rate_a": 0.3504,
+   "error_rate_b": 0.3343,
+   "mcnemar": {
+    "a_wins": 113,
+    "b_wins": 129,
+    "discordant": 242,
+    "exact_two_sided_p": 0.33494
+   },
+   "bootstrap_error_rate": {
+    "diff": 0.0161,
+    "ci95": [
+     -0.0151,
+     0.0472
+    ],
+    "resamples": 10000,
+    "seed": 0
+   }
+  },
+  "v15-vs-v1-absolute": {
+   "a": "results/perquery-Singaraj_morisien-embed-v1.5-absolute-xsim-margin.npz",
+   "b": "results/perquery-Singaraj_morisien-embed-absolute-xsim-margin.npz",
+   "queries": 996,
+   "alignment": "verified by query id",
+   "error_rate_a": 0.2751,
+   "error_rate_b": 0.3143,
+   "mcnemar": {
+    "a_wins": 130,
+    "b_wins": 91,
+    "discordant": 221,
+    "exact_two_sided_p": 0.010421
+   },
+   "bootstrap_error_rate": {
+    "diff": -0.0392,
+    "ci95": [
+     -0.0683,
+     -0.011
+    ],
+    "resamples": 10000,
+    "seed": 0
+   }
+  },
+  "v15-vs-v1-ratio": {
+   "a": "results/perquery-Singaraj_morisien-embed-v1.5-ratio-xsim-margin.npz",
+   "b": "results/perquery-Singaraj_morisien-embed-ratio-xsim-margin.npz",
+   "queries": 996,
+   "alignment": "verified by query id",
+   "error_rate_a": 0.2932,
+   "error_rate_b": 0.3504,
+   "mcnemar": {
+    "a_wins": 160,
+    "b_wins": 103,
+    "discordant": 263,
+    "exact_two_sided_p": 0.00053
+   },
+   "bootstrap_error_rate": {
+    "diff": -0.0572,
+    "ci95": [
+     -0.0884,
+     -0.0261
+    ],
+    "resamples": 10000,
+    "seed": 0
+   }
+  }
+ }
+}

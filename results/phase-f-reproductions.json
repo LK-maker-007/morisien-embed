@@ -1,0 +1,238 @@
+{
+ "run": "Paper figures that had no result file, re-measured on the released sentence-transformers stack",
+ "utc": "2026-10-16",
+ "git": {
+  "sha": "c20e85b0527460f25c2479b863303542d452cfd1",
+  "note": "scripts/ unchanged since 6560ab6"
+ },
+ "env": {
+  "python": "3.12.3",
+  "torch": "2.14.0+cpu",
+  "sentence-transformers": "6.0.1",
+  "transformers": "5.16.1",
+  "mteb": "2.20.10",
+  "device": "cpu",
+  "threads": 6,
+  "note": "The stack results/phase-e-xsim-margin.json records. Models were loaded offline from pinned revisions."
+ },
+ "common": "HF_HUB_OFFLINE=1 OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 PYTHONPATH=. before each command",
+ "in_domain_creole_to_english": {
+  "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2": {
+   "command": "python scripts/evaluate.py sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 --revision e8f8c211226b894fcb81acc59f3b34ba3efd5f42 --data-dir benchmark/data/eng",
+   "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+   "scores": {
+    "accuracy@1": 0.102,
+    "accuracy@10": 0.233,
+    "mrr@10": 0.138,
+    "ndcg@10": 0.1604,
+    "map@100": 0.1467
+   }
+  },
+  "BAAI/bge-m3": {
+   "command": "python scripts/evaluate.py BAAI/bge-m3 --revision 5617a9f61b028005a4858fdac845db406aefb181 --data-dir benchmark/data/eng",
+   "revision": "5617a9f61b028005a4858fdac845db406aefb181",
+   "scores": {
+    "accuracy@1": 0.356,
+    "accuracy@10": 0.572,
+    "mrr@10": 0.421,
+    "ndcg@10": 0.4569,
+    "map@100": 0.4294
+   }
+  },
+  "intfloat/multilingual-e5-small": {
+   "command": "python scripts/evaluate.py intfloat/multilingual-e5-small --revision 614241f622f53c4eeff9890bdc4f31cfecc418b3 --data-dir benchmark/data/eng",
+   "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+   "scores": {
+    "accuracy@1": 0.424,
+    "accuracy@10": 0.667,
+    "mrr@10": 0.5013,
+    "ndcg@10": 0.541,
+    "map@100": 0.5094
+   }
+  },
+  "intfloat/multilingual-e5-base": {
+   "command": "python scripts/evaluate.py intfloat/multilingual-e5-base --revision d128750597153bb5987e10b1c3493a34e5a4502a --data-dir benchmark/data/eng",
+   "revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+   "scores": {
+    "accuracy@1": 0.533,
+    "accuracy@10": 0.748,
+    "mrr@10": 0.6057,
+    "ndcg@10": 0.6402,
+    "map@100": 0.6124
+   }
+  },
+  "intfloat/multilingual-e5-large": {
+   "command": "python scripts/evaluate.py intfloat/multilingual-e5-large --revision 3d7cfbdacd47fdda877c5cd8a79fbcc4f2a574f3 --data-dir benchmark/data/eng",
+   "revision": "3d7cfbdacd47fdda877c5cd8a79fbcc4f2a574f3",
+   "scores": {
+    "accuracy@1": 0.65,
+    "accuracy@10": 0.827,
+    "mrr@10": 0.7056,
+    "ndcg@10": 0.7347,
+    "map@100": 0.7106
+   }
+  },
+  "sentence-transformers/LaBSE": {
+   "command": "python scripts/evaluate.py sentence-transformers/LaBSE --revision 836121a0533e5664b21c7aacc5d22951f2b8b25b --data-dir benchmark/data/eng",
+   "revision": "836121a0533e5664b21c7aacc5d22951f2b8b25b",
+   "scores": {
+    "accuracy@1": 0.909,
+    "accuracy@10": 0.967,
+    "mrr@10": 0.9303,
+    "ndcg@10": 0.9393,
+    "map@100": 0.9312
+   }
+  }
+ },
+ "labse_other_directions": {
+  "fra": {
+   "command": "python scripts/evaluate.py sentence-transformers/LaBSE --revision 836121a0533e5664b21c7aacc5d22951f2b8b25b --data-dir benchmark/data/fra",
+   "revision": "836121a0533e5664b21c7aacc5d22951f2b8b25b",
+   "scores": {
+    "accuracy@1": 0.913,
+    "accuracy@10": 0.981,
+    "mrr@10": 0.9367,
+    "ndcg@10": 0.9475,
+    "map@100": 0.9374
+   }
+  },
+  "eng-creole": {
+   "command": "python scripts/evaluate.py sentence-transformers/LaBSE --revision 836121a0533e5664b21c7aacc5d22951f2b8b25b --data-dir benchmark/data/eng-creole",
+   "revision": "836121a0533e5664b21c7aacc5d22951f2b8b25b",
+   "scores": {
+    "accuracy@1": 0.8789,
+    "accuracy@10": 0.967,
+    "mrr@10": 0.911,
+    "ndcg@10": 0.9247,
+    "map@100": 0.9118
+   }
+  }
+ },
+ "flores_plus_plain": {
+  "sentence-transformers/LaBSE": {
+   "command": "python scripts/evaluate.py sentence-transformers/LaBSE --revision 836121a0533e5664b21c7aacc5d22951f2b8b25b --data-dir benchmark/data/flores-eng",
+   "revision": "836121a0533e5664b21c7aacc5d22951f2b8b25b",
+   "scores": {
+    "accuracy@1": 0.999,
+    "accuracy@10": 1.0,
+    "mrr@10": 0.9995,
+    "ndcg@10": 0.9996,
+    "map@100": 0.9995
+   }
+  },
+  "Singaraj/morisien-embed": {
+   "command": "python scripts/evaluate.py Singaraj/morisien-embed --revision daa39be6a63727a2462df043cd73ee5823b7137e --data-dir benchmark/data/flores-eng",
+   "revision": "daa39be6a63727a2462df043cd73ee5823b7137e",
+   "scores": {
+    "accuracy@1": 1.0,
+    "accuracy@10": 1.0,
+    "mrr@10": 1.0,
+    "ndcg@10": 1.0,
+    "map@100": 1.0
+   }
+  },
+  "Singaraj/morisien-embed-v1.5": {
+   "command": "python scripts/evaluate.py Singaraj/morisien-embed-v1.5 --revision 954c0137a5ba8e95d9b7d90dbaf821b77519579d --data-dir benchmark/data/flores-eng",
+   "revision": "954c0137a5ba8e95d9b7d90dbaf821b77519579d",
+   "scores": {
+    "accuracy@1": 1.0,
+    "accuracy@10": 1.0,
+    "mrr@10": 1.0,
+    "ndcg@10": 1.0,
+    "map@100": 1.0
+   }
+  }
+ },
+ "xsim_eng_baselines": {
+  "sentence-transformers/LaBSE": {
+   "command": "python scripts/evaluate.py sentence-transformers/LaBSE --revision 836121a0533e5664b21c7aacc5d22951f2b8b25b --data-dir benchmark/data/xsim-eng",
+   "revision": "836121a0533e5664b21c7aacc5d22951f2b8b25b",
+   "scores": {
+    "accuracy@1": 0.6928,
+    "accuracy@10": 0.9739,
+    "mrr@10": 0.8023,
+    "ndcg@10": 0.8449,
+    "map@100": 0.804
+   }
+  },
+  "intfloat/multilingual-e5-base": {
+   "command": "python scripts/evaluate.py intfloat/multilingual-e5-base --revision d128750597153bb5987e10b1c3493a34e5a4502a --data-dir benchmark/data/xsim-eng",
+   "revision": "d128750597153bb5987e10b1c3493a34e5a4502a",
+   "scores": {
+    "accuracy@1": 0.4639,
+    "accuracy@10": 0.8645,
+    "mrr@10": 0.6061,
+    "ndcg@10": 0.6691,
+    "map@100": 0.6111
+   }
+  }
+ },
+ "morisien_embed_matryoshka": {
+  "256": {
+   "command": "python scripts/evaluate.py Singaraj/morisien-embed --revision daa39be6a63727a2462df043cd73ee5823b7137e --data-dir benchmark/data/eng --truncate-dim 256",
+   "revision": "daa39be6a63727a2462df043cd73ee5823b7137e",
+   "scores": {
+    "accuracy@1": 0.932,
+    "accuracy@10": 0.982,
+    "mrr@10": 0.9515,
+    "ndcg@10": 0.9591,
+    "map@100": 0.9518
+   }
+  },
+  "128": {
+   "command": "python scripts/evaluate.py Singaraj/morisien-embed --revision daa39be6a63727a2462df043cd73ee5823b7137e --data-dir benchmark/data/eng --truncate-dim 128",
+   "revision": "daa39be6a63727a2462df043cd73ee5823b7137e",
+   "scores": {
+    "accuracy@1": 0.925,
+    "accuracy@10": 0.978,
+    "mrr@10": 0.945,
+    "ndcg@10": 0.9531,
+    "map@100": 0.9455
+   }
+  }
+ },
+ "mteb_e5_small": {
+  "command": "python scripts/mteb_score.py intfloat/multilingual-e5-small --revision 614241f622f53c4eeff9890bdc4f31cfecc418b3 --output <file>",
+  "task": {
+   "name": "MorisienMTBitextMining",
+   "dataset": "mteb/MorisienMTBitextMining",
+   "revision": "45f511e86cc511a422a130f2d23a2697e279efa2",
+   "main_score": "f1"
+  },
+  "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+  "by_subset": {
+   "mfe_Latn-eng_Latn": 0.3579,
+   "eng_Latn-mfe_Latn": 0.4538,
+   "mfe_Latn-fra_Latn": 0.4748,
+   "fra_Latn-mfe_Latn": 0.4954
+  },
+  "mean_f1": 0.4455
+ },
+ "haitian_probe": {
+  "note": "FLORES+ devtest at the revision pinned in morisien_embed/flores.py. trap: Creole query against the English sentences plus every Haitian translation. mauritian_closer: English sentences closer to their Mauritian than their Haitian translation.",
+  "Singaraj/morisien-embed": {
+   "command": "python scripts/probe_haitian.py Singaraj/morisien-embed --revision daa39be6a63727a2462df043cd73ee5823b7137e",
+   "revision": "daa39be6a63727a2462df043cd73ee5823b7137e",
+   "trap_accuracy@1": 0.6759,
+   "trap_hits": 684,
+   "mauritian_closer": 709,
+   "triplets": 1012
+  },
+  "Singaraj/morisien-embed-v1.5": {
+   "command": "python scripts/probe_haitian.py Singaraj/morisien-embed-v1.5 --revision 954c0137a5ba8e95d9b7d90dbaf821b77519579d",
+   "revision": "954c0137a5ba8e95d9b7d90dbaf821b77519579d",
+   "trap_accuracy@1": 0.7875,
+   "trap_hits": 797,
+   "mauritian_closer": 367,
+   "triplets": 1012
+  },
+  "sentence-transformers/LaBSE": {
+   "command": "python scripts/probe_haitian.py sentence-transformers/LaBSE --revision 836121a0533e5664b21c7aacc5d22951f2b8b25b",
+   "revision": "836121a0533e5664b21c7aacc5d22951f2b8b25b",
+   "trap_accuracy@1": 0.7866,
+   "trap_hits": 796,
+   "mauritian_closer": 351,
+   "triplets": 1012
+  }
+ }
+}
