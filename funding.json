@@ -6,7 +6,7 @@
     "role": "owner",
     "name": "Singaraj B",
     "email": "singaraj.yali@gmail.com",
-    "description": "Independent ML engineer in Tiruppur, India, working on text embedding models and evaluation for low-resource languages. Author of morisien-embed, the first embedding model for Mauritian Creole (Kreol Morisien), and of MorisienMTBitextMining, the first Mauritian Creole task in MTEB, the benchmark used across the field to compare embedding models. Also published sante-embed, a 1.5B-parameter model for medical retrieval in nine languages. All models, datasets and training code are released under MIT. Upstream contributor with 18 merged pull requests across sentence-transformers, PEFT, MTEB and Haystack, including fixes to adapter merging and injection in PEFT and to semantic search, ONNX export and evaluation in sentence-transformers. All work to date was trained on a free Kaggle T4.",
+    "description": "Self-taught ML engineer based in Tiruppur, Tamil Nadu. Author of morisien-embed, the first embedding model for Kreol Morisien, archived on Zenodo (DOI 10.5281/zenodo.21877805), and of sante-embed, a 1.5B medical retrieval model across nine languages. Merged contributions to MTEB, sentence-transformers, PEFT and Haystack, including MorisienMTBitextMining, the first Mauritian Creole task in MTEB, with model registrations and results published to embeddings-benchmark/results. No degree, no institutional affiliation.",
     "webpageUrl": {
       "url": "https://github.com/LK-maker-007",
       "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
@@ -16,7 +16,7 @@
     {
       "guid": "morisien-embed",
       "name": "morisien-embed",
-      "description": "The first dedicated text embedding models for Mauritian Creole (Kreol Morisien): training pipeline, leak-audited benchmark and evaluation. Includes morisien-embed and morisien-embed-v1.5, the MorisienMTBitextMining dataset, and the first Mauritian Creole task contributed upstream to MTEB. Every evaluation sentence was checked against the training data before any score was reported, and the models' limitations are published alongside their results. Models and dataset are on the Hugging Face Hub; the work is documented in a sole-author preprint indexed in OpenAIRE.",
+      "description": "morisien-embed is a complete, released pipeline for building evaluation coverage for a language that had none: corpus assembly, leakage audit enforced by tests, MTEB task merged upstream, model trained, results published. MIT licensed throughout, trained in 45 minutes on a free Kaggle T4. This grant applies the same pipeline to Indian languages. Measured against the current MTEB task registry: Tamil has 31 tasks and Malayalam 29, but zero reranking and one STS task each. Bhojpuri has 6 and Maithili 7, with zero retrieval, zero STS and zero reranking. Maithili is a scheduled language of India.",
       "webpageUrl": {
         "url": "https://github.com/LK-maker-007/morisien-embed",
         "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
@@ -26,7 +26,7 @@
         "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
       },
       "licenses": ["spdx:MIT"],
-      "tags": ["machine-learning", "nlp", "embeddings", "low-resource-languages", "benchmark", "evaluation", "mteb"]
+      "tags": ["machine-learning", "nlp", "embeddings", "low-resource-languages", "benchmark", "evaluation", "mteb", "indian-languages"]
     }
   ],
   "funding": {
@@ -40,26 +40,15 @@
     ],
     "plans": [
       {
-        "guid": "task-equity",
+        "guid": "indic-mteb-coverage",
         "status": "active",
-        "name": "Closing the task equity gap for low-resource languages",
-        "description": "Low-resource languages get only 1-3 MTEB task categories against 14 for high-resource ones, and those are mostly bitext mining and classification. Retrieval, semantic similarity, reranking and clustering are empty; no low-resource language appears in MTEB's STS datasets. This builds those missing categories for creoles and other under-served languages, leak-audited and merged upstream into MTEB, with models trained against them. Reproducible on a single free GPU. 12 months. All MIT.",
-        "amount": 25000,
-        "currency": "USD",
-        "frequency": "one-time",
-        "channels": ["bank-transfer"]
-      },
-      {
-        "guid": "compute-only",
-        "status": "active",
-        "name": "Compute support",
-        "description": "GPU compute alone, to train and evaluate models larger than a free Kaggle T4 allows, and to run the full evaluation suite across the new task categories.",
-        "amount": 10000,
-        "currency": "USD",
+        "name": "Leak-audited MTEB evaluation coverage for Indian languages",
+        "description": "Builds the missing MTEB categories for Tamil, Malayalam, Bhojpuri and Maithili: leak-audited, merged into MTEB, with models trained against them. Tamil has 31 tasks and Malayalam 29, but zero reranking and one STS each. Bhojpuri has 6 and Maithili 7, with zero retrieval, STS or reranking. Budget: INR 180000 native-speaker data (Bhojpuri and Maithili, 60 days each at INR 1500/day); INR 60000 annotation; INR 160000 maintainer time; INR 30000 compute. 56% of the grant goes to native speakers.",
+        "amount": 430000,
+        "currency": "INR",
         "frequency": "one-time",
         "channels": ["bank-transfer"]
       }
     ]
   }
 }
-
