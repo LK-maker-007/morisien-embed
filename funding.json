@@ -18,7 +18,7 @@
       "name": "morisien-embed",
       "description": "The first dedicated text embedding models for Mauritian Creole (Kreol Morisien): training pipeline, leak-audited benchmark and evaluation. Includes morisien-embed and morisien-embed-v1.5, the MorisienMTBitextMining dataset, and the first Mauritian Creole task contributed upstream to MTEB. Every evaluation sentence was checked against the training data before any score was reported, and the models' limitations are published alongside their results. Models and dataset are on the Hugging Face Hub; the work is documented in a sole-author preprint indexed in OpenAIRE.",
       "webpageUrl": {
-        "url": "https://huggingface.co/Singaraj",
+        "url": "https://github.com/LK-maker-007/morisien-embed",
         "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
       },
       "repositoryUrl": {
