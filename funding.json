@@ -1,0 +1,65 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "owner",
+    "name": "Singaraj B",
+    "email": "singaraj.yali@gmail.com",
+    "description": "Independent ML engineer in Tiruppur, India, working on text embedding models and evaluation for low-resource languages. Author of morisien-embed, the first embedding model for Mauritian Creole (Kreol Morisien), and of MorisienMTBitextMining, the first Mauritian Creole task in MTEB, the benchmark used across the field to compare embedding models. Also published sante-embed, a 1.5B-parameter model for medical retrieval in nine languages. All models, datasets and training code are released under MIT. Upstream contributor with 18 merged pull requests across sentence-transformers, PEFT, MTEB and Haystack, including fixes to adapter merging and injection in PEFT and to semantic search, ONNX export and evaluation in sentence-transformers. All work to date was trained on a free Kaggle T4.",
+    "webpageUrl": {
+      "url": "https://github.com/LK-maker-007",
+      "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
+    }
+  },
+  "projects": [
+    {
+      "guid": "morisien-embed",
+      "name": "morisien-embed",
+      "description": "The first dedicated text embedding models for Mauritian Creole (Kreol Morisien): training pipeline, leak-audited benchmark and evaluation. Includes morisien-embed and morisien-embed-v1.5, the MorisienMTBitextMining dataset, and the first Mauritian Creole task contributed upstream to MTEB. Every evaluation sentence was checked against the training data before any score was reported, and the models' limitations are published alongside their results. Models and dataset are on the Hugging Face Hub; the work is documented in a sole-author preprint indexed in OpenAIRE.",
+      "webpageUrl": {
+        "url": "https://huggingface.co/Singaraj",
+        "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/LK-maker-007/morisien-embed",
+        "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
+      },
+      "licenses": ["spdx:MIT"],
+      "tags": ["machine-learning", "nlp", "embeddings", "low-resource-languages", "benchmark", "evaluation", "mteb"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "bank-transfer",
+        "type": "bank",
+        "address": "",
+        "description": "Indian bank account. Details shared privately on request."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "task-equity",
+        "status": "active",
+        "name": "Closing the task equity gap for low-resource languages",
+        "description": "Low-resource languages are evaluated on only one to three MTEB task categories against fourteen for high-resource languages, and the categories they do have are mostly bitext mining and classification. Retrieval, semantic similarity, reranking and clustering are effectively empty — no low-resource language appears in MTEB's STS datasets at all. This plan builds those missing task categories for a family of creoles and other under-served languages, each leak-audited and merged upstream into MTEB, together with embedding models trained and measured against them. Every step is reproducible on a single free GPU, which matters because the communities with the least data also have the least compute. MTEB's maintainers have publicly called for contributors to close this gap. Twelve months of maintainer time, GPU compute and dataset construction. All models, datasets and code released under MIT.",
+        "amount": 25000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["bank-transfer"]
+      },
+      {
+        "guid": "compute-only",
+        "status": "active",
+        "name": "Compute support",
+        "description": "GPU compute alone, to train and evaluate models larger than a free Kaggle T4 allows, and to run the full evaluation suite across the new task categories.",
+        "amount": 10000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["bank-transfer"]
+      }
+    ]
+  }
+}
+
