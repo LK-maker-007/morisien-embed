@@ -43,7 +43,7 @@
         "guid": "task-equity",
         "status": "active",
         "name": "Closing the task equity gap for low-resource languages",
-        "description": "Low-resource languages are evaluated on only one to three MTEB task categories against fourteen for high-resource languages, and the categories they do have are mostly bitext mining and classification. Retrieval, semantic similarity, reranking and clustering are effectively empty — no low-resource language appears in MTEB's STS datasets at all. This plan builds those missing task categories for a family of creoles and other under-served languages, each leak-audited and merged upstream into MTEB, together with embedding models trained and measured against them. Every step is reproducible on a single free GPU, which matters because the communities with the least data also have the least compute. MTEB's maintainers have publicly called for contributors to close this gap. Twelve months of maintainer time, GPU compute and dataset construction. All models, datasets and code released under MIT.",
+        "description": "Low-resource languages get only 1-3 MTEB task categories against 14 for high-resource ones, and those are mostly bitext mining and classification. Retrieval, semantic similarity, reranking and clustering are empty; no low-resource language appears in MTEB's STS datasets. This builds those missing categories for creoles and other under-served languages, leak-audited and merged upstream into MTEB, with models trained against them. Reproducible on a single free GPU. 12 months. All MIT.",
         "amount": 25000,
         "currency": "USD",
         "frequency": "one-time",
