@@ -43,9 +43,29 @@
         "guid": "indic-mteb-coverage",
         "status": "active",
         "name": "Leak-audited MTEB evaluation coverage for Indian languages",
-        "description": "Builds the missing MTEB categories for Tamil, Malayalam, Bhojpuri and Maithili: leak-audited, merged into MTEB, with models trained against them. Tamil has 31 tasks and Malayalam 29, but zero reranking and one STS each. Bhojpuri has 6 and Maithili 7, with zero retrieval, STS or reranking. Budget: INR 180000 native-speaker data (Bhojpuri and Maithili, 60 days each at INR 1500/day); INR 60000 annotation; INR 160000 maintainer time; INR 30000 compute. 56% of the grant goes to native speakers.",
+        "description": "Builds the missing MTEB categories for Tamil, Malayalam, Bhojpuri and Maithili: leak-audited, merged into MTEB, models trained against them. Tamil/Malayalam have zero reranking and one STS each; Bhojpuri and Maithili have zero retrieval, STS or reranking. 56% paid to native speakers. The task-equity and compute-only plans are open-ended asks for morisien-embed, submitted to FLOSS/fund in November 2026, no decision yet. This plan is a separate, scoped request for the Indian-language expansion.",
         "amount": 430000,
         "currency": "INR",
+        "frequency": "one-time",
+        "channels": ["bank-transfer"]
+      },
+      {
+        "guid": "task-equity",
+        "status": "active",
+        "name": "Closing the task equity gap for low-resource languages",
+        "description": "Low-resource languages get only 1-3 MTEB task categories against 14 for high-resource ones, and those are mostly bitext mining and classification. Retrieval, semantic similarity, reranking and clustering are empty; no low-resource language appears in MTEB's STS datasets. This builds those missing categories for creoles and other under-served languages, leak-audited and merged upstream into MTEB, with models trained against them. Reproducible on a single free GPU. 12 months. All MIT.",
+        "amount": 25000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["bank-transfer"]
+      },
+      {
+        "guid": "compute-only",
+        "status": "active",
+        "name": "Compute support",
+        "description": "GPU compute alone, to train and evaluate models larger than a free Kaggle T4 allows, and to run the full evaluation suite across the new task categories.",
+        "amount": 10000,
+        "currency": "USD",
         "frequency": "one-time",
         "channels": ["bank-transfer"]
       }
