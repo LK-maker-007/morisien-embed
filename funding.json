@@ -16,7 +16,7 @@
     {
       "guid": "morisien-embed",
       "name": "morisien-embed",
-      "description": "morisien-embed is a complete, released pipeline for building evaluation coverage for a language that had none: corpus assembly, leakage audit enforced by tests, MTEB task merged upstream, model trained, results published. MIT licensed throughout, trained in 45 minutes on a free Kaggle T4. This grant applies the same pipeline to Indian languages. Measured against the current MTEB task registry: Tamil has 31 tasks and Malayalam 29, but zero reranking and one STS task each. Bhojpuri has 6 and Maithili 7, with zero retrieval, zero STS and zero reranking. Maithili is a scheduled language of India.",
+      "description": "morisien-embed is a complete, released pipeline for building evaluation coverage for a language that had none: corpus assembly, leakage audit enforced by tests, MTEB task merged upstream, model trained, results published. MIT licensed throughout, trained in 45 minutes on a free Kaggle T4. This grant applies the same pipeline to Indian languages. Measured against the current MTEB task registry: Tamil has 31 tasks and Malayalam 29, but zero reranking and one STS task each. Bhojpuri has 6 and Maithili 7, with zero retrieval, zero STS and zero reranking. Maithili is a scheduled language of India. All-time downloads: 1140 across morisien-embed, morisien-embed-v1.5 and sante-embed. MorisienMTBitextMining is merged into MTEB and runs as part of the multilingual benchmark, with results published to embeddings-benchmark/results.",
       "webpageUrl": {
         "url": "https://github.com/LK-maker-007/morisien-embed",
         "wellKnown": "https://github.com/LK-maker-007/morisien-embed/blob/main/.well-known/funding-manifest-urls"
